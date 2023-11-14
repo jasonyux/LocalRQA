@@ -1,0 +1,9 @@
+transformers
+sentencepiece
+deepspeed
+accelerate
+openai
+tiktoken
+wandb
+langchain
+llama-index
