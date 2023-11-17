@@ -1,5 +1,6 @@
 model_checkpoints
 dataset
+.hypothesis
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
