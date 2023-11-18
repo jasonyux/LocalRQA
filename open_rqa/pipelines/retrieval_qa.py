@@ -1,15 +1,10 @@
-from langchain.schema import Document, BaseRetriever
-from langchain.memory import ConversationBufferMemory
-from transformers import AutoTokenizer, BertModel, BertForMaskedLM, AutoModelForCausalLM
 from typing import Any, Dict, List
-from src.model.base import TamarinPipeline
-from src.model.wrappers import TGIAPIModel
-from src.embeddings.base import LocalEmbeddings, LocalBERTMLMEmbeddings
-from src.database.chroma import MyChroma
-from src.database.faiss import MyFAISS
-from src.schema.outputs import RetrievalOutput, GenerationOutput
-from src.utils.utils import print_green
-from src.prompts.vicuna import REPLY_PROMPT
+from open_rqa.schema.document import Document
+from open_rqa.schema.dialogue import DialogueSession, RQAOutput
+from open_rqa.guardrails.base import BaseAnswerGuardrail
+from open_rqa.retrievers.base import BaseRetriever
+from open_rqa.qa_llms.base import BaseQAModel
+from open_rqa.pipelines.base import RQAPipeline
 import torch
 import logging
 
@@ -17,7 +12,43 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RetrievalQA:
+class BaseRQA(RQAPipeline):
+    def __init__(self,
+        retriever: BaseRetriever,
+        qa_llm: BaseQAModel,
+        answer_guardrail: BaseAnswerGuardrail
+    ):
+        self.retriever = retriever
+        self.qa_llm = qa_llm
+        self.guardrail = answer_guardrail
+        return
+
+    def qa(self, batch_questions: List[str], batch_dialogue_history: List[DialogueSession]) -> RQAOutput:
+        # retrieve relevant documents
+        retrieval_output = self.retriever.retrieve(batch_questions, batch_dialogue_history)
+        # generate answers
+        raw_gen_output = self.qa_llm.r_generate(retrieval_output)
+        # guardrail
+        gen_output = self.guardrail.guardrail(
+            batch_questions=batch_questions,
+            batch_source_documents=retrieval_output.source_documents,
+            batch_dialogue_history=batch_dialogue_history,
+            batch_generated_answers=raw_gen_output.batched_answers
+        )
+        return gen_output
+
+
+class AutoRQA(BaseRQA):
+    def __init__(self,
+        retriever: BaseRetriever,
+        qa_llm: BaseQAModel,
+        answer_guardrail: BaseAnswerGuardrail
+    ):
+        super().__init__(retriever, qa_llm, answer_guardrail)
+        return
+        
+
+class SimpleRQA:
     def __init__(self,
         generation_model: str,
         texts_db_path: str,
