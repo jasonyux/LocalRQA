@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class RQAPipeline(Component):
-    """given a question and a dialogue history, return an answer based on the retrieval and QA models
-    """
-    run_input_keys = ["batch_questions", "batch_dialogue_history"]
+    """given a question and a dialogue history, return an answer based on the retrieval and QA models"""
+
+    run_input_keys = ["batch_questions", "batch_dialogue_session"]
 
     @abstract_attribute
     def components(self) -> List[Component]:
@@ -28,27 +28,30 @@ class RQAPipeline(Component):
         for key in keys:
             prepared_input_dict[key] = data_dict[key]
         return prepared_input_dict
-    
-    def qa(self,
+
+    def qa(
+        self,
         batch_questions: List[str],
-        batch_dialogue_history: List[DialogueSession],
+        batch_dialogue_session: List[DialogueSession],
     ) -> RQAOutput:
         """returns an answer given a question and a dialogue history
 
         Args:
             batch_questions (List[str]): _description_
-            batch_dialogue_history (List[DialogueSession]): _description_
+            batch_dialogue_session (List[DialogueSession]): _description_
 
         Returns:
             RQAOutput: a dataclass containing the answer and the source documents
         """
         input_dict = {
             "batch_questions": batch_questions,
-            "batch_dialogue_history": batch_dialogue_history,
+            "batch_dialogue_session": batch_dialogue_session,
         }
         for module in self.components:
             module: Component
-            processed_input_dict = self._prepare_input(input_dict, module.run_input_keys)
+            processed_input_dict = self._prepare_input(
+                input_dict, module.run_input_keys
+            )
             module_output = module.run(**processed_input_dict)
 
             # update any existing keys in the input dict with the output dict

@@ -12,22 +12,47 @@ class GenerationOutput:
 
 
 class BaseQAModel(Component):
-    """uses LLMs to generate answers given a question and a set of source documents
-    """
-    run_input_keys = ["batch_questions", "batch_source_documents", "batch_dialogue_history"]
+    """uses LLMs to generate answers given a question and a set of source documents"""
+
+    run_input_keys = [
+        "batch_questions",
+        "batch_source_documents",
+        "batch_dialogue_history",
+    ]
 
     @abstractmethod
-    def r_generate(self,
+    def r_generate(
+        self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
         batch_dialogue_history: List[DialogueSession],
     ) -> GenerationOutput:
-        """conditional generation based on the source documents
+        """retrieval augemented generation based on the source documents
 
         Args:
             batch_questions (List[str]): _description_
             batch_source_documents (List[List[Document]]): _description_
             batch_dialogue_history (List[DialogueSession]): _description_
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            GenerationOutput: _description_
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def generate(
+        self,
+        batched_prompts: List[str],
+        tokenization_kwargs: dict,
+        generation_kwargs: dict,
+    ) -> GenerationOutput:
+        """generic generation method. Used by r_generate but potentially useful for other purposes (e.g. rephrasing questions)
+
+        Args:
+            batched_prompts (List[str]): _description_
 
         Raises:
             NotImplementedError: _description_

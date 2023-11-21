@@ -17,18 +17,13 @@ if __name__ == "__main__":
     answer_guardrail = NoopAnswerGuardrail()
 
     # QA!
-    rqa = BaseRQA(
-        retriever=retriever,
-        qa_llm=qa_llm,
-        answer_guardrail=answer_guardrail
-    )
+    rqa = BaseRQA(retriever=retriever, qa_llm=qa_llm, answer_guardrail=answer_guardrail)
 
     response = rqa.qa(
         batch_questions=["What is the capital of the United States?"],
-        batch_dialogue_history=[DialogueSession()],
+        batch_dialogue_session=[DialogueSession()],
     )
     print(response)
-
 
     ##### Auto usage of RQA ######
     documents = SimpleDirectoryReader("data").load_data()
@@ -40,6 +35,6 @@ if __name__ == "__main__":
 
     response = rqa.qa(
         batch_questions=["What is the capital of the United States?"],
-        batch_dialogue_history=[DialogueSession()],
+        batch_dialogue_session=[DialogueSession()],
     )
     print(response)
