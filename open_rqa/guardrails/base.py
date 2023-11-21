@@ -12,7 +12,7 @@ class BaseAnswerGuardrail(ABC):
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
         batch_dialogue_history: List[DialogueSession],
-        batch_generated_answers: List[str]
+        batch_answers: List[str]
     ) -> RQAOutput:
         """post-processing the response before returning to the user
 
@@ -20,7 +20,7 @@ class BaseAnswerGuardrail(ABC):
             batch_questions (List[str]): _description_
             batch_source_documents (List[List[Document]]): _description_
             batch_dialogue_history (List[DialogueSession]): _description_
-            batch_generated_answers (List[str]): _description_
+            batch_answers (List[str]): _description_
 
         Raises:
             NotImplementedError: _description_
@@ -38,9 +38,9 @@ class NoopAnswerGuardrail(BaseAnswerGuardrail):
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
         batch_dialogue_history: List[DialogueSession],
-        batch_generated_answers: List[str]
+        batch_answers: List[str]
     ) -> RQAOutput:
         return RQAOutput(
-            batched_answers=batch_generated_answers,
+            batched_answers=batch_answers,
             batched_source_documents=batch_source_documents,
         )

@@ -13,29 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRQA(RQAPipeline):
+    """takes in three components: retriever, qa_llm, answer_guardrail, and runs them in sequence
+    """
     def __init__(self,
         retriever: BaseRetriever,
         qa_llm: BaseQAModel,
         answer_guardrail: BaseAnswerGuardrail
     ):
-        self.retriever = retriever
-        self.qa_llm = qa_llm
-        self.guardrail = answer_guardrail
+        self.components = [retriever, qa_llm, answer_guardrail]
         return
-
-    def qa(self, batch_questions: List[str], batch_dialogue_history: List[DialogueSession]) -> RQAOutput:
-        # retrieve relevant documents
-        retrieval_output = self.retriever.retrieve(batch_questions, batch_dialogue_history)
-        # generate answers
-        raw_gen_output = self.qa_llm.r_generate(retrieval_output)
-        # guardrail
-        gen_output = self.guardrail.guardrail(
-            batch_questions=batch_questions,
-            batch_source_documents=retrieval_output.source_documents,
-            batch_dialogue_history=batch_dialogue_history,
-            batch_generated_answers=raw_gen_output.batched_answers
-        )
-        return gen_output
 
 
 class AutoRQA(BaseRQA):
@@ -45,8 +31,8 @@ class AutoRQA(BaseRQA):
         answer_guardrail: BaseAnswerGuardrail
     ):
         super().__init__(retriever, qa_llm, answer_guardrail)
-        return
-        
+        raise NotImplementedError
+
 
 class SimpleRQA:
     def __init__(self,
@@ -81,7 +67,7 @@ class SimpleRQA:
             "num_beams": 1,
             # "repetition_penalty": 1.00,  # cause CUDA-assertion when used with TGI
             # "typical_p": 0.999,  # cause CUDA-assertion when used with TGI
-            "eos_token_id": None if self.is_api_model else self.tokenizer.eos_token_id, 
+            "eos_token_id": None if self.is_api_model else self.tokenizer.eos_token_id,
             "early_stopping": True,
         }
         return

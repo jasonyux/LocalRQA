@@ -11,5 +11,4 @@ class RQAOutput:
 
 @dataclass
 class DialogueSession:
-    @field(default_factory=list)
-    stuff: Any
+    stuff: Any = field(default_factory=list)

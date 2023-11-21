@@ -1,16 +1,19 @@
 from typing import List
 from abc import ABC, abstractmethod
+from open_rqa.base import Component
 from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.schema.document import Document
 
 
 class RetrievalOutput(ABC):
-    source_documents: List[List[Document]]
+    batch_source_documents: List[List[Document]]
 
 
-class BaseRetriever(ABC):
+class BaseRetriever(Component):
     """retrieves relevant documents from a corpus given a query
     """
+    run_input_keys = ["batch_query", "batch_dialogue_history"]
+
     @abstractmethod
     def retrieve(
         self,
@@ -27,3 +30,6 @@ class BaseRetriever(ABC):
             RetrievalOutput: _description_
         """
         raise NotImplementedError
+
+    def run(self, *args, **kwargs):
+        return self.retrieve(*args, **kwargs)
