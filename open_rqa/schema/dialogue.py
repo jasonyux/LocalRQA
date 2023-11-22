@@ -4,12 +4,6 @@ from open_rqa.schema.document import Document
 
 
 @dataclass
-class RQAOutput:
-    batched_answers: List[str]
-    batched_source_documents: List[List[Document]]
-
-
-@dataclass
 class DialogueSession:
     history: Any = field(default_factory=list)
 
@@ -36,3 +30,12 @@ class DialogueSession:
             system_message (str): system message
         """
         raise NotImplementedError
+
+
+@dataclass
+class RQAOutput:
+    """stores the answers to a user's question, the relevant source documents, and the UPDATED dialogue history
+    """
+    batch_answers: List[str]
+    batch_source_documents: List[List[Document]]
+    batch_dialogue_session: List[DialogueSession]

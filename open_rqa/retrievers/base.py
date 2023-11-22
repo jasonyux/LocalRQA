@@ -1,7 +1,6 @@
 from typing import List
 from abc import ABC, abstractmethod
 from open_rqa.base import Component
-from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.schema.document import Document
 
 
@@ -18,13 +17,11 @@ class BaseRetriever(Component):
     def retrieve(
         self,
         batch_query: List[str],
-        batch_dialogue_history: List[DialogueSession],
     ) -> RetrievalOutput:
-        """given a batched query and dialogue history, retrieve relevant documents (potentially rephrasing the query)
+        """given a batched query, retrieve relevant documents (query rephrasing is handled by the RQA pipeline)
 
         Args:
             batch_query (List[str]): _description_
-            batch_dialogue_history (List[DialogueSession]): _description_
 
         Returns:
             RetrievalOutput: _description_
@@ -33,3 +30,22 @@ class BaseRetriever(Component):
 
     def run(self, *args, **kwargs):
         return self.retrieve(*args, **kwargs)
+
+
+class DummyRetriever(BaseRetriever):
+    """a mock retriever used for testing
+
+    Args:
+        BaseRetriever (_type_): _description_
+    """
+    def retrieve(
+        self,
+        batch_query: List[str],
+    ) -> RetrievalOutput:
+        dummy_document = Document(
+            content="dummy document",
+            metadata={"dummy": "dummy"},
+        )
+        return RetrievalOutput(
+            batch_source_documents=[[dummy_document] for _ in batch_query]
+        )

@@ -5,14 +5,15 @@ from open_rqa.schema.dialogue import DialogueSession, RQAOutput
 
 
 class BaseAnswerGuardrail(ABC):
-    """performs actions such as fact checking, safety filtering, etc,
-    """
+    """performs actions such as fact checking, safety filtering, etc,"""
+
     @abstractmethod
-    def guardrail(self,
+    def guardrail(
+        self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
         batch_dialogue_history: List[DialogueSession],
-        batch_answers: List[str]
+        batch_answers: List[str],
     ) -> RQAOutput:
         """post-processing the response before returning to the user
 
@@ -32,15 +33,16 @@ class BaseAnswerGuardrail(ABC):
 
 
 class NoopAnswerGuardrail(BaseAnswerGuardrail):
-    """dummy answer guardrail that passes the answer through
-    """
-    def guardrail(self,
+    """dummy answer guardrail that passes the answer through"""
+
+    def guardrail(
+        self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
         batch_dialogue_history: List[DialogueSession],
-        batch_answers: List[str]
+        batch_answers: List[str],
     ) -> RQAOutput:
         return RQAOutput(
-            batched_answers=batch_answers,
-            batched_source_documents=batch_source_documents,
+            batch_answers=batch_answers,
+            batch_source_documents=batch_source_documents,
         )

@@ -23,6 +23,27 @@ class RQAPipeline(Component):
         """
         raise NotImplementedError
 
+    def update_dialogue_session(
+        self,
+        batch_questions: List[str],
+        retrieval_qa_output: RQAOutput,
+        batch_dialogue_session: List[DialogueSession],
+    ):
+        """update the dialogue session with the question from the current turn and the answer from the system
+
+        Args:
+            batch_questions (List[str]): _description_
+            retrieval_qa_output (RQAOutput): _description_
+            batch_dialogue_session (List[DialogueSession]): _description_
+        """
+        batch_answers = retrieval_qa_output.batch_answers
+        for i, dialogue_session in enumerate(batch_dialogue_session):
+            question = batch_questions[i]
+            answer = batch_answers[i]
+            dialogue_session.add_user_message(question)
+            dialogue_session.add_system_message(answer)
+        return
+
     def _prepare_input(self, data_dict: dict, keys: List[str]):
         prepared_input_dict = {}
         for key in keys:
@@ -34,7 +55,7 @@ class RQAPipeline(Component):
         batch_questions: List[str],
         batch_dialogue_session: List[DialogueSession],
     ) -> RQAOutput:
-        """returns an answer given a question and a dialogue history
+        """returns an answer given a question and a dialogue history. Assume that you can directly pipe through all the components
 
         Args:
             batch_questions (List[str]): _description_
@@ -58,9 +79,16 @@ class RQAPipeline(Component):
             output_dict = asdict(module_output)
             input_dict.update(output_dict)
 
+        self.update_dialogue_session(
+            batch_questions=batch_questions,
+            retrieval_qa_output=module_output,
+            batch_dialogue_session=batch_dialogue_session,
+        )
+
         return RQAOutput(
-            batched_answers=module_output.batched_answers,
-            batched_source_documents=module_output.batched_source_documents,
+            batch_answers=module_output.batched_answers,
+            batch_source_documents=module_output.batched_source_documents,
+            batch_dialogue_session=batch_dialogue_session,
         )
 
     def run(self, *args, **kwargs):

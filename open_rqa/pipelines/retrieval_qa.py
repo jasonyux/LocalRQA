@@ -23,15 +23,6 @@ class BaseRQA(RQAPipeline):
         return
 
 
-class AutoRQA(BaseRQA):
-    def __init__(
-        self,
-        retriever: str,
-        qa_llm: str,
-    ):
-        raise NotImplementedError
-
-
 class SimpleRQA(BaseRQA):
     REPHRASE_QUESTION_PROMPT = """
     Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
@@ -39,9 +30,9 @@ class SimpleRQA(BaseRQA):
     Follow Up Input: {question}{eos_token}
     Standalone question:
     """.replace(
-        " "*4, ""
+        " " * 4, ""
     ).strip()
-    
+
     def __init__(
         self,
         retriever: BaseRetriever,
@@ -60,7 +51,9 @@ class SimpleRQA(BaseRQA):
             "num_beams": 1,
             # "repetition_penalty": 1.00,  # cause CUDA-assertion when used with TGI
             # "typical_p": 0.999,  # cause CUDA-assertion when used with TGI
-            "eos_token_id": None if self.qa_llm.is_api_model else self.qa_llm.tokenizer.eos_token_id, 
+            "eos_token_id": None
+            if self.qa_llm.is_api_model
+            else self.qa_llm.tokenizer.eos_token_id,
             "early_stopping": True,
         }
         return
@@ -75,7 +68,9 @@ class SimpleRQA(BaseRQA):
             generation_kwargs=_gen_kwargs,
         )
         responses = gen_output.batch_answers
-        responses =[r.strip().replace(self.qa_llm.tokenizer.eos_token, "") for r in responses]
+        responses = [
+            r.strip().replace(self.qa_llm.tokenizer.eos_token, "") for r in responses
+        ]
         return responses
 
     def rephrase_questions(
@@ -136,32 +131,11 @@ class SimpleRQA(BaseRQA):
             logger.info("\n".join(rephrased_qs))
         return rephrased_qs
 
-    def update_dialogue_session(
-        self,
-        batch_questions: List[str],
-        retrieval_qa_output: RQAOutput,
-        batch_dialogue_session: List[DialogueSession],
-    ):
-        """update the dialogue session with the question from the current turn and the answer from the system
-
-        Args:
-            batch_questions (List[str]): _description_
-            retrieval_qa_output (RQAOutput): _description_
-            batch_dialogue_session (List[DialogueSession]): _description_
-        """
-        batch_answers = retrieval_qa_output.batched_answers
-        for i, dialogue_session in enumerate(batch_dialogue_session):
-            question = batch_questions[i]
-            answer = batch_answers[i]
-            dialogue_session.add_user_message(question)
-            dialogue_session.add_system_message(answer)
-        return
-
     def qa(
         self,
         batch_questions: List[str],
         batch_dialogue_session: List[DialogueSession],
-    ) -> List[RQAOutput]:
+    ) -> RQAOutput:
         batch_questions = self.rephrase_questions(
             batch_questions, batch_dialogue_session
         )
@@ -175,3 +149,12 @@ class SimpleRQA(BaseRQA):
             batch_dialogue_session=batch_dialogue_session,
         )
         return retrieval_qa_output
+
+
+class AutoRQA(BaseRQA):
+    def __init__(
+        self,
+        retriever: str,
+        qa_llm: str,
+    ):
+        raise NotImplementedError
