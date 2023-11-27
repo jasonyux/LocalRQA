@@ -6,11 +6,17 @@
 Welcome to OpenRQA's documentation!
 ===================================
 
+OpenRQA is a framework ...
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
 
+   open_rqa
 
 Indices and tables
 ==================
