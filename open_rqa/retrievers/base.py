@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from typing import List
 from abc import ABC, abstractmethod
 from open_rqa.base import Component
 from open_rqa.schema.document import Document
 
 
+@dataclass
 class RetrievalOutput(ABC):
     batch_source_documents: List[List[Document]]
 
@@ -12,6 +14,11 @@ class BaseRetriever(Component):
     """retrieves relevant documents from a corpus given a query
     """
     run_input_keys = ["batch_query", "batch_dialogue_history"]
+
+    def __init__(self, texts: List[Document], embeddings) -> None:
+        super().__init__()
+        self.texts = texts
+        self.embeddings = embeddings
 
     @abstractmethod
     def retrieve(
