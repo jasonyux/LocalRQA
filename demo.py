@@ -1,14 +1,41 @@
+from langchain.document_loaders import *
+from langchain.text_splitter import *
+from langchain.schema import Document
+from langchain.embeddings.openai import OpenAIEmbeddings
+from transformers import AutoTokenizer
+
 from open_rqa.pipelines.retrieval_qa import SimpleRQA, AutoRQA
 from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever, DummyRetriever
+from open_rqa.retrievers.faiss_retriever import FaissRetriever
+from open_rqa.text_loaders.langchain_text_loader import LangChainTextLoader, DirectoryTextLoader
+
 
 
 if __name__ == "__main__":
     ###### Manual usage of RQA ######
-    # TODO: a quick way to load data into retriever
-    documents = SimpleDirectoryReader("data").load_data()
-    retriever: BaseRetriever = DummyRetriever()
+    # a quick way to load data into retriever
+    documents = DirectoryTextLoader("./open_rqa/text_loaders/data").load_data()
+
+    # Customized way by using different document_loaders provided in LangChain 
+    loader_func, split_func = DirectoryLoader, CharacterTextSplitter
+    loader_parameters = {'path': "./open_rqa/text_loaders/data", 'glob': "**/*.txt"}
+    splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+    kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    documents = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
+
+
+
+    # retriever: BaseRetriever = DummyRetriever()
+
+    # FaissRetriever by using different embeddings provided in Langchain, the embedding index will be cached for faster later use case
+    retriever = FaissRetriever(documents, embeddings=OpenAIEmbeddings(model='text-embedding-ada-002'), index_path="./index")
+    
+    # testcase
+    # kwargs = {'batch_query': ['what does Revvo do?'], 'batch_dialogue_history': [DialogueSession()]}
+    # output = retriever.retrieve(**kwargs)
+    # print(output.batch_source_documents)
 
     # pick a QA model
     qa_llm = HuggingFaceQAModel()
