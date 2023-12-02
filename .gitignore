@@ -2,6 +2,11 @@ model_checkpoints
 dataset
 notebooks
 .hypothesis
+.vscode
+data
+
+# environmental variables
+.envs 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

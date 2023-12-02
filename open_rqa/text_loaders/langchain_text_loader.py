@@ -1,12 +1,12 @@
-import os
 from typing import Any, List
-import pickle
 from langchain.document_loaders import *
 from langchain.text_splitter import *
 from langchain.schema import Document
 from transformers import AutoTokenizer
-
 from open_rqa.text_loaders.base import BaseTextLoader
+import pickle
+import os
+import tiktoken
 
 
 class LangChainTextLoader(BaseTextLoader):
@@ -23,6 +23,7 @@ class LangChainTextLoader(BaseTextLoader):
         self.splitter_func = splitter_func
         self.save_folder = save_folder
         self.save_filename = save_filename
+        return
 
     def load_data(self, *args: Any, **kwargs: Any) -> List[Document]:
         """load the documents by using the specified loader_func parameters and splitter_func parameters
@@ -75,7 +76,7 @@ class DirectoryTextLoader(LangChainTextLoader):
         """
         super().__init__(save_folder, save_filename)
         self.datapath = datapath
-
+        return
 
     def load_data(self, *args: Any, **kwargs: Any) -> List[Document]:
         """default load data through DirectoryLoader with default parameter setting
@@ -83,11 +84,24 @@ class DirectoryTextLoader(LangChainTextLoader):
         Returns:
             List[Document]: _description_
         """
-        tokenizer = AutoTokenizer.from_pretrained("facebook/contriever-msmarco")
-        loader_parameters = kwargs.get('loader_params') if kwargs.get('loader_params') else {'path': self.datapath}
-        splitter_parameters = kwargs.get('splitter_params') if kwargs.get('splitter_params') else {'tokenizer': tokenizer, 'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+        # TODO: distinguish between 
+        # tokenizer = AutoTokenizer.from_pretrained("facebook/contriever-msmarco")
+        # loader_parameters = kwargs.get('loader_params') if kwargs.get('loader_params') else {'path': self.datapath}
+        # splitter_parameters = kwargs.get('splitter_params') if kwargs.get('splitter_params') else {'tokenizer': tokenizer, 'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+        # docs = self.loader_func(**loader_parameters).load()
+        # text_splitter = self.splitter_func.from_huggingface_tokenizer(**splitter_parameters)
+        
+        loader_parameters = kwargs.get('loader_params') if kwargs.get('loader_params') else {
+            'path': self.datapath
+        }
+        splitter_parameters = kwargs.get('splitter_params') if kwargs.get('splitter_params') else {
+            'encoding_name': tiktoken.encoding_name_for_model("text-embedding-ada-002"),
+            'chunk_size': 500,
+            'chunk_overlap': 200,
+            'separator': "\n\n"
+        }
         docs = self.loader_func(**loader_parameters).load()
-        text_splitter = self.splitter_func.from_huggingface_tokenizer(**splitter_parameters)
+        text_splitter = self.splitter_func.from_tiktoken_encoder(**splitter_parameters)
         texts = text_splitter.split_documents(docs)
         
         self.save_texts(texts)
