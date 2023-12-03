@@ -24,68 +24,57 @@ from open_rqa.retrievers.base import RetrievalOutput
 
 
 class FaissRetriever(BaseRetriever):
+    def __init__(
+        self,
+        texts: List[Document],
+        embeddings=OpenAIEmbeddings(model='text-embedding-ada-002'),
+        index_path="./index"
+    ) -> None:
+        """
 
-	def __init__(
-		self, 
-		texts: List[Document], 
-		embeddings=OpenAIEmbeddings(model='text-embedding-ada-002'), 
-		index_path="./index"
-	) -> None:
-		"""
+        Args:
+            texts (List[Document]): documents for retriever
+            embeddings (_type_, optional): embeddings wrapper supported by LangChain. Defaults to OpenAIEmbeddings(model='text-embedding-ada-002').
+            index_path (str, optional): saving index path. Defaults to "./index".
+        """
+        
+        fs = LocalFileStore(index_path)
+        cached_embedder = CacheBackedEmbeddings.from_bytes_store(
+            embeddings, fs, namespace=embeddings.model
+        )
+        super().__init__(texts, cached_embedder)
+        self.retriever = self._init_retriever()
+        return
+    
+    def _init_retriever(self, **kwargs):
+        """initiate FAISS retriever
 
-		Args:
-			texts (List[Document]): documents for retriever
-			embeddings (_type_, optional): embeddings wrapper supported by LangChain. Defaults to OpenAIEmbeddings(model='text-embedding-ada-002').
-			index_path (str, optional): saving index path. Defaults to "./index".
-		"""
-		
-		fs = LocalFileStore(index_path)
-		cached_embedder = CacheBackedEmbeddings.from_bytes_store(
-			embeddings, fs, namespace=embeddings.model
-		)
-		super().__init__(texts, cached_embedder)
-		self.retriever = self._init_retriever()
-	
-	def _init_retriever(self, **kwargs):
-		"""initiate FAISS retriever
+        Returns:
+            _type_: retriever
+        """
 
-		Returns:
-			_type_: retriever
-		"""
+        docsearch = FAISS.from_documents(self.texts, self.embeddings)
+        
+        retriever = docsearch.as_retriever(**kwargs)
+        return retriever
+    
+    def retrieve(self, batch_query: List[str]) -> RetrievalOutput:
+        """given a batched query and dialogue history, retrieve relevant documents
 
-		docsearch = FAISS.from_documents(self.texts, self.embeddings)
-		
-		retriever = docsearch.as_retriever(**kwargs)
-		return retriever
-	
-	def retrieve(
-		self,
-		question_generator=None,
-		*args, **kwargs
-	) -> RetrievalOutput:
-		"""given a batched query and dialogue history, retrieve relevant documents
+        Args:
+            batch_query (List[str]): _description_
+            batch_dialogue_history (List[DialogueSession]): _description_
 
-		Args:
-			batch_query (List[str]): _description_
-			batch_dialogue_history (List[DialogueSession]): _description_
+        Returns:
+            RetrievalOutput: _description_
+        """
+        all_docs = []
+        for query in batch_query:
+            docs = self.retriever.get_relevant_documents(query)
+            all_docs.append(docs)
 
-		Returns:
-			RetrievalOutput: _description_
-		"""
-		batch_query = kwargs.get('batch_query')
-		batch_dialogue_history = kwargs.get('batch_dialogue_history')
-		all_docs = []
-
-		for i in range(len(batch_query)):
-			question = batch_query[i]
-			chat_history_str = batch_dialogue_history[i].to_string()
-			docs = self.retriever.get_relevant_documents(question)
-
-			all_docs.append(docs)
-
-
-		output = RetrievalOutput(
-			batch_source_documents=all_docs
-		)
-		return output
-		
+        output = RetrievalOutput(
+            batch_source_documents=all_docs
+        )
+        return output
+        

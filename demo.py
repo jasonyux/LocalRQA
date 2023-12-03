@@ -1,6 +1,5 @@
 from langchain.document_loaders import *
 from langchain.text_splitter import *
-from langchain.schema import Document
 from langchain.embeddings.openai import OpenAIEmbeddings
 from transformers import AutoTokenizer
 
