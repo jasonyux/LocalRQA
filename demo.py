@@ -18,15 +18,14 @@ import os
 if __name__ == "__main__":
     ###### Manual usage of RQA ######
     # a quick way to load data into retriever
-    documents = DirectoryTextLoader("/local2/data/shared/rqa/data").load_data()
+    # documents = DirectoryTextLoader("/local2/data/shared/rqa/data").load_data()
 
-    # # TODO: this does not work because save_folder was empty
-    # # Customized way by using different document_loaders provided in LangChain 
-    # loader_func, split_func = DirectoryLoader, CharacterTextSplitter
-    # loader_parameters = {'path': "/local2/data/shared/rqa/data", 'glob': "**/*.txt"}
-    # splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
-    # kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
-    # documents = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
+    # Customized way by using different document_loaders provided in LangChain 
+    loader_func, splitter_func = DirectoryLoader, CharacterTextSplitter
+    loader_parameters = {'path': "/local2/data/shared/rqa/data", 'glob': "**/*.txt"}
+    splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+    kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    documents = LangChainTextLoader(loader_func=loader_func, splitter_func=splitter_func).load_data(**kwargs)
 
     # retriever: BaseRetriever = DummyRetriever()
 
