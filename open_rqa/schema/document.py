@@ -23,6 +23,7 @@ def default_document_formatter(document):
 class Document:
     """representing a chunk of text, along with its metadata (e.g. title, author, url, etc.)
     """
+    title: str  # title, subtitle, url, etc. This is REQUIRED for RQA prompts
     content: str
     to_string: Callable = default_document_formatter
     metadata: dict = field(default_factory=dict)

@@ -1,11 +1,28 @@
-from dataclasses import dataclass, field
-from typing import Any, List
+from dataclasses import dataclass
+from typing import List, Optional
 from open_rqa.schema.document import Document
 
 
 @dataclass
+class DialogueTurn:
+    """stores a single dialogue turn. Added source_documents which MAY be useful later
+    """
+    speaker: str
+    message: str
+    source_documents: Optional[List[Document]] = []
+
+    def to_string(self) -> str:
+        """converts the dialogue turn into a string
+
+        Returns:
+            str: string representation of the dialogue turn
+        """
+        return f"{self.speaker}: {self.message}"
+
+
+@dataclass
 class DialogueSession:
-    history: Any = field(default_factory=list)
+    history: List[DialogueTurn] = []
 
     def to_string(self) -> str:
         """format dialogue history into a string
@@ -13,10 +30,10 @@ class DialogueSession:
         Returns:
             str: formatted dialogue history
         """
-        return "\n".join([str(h) for h in self.history])
+        return "\n".join([turn.to_string() for turn in self.history])
 
     def add_user_message(self, user_message: str):
-        """add user message to dialogue history
+        """add user message as DialogueTurn to dialogue history
 
         Args:
             user_message (str): user message
@@ -24,7 +41,7 @@ class DialogueSession:
         raise NotImplementedError
 
     def add_system_message(self, system_message: str):
-        """add system message to dialogue history
+        """add system message as DialogueTurn to dialogue history
 
         Args:
             system_message (str): system message

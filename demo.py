@@ -10,6 +10,7 @@ from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever, DummyRetriever
 from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.text_loaders.langchain_text_loader import LangChainTextLoader, DirectoryTextLoader
+from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
 import os
 
 
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     print(output.batch_source_documents)
 
     # pick a QA model
-    qa_llm = HuggingFaceQAModel()
+    qa_llm = HuggingFaceQAModel(model_name_or_path="lmsys/vicuna-13b-v1.3")
     # pick an answer guardrail
 
     answer_guardrail = NoopAnswerGuardrail()
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     rqa = SimpleRQA(retriever=retriever, qa_llm=qa_llm, answer_guardrail=answer_guardrail, verbose=True)
 
     response = rqa.qa(
-        batch_questions=["What is the capital of the United States?"],
+        batch_questions=['what does Revvo do?'],
         batch_dialogue_session=[DialogueSession()],
     )
     print(response.batch_answers[0])

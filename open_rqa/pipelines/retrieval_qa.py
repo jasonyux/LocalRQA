@@ -4,6 +4,7 @@ from open_rqa.guardrails.base import BaseAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever
 from open_rqa.qa_llms.base import BaseQAModel
 from open_rqa.pipelines.base import RQAPipeline
+from open_rqa.pipelines.prompts import REPHRASE_QUESTION_PROMPT
 import logging
 
 
@@ -24,15 +25,6 @@ class BaseRQA(RQAPipeline):
 
 
 class SimpleRQA(BaseRQA):
-    REPHRASE_QUESTION_PROMPT = """
-    Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
-    Chat History: {chat_history_str}
-    Follow Up Input: {question}{eos_token}
-    Standalone question:
-    """.replace(
-        " " * 4, ""
-    ).strip()
-
     def __init__(
         self,
         retriever: BaseRetriever,
@@ -44,33 +36,29 @@ class SimpleRQA(BaseRQA):
         self.qa_llm = qa_llm
         self.verbose = verbose
 
-        # TODO: with TGI we have quite a different score than not using it. perhaps check if it was doing quantization automatically
-        self.__default_generate_kwargs = {
+        # for answering questions
+        self._default_tokenization_kwargs = {}
+        self._default_generate_kwargs = {
             "max_new_tokens": 512,
             "do_sample": False,
-            "num_beams": 1,
-            # "repetition_penalty": 1.00,  # cause CUDA-assertion when used with TGI
-            # "typical_p": 0.999,  # cause CUDA-assertion when used with TGI
-            "eos_token_id": None
-            if self.qa_llm.is_api_model
-            else self.qa_llm.tokenizer.eos_token_id,
             "early_stopping": True,
+        }
+        # for rephrasing questions
+        self._default_rephrase_kwargs = {
+            "max_new_tokens": 128,
         }
         return
 
     def _batch_generate(self, input_prompts, **generate_kwargs):
         # merge default kwargs with user kwargs
-        _gen_kwargs = {**self.__default_generate_kwargs, **generate_kwargs}
+        _gen_kwargs = {**self._default_generate_kwargs, **generate_kwargs}
 
         gen_output = self.qa_llm.generate(
             batched_prompts=input_prompts,
-            tokenization_kwargs={},
+            tokenization_kwargs=self._default_tokenization_kwargs,
             generation_kwargs=_gen_kwargs,
         )
         responses = gen_output.batch_answers
-        responses = [
-            r.strip().replace(self.qa_llm.tokenizer.eos_token, "") for r in responses
-        ]
         return responses
 
     def rephrase_questions(
@@ -115,7 +103,7 @@ class SimpleRQA(BaseRQA):
     ) -> List[str]:
         input_prompts = []
         for question, chat_history_str in zip(questions, chat_history_strs):
-            prompt_i = self.REPHRASE_QUESTION_PROMPT.format(
+            prompt_i = REPHRASE_QUESTION_PROMPT.format(
                 question=question,
                 chat_history_str=chat_history_str,
                 eos_token=self.qa_llm.tokenizer.eos_token,
@@ -125,7 +113,10 @@ class SimpleRQA(BaseRQA):
                 logger.info("[__rephrase_questions] Prompt:")
                 logger.info(prompt_i)
 
-        rephrased_qs = self._batch_generate(input_prompts, max_new_tokens=128)
+        rephrased_qs = self._batch_generate(
+            input_prompts,
+            **self._default_rephrase_kwargs
+        )
         if self.verbose:
             logger.info("[__rephrase_questions] Rephrased questions:")
             logger.info("\n".join(rephrased_qs))

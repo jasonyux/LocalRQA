@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 from open_rqa.base import Component
 from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.schema.document import Document
@@ -26,6 +26,8 @@ class BaseQAModel(Component):
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
         batch_dialogue_history: List[DialogueSession],
+        tokenization_kwargs: Optional[dict] = None,
+        generation_kwargs: Optional[dict] = None,
     ) -> GenerationOutput:
         """retrieval augemented generation based on the source documents
 
@@ -33,6 +35,8 @@ class BaseQAModel(Component):
             batch_questions (List[str]): _description_
             batch_source_documents (List[List[Document]]): _description_
             batch_dialogue_history (List[DialogueSession]): _description_
+            tokenization_kwargs (Optional[dict], optional): controls tokenization before generation. Defaults to None = use default in generation model
+            generation_kwargs (Optional[dict], optional): controls generation. Defaults to None = use default in generation model
 
         Raises:
             NotImplementedError: _description_
