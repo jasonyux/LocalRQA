@@ -12,7 +12,7 @@ from langchain.storage import (
     RedisStore,
     UpstashRedisStore,
 )
-from langchain.vectorstores import FAISS
+from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
 
 

@@ -9,6 +9,8 @@ import os
 import tiktoken
 
 
+# TODO: change langchain.schema Document to our Document
+
 class LangChainTextLoader(BaseTextLoader):
     def __init__(self, save_folder="data", save_filename="parsed_docs", loader_func=DirectoryLoader, splitter_func=CharacterTextSplitter):
         """Customized text loader by using different document_loaders provided in LangChain
