@@ -14,9 +14,6 @@ from langchain.storage import (
 )
 from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
-
-
-from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.schema.document import Document
 from open_rqa.retrievers.base import BaseRetriever
 from open_rqa.retrievers.base import RetrievalOutput
@@ -58,18 +55,17 @@ class FaissRetriever(BaseRetriever):
         retriever = docsearch.as_retriever(**kwargs)
         return retriever
     
-    def retrieve(self, batch_query: List[str]) -> RetrievalOutput:
+    def retrieve(self, batch_questions: List[str]) -> RetrievalOutput:
         """given a batched query and dialogue history, retrieve relevant documents
 
         Args:
-            batch_query (List[str]): _description_
-            batch_dialogue_history (List[DialogueSession]): _description_
+            batch_questions (List[str]): _description_
 
         Returns:
             RetrievalOutput: _description_
         """
         all_docs = []
-        for query in batch_query:
+        for query in batch_questions:
             docs = self.retriever.get_relevant_documents(query)
             all_docs.append(docs)
 
@@ -77,4 +73,3 @@ class FaissRetriever(BaseRetriever):
             batch_source_documents=all_docs
         )
         return output
-        

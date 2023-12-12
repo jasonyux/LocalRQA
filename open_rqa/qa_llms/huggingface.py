@@ -11,7 +11,12 @@ class HuggingFaceQAModel(BaseQAModel):
     Args:
         BaseQAModel (_type_): _description_
     """
-    def __init__(self, model_name_or_path: str = "lmsys/vicuna-13b-v1.3"):
+    def __init__(
+        self,
+        model_name_or_path: str = "lmsys/vicuna-13b-v1.3",
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+    ):
         super().__init__()
         self.model_name_or_path = model_name_or_path
 
@@ -35,8 +40,8 @@ class HuggingFaceQAModel(BaseQAModel):
             "eos_token_id": self.tokenizer.eos_token_id, 
             "early_stopping": True,
         }
-        self.user_prefix = "USER"
-        self.assistant_prefix = "ASSISTANT"
+        self.user_prefix = user_prefix
+        self.assistant_prefix = assistant_prefix
         return
 
     def generate(self, batched_prompts: List[str], tokenization_kwargs: dict, generation_kwargs: dict) -> GenerationOutput:
@@ -79,6 +84,7 @@ class HuggingFaceQAModel(BaseQAModel):
         # format documents
         formatted_documents = ""
         for doc in docs:
+            # formatted_documents += f"content: {doc.page_content}\n"
             formatted_documents += f"title: {doc.title} content: {doc.content}\n"
         formatted_documents = formatted_documents.strip()
 
@@ -95,12 +101,17 @@ class HuggingFaceQAModel(BaseQAModel):
         self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
-        batch_dialogue_history: List[DialogueSession],
+        batch_dialogue_session: List[DialogueSession],
         tokenization_kwargs: Optional[dict] = None,
         generation_kwargs: Optional[dict] = None,
     ) -> GenerationOutput:
+        if tokenization_kwargs is None:
+            tokenization_kwargs = {}
+        if generation_kwargs is None:
+            generation_kwargs = {}
+        
         q_w_retrieved_docs = []
-        chat_history_strs = [session.to_string() for session in batch_dialogue_history]
+        chat_history_strs = [session.to_string() for session in batch_dialogue_session]
         for i, _ in enumerate(batch_questions):
             question = batch_questions[i]
             chat_history_str = chat_history_strs[i]

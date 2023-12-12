@@ -39,12 +39,11 @@ if __name__ == "__main__":
     )
     
     # testcase
-    kwargs = {'batch_query': ['what does Revvo do?'], 'batch_dialogue_history': [DialogueSession()]}
-    output = retriever.retrieve(**kwargs)
+    output = retriever.retrieve(batch_questions=['what does Revvo do?'])
     print(output.batch_source_documents)
 
     # pick a QA model
-    qa_llm = HuggingFaceQAModel(model_name_or_path="lmsys/vicuna-13b-v1.3")
+    qa_llm = HuggingFaceQAModel(model_name_or_path="lmsys/vicuna-13b-v1.5-16k")
     # pick an answer guardrail
 
     answer_guardrail = NoopAnswerGuardrail()

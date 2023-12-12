@@ -13,7 +13,7 @@ class RetrievalOutput(ABC):
 class BaseRetriever(Component):
     """retrieves relevant documents from a corpus given a query
     """
-    run_input_keys = ["batch_query", "batch_dialogue_history"]
+    run_input_keys = ["batch_questions"]
 
     def __init__(self, texts: List[Document], embeddings) -> None:
         super().__init__()
@@ -23,12 +23,12 @@ class BaseRetriever(Component):
     @abstractmethod
     def retrieve(
         self,
-        batch_query: List[str],
+        batch_questions: List[str],
     ) -> RetrievalOutput:
         """given a batched query, retrieve relevant documents (query rephrasing is handled by the RQA pipeline)
 
         Args:
-            batch_query (List[str]): _description_
+            batch_questions (List[str]): _description_
 
         Returns:
             RetrievalOutput: _description_
@@ -47,12 +47,13 @@ class DummyRetriever(BaseRetriever):
     """
     def retrieve(
         self,
-        batch_query: List[str],
+        batch_questions: List[str],
     ) -> RetrievalOutput:
         dummy_document = Document(
+            title="dummy title",
             content="dummy document",
             metadata={"dummy": "dummy"},
         )
         return RetrievalOutput(
-            batch_source_documents=[[dummy_document] for _ in batch_query]
+            batch_source_documents=[[dummy_document] for _ in batch_questions]
         )

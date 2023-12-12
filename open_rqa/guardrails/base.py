@@ -1,18 +1,25 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List
 from open_rqa.schema.document import Document
 from open_rqa.schema.dialogue import DialogueSession, RQAOutput
+from open_rqa.base import Component
 
 
-class BaseAnswerGuardrail(ABC):
+class BaseAnswerGuardrail(Component):
     """performs actions such as fact checking, safety filtering, etc,"""
+    run_input_keys = [
+        "batch_questions",
+        "batch_source_documents",
+        "batch_dialogue_session",
+        "batch_answers",
+    ]
 
     @abstractmethod
     def guardrail(
         self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
-        batch_dialogue_history: List[DialogueSession],
+        batch_dialogue_session: List[DialogueSession],
         batch_answers: List[str],
     ) -> RQAOutput:
         """post-processing the response before returning to the user
@@ -20,7 +27,7 @@ class BaseAnswerGuardrail(ABC):
         Args:
             batch_questions (List[str]): _description_
             batch_source_documents (List[List[Document]]): _description_
-            batch_dialogue_history (List[DialogueSession]): _description_
+            batch_dialogue_session (List[DialogueSession]): _description_
             batch_answers (List[str]): _description_
 
         Raises:
@@ -31,6 +38,9 @@ class BaseAnswerGuardrail(ABC):
         """
         raise NotImplementedError
 
+    def run(self, *args, **kwargs):
+        return self.guardrail(*args, **kwargs)
+
 
 class NoopAnswerGuardrail(BaseAnswerGuardrail):
     """dummy answer guardrail that passes the answer through"""
@@ -39,10 +49,11 @@ class NoopAnswerGuardrail(BaseAnswerGuardrail):
         self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
-        batch_dialogue_history: List[DialogueSession],
+        batch_dialogue_session: List[DialogueSession],
         batch_answers: List[str],
     ) -> RQAOutput:
         return RQAOutput(
             batch_answers=batch_answers,
             batch_source_documents=batch_source_documents,
+            batch_dialogue_session=batch_dialogue_session,
         )

@@ -37,11 +37,13 @@ class RQAPipeline(Component):
             batch_dialogue_session (List[DialogueSession]): _description_
         """
         batch_answers = retrieval_qa_output.batch_answers
+        source_documents = retrieval_qa_output.batch_source_documents
         for i, dialogue_session in enumerate(batch_dialogue_session):
             question = batch_questions[i]
             answer = batch_answers[i]
+            source_docs = source_documents[i]
             dialogue_session.add_user_message(question)
-            dialogue_session.add_system_message(answer)
+            dialogue_session.add_system_message(answer, source_documents=source_docs)
         return
 
     def _prepare_input(self, data_dict: dict, keys: List[str]):

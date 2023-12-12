@@ -17,7 +17,7 @@ class BaseQAModel(Component):
     run_input_keys = [
         "batch_questions",
         "batch_source_documents",
-        "batch_dialogue_history",
+        "batch_dialogue_session",
     ]
 
     @abstractmethod
@@ -25,7 +25,7 @@ class BaseQAModel(Component):
         self,
         batch_questions: List[str],
         batch_source_documents: List[List[Document]],
-        batch_dialogue_history: List[DialogueSession],
+        batch_dialogue_session: List[DialogueSession],
         tokenization_kwargs: Optional[dict] = None,
         generation_kwargs: Optional[dict] = None,
     ) -> GenerationOutput:
@@ -34,7 +34,7 @@ class BaseQAModel(Component):
         Args:
             batch_questions (List[str]): _description_
             batch_source_documents (List[List[Document]]): _description_
-            batch_dialogue_history (List[DialogueSession]): _description_
+            batch_dialogue_session (List[DialogueSession]): _description_
             tokenization_kwargs (Optional[dict], optional): controls tokenization before generation. Defaults to None = use default in generation model
             generation_kwargs (Optional[dict], optional): controls generation. Defaults to None = use default in generation model
 
