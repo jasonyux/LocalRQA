@@ -1,8 +1,13 @@
-from typing import List
+from typing import List, Optional
+from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM
 from open_rqa.schema.dialogue import DialogueSession, RQAOutput
+from open_rqa.schema.document import Document
 from open_rqa.guardrails.base import BaseAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever
+from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.qa_llms.base import BaseQAModel
+from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
+from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.pipelines.base import RQAPipeline
 from open_rqa.pipelines.prompts import REPHRASE_QUESTION_PROMPT
 import logging
@@ -140,6 +145,45 @@ class SimpleRQA(BaseRQA):
             batch_dialogue_session=batch_dialogue_session,
         )
         return retrieval_qa_output
+
+    @staticmethod
+    def from_huggingface(
+        retriever: BaseRetriever,
+        qa_model: Optional[AutoModelForCausalLM] = None,
+        qa_tokenizer: Optional[AutoTokenizer] = None,
+        qa_model_name_or_path: str = "",
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+    ):
+        """initialize simple RQA given an already initialized retriever model + huggingface-based qa model
+
+        Args:
+            retriever (BaseRetriever): _description_
+            qa_model (Optional[AutoModelForCausalLM], optional): _description_. Defaults to None.
+            qa_tokenizer (Optional[AutoTokenizer], optional): _description_. Defaults to None.
+            qa_model_name_or_path (str, optional): _description_. Defaults to "".
+            user_prefix (str, optional): _description_. Defaults to "USER".
+            assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+
+        Returns:
+            _type_: _description_
+        """
+        qa_llm = HuggingFaceQAModel(
+            model=qa_model,
+            tokenizer=qa_tokenizer,
+            model_name_or_path=qa_model_name_or_path,
+            user_prefix=user_prefix,
+            assistant_prefix=assistant_prefix,
+        )
+        answer_guardrail = NoopAnswerGuardrail()
+
+        rqa = SimpleRQA(
+            retriever=retriever,
+            qa_llm=qa_llm,
+            answer_guardrail=answer_guardrail,
+            verbose=False
+        )
+        return rqa
 
 
 class AutoRQA(BaseRQA):

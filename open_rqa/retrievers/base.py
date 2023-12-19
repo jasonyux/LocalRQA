@@ -19,6 +19,7 @@ class BaseRetriever(Component):
         super().__init__()
         self.texts = texts
         self.embeddings = embeddings
+        return
 
     @abstractmethod
     def retrieve(
