@@ -1,9 +1,22 @@
 RQA_PROMPT = """
-You are a QA bot. Use the following pieces of context to answer the users question.
-Do not mention 'this context' in your response, since the following context is only visible to you.
+This is a chat between a curious user and an artificial intelligence assistant.
+The assistant gives helpful, detailed, and polite answers using documents from the following context.
+Do not mention 'this context' in the assistant's response, since the following context is only visible to the assistant.
 ----------------
 Context:
 {formatted_documents}
 ----------------
 {formatted_chat} {assistant_prefix}:
-""".replace("\t", "").strip()
+""".strip()
+
+
+RQA_PROMPT_TRAIN = """
+This is a chat between a curious user and an artificial intelligence assistant.
+The assistant gives helpful, detailed, and polite answers using documents from the following context.
+Do not mention 'this context' in the assistant's response, since the following context is only visible to the assistant.
+----------------
+Context:
+{formatted_documents}
+----------------
+{formatted_chat_w_answer}
+""".strip()

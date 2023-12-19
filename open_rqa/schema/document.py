@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Dict, Any
 
 
 def default_document_formatter(document):
@@ -12,8 +12,10 @@ def default_document_formatter(document):
         _type_: _description_
     """
     formatted_str = ''
-    for key, value in document.metadata.items():
-        formatted_str += f'{key}: {value}\n'
+    if 'source' in document.metadata:
+        formatted_str += f'Source: {document.metadata["source"]}\n'
+    if 'title' in document.metadata:
+        formatted_str += f'Title: {document.metadata["title"]}\n'
     formatted_str += 'Content:\n'
     formatted_str += document.content
     return formatted_str.strip()
@@ -23,7 +25,41 @@ def default_document_formatter(document):
 class Document:
     """representing a chunk of text, along with its metadata (e.g. title, author, url, etc.)
     """
-    title: str  # title, subtitle, url, etc. This is REQUIRED for RQA prompts
+    title: str  # TODO: remove. title, subtitle, url, etc. This is REQUIRED for RQA prompts
     content: str
-    to_string: Callable = default_document_formatter
+    fmt_content: str = field(default='')  # content formatted with metadata information
     metadata: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        if self.fmt_content == '':
+            self.fmt_content = default_document_formatter(self)
+        return
+
+    def to_dict(self) -> Dict[str, Any]:
+        """converts the Document object into a dictionary
+
+        Returns:
+            dict[str, Any]: _description_
+        """
+        # return asdict(self)  # this also encodes the to_string function
+        return {
+            'title': self.title,
+            'content': self.content,
+            'fmt_content': self.fmt_content,
+            'metadata': self.metadata
+        }
+
+    @staticmethod
+    def from_dict(document_dict):
+        """converts a dictionary to a Document object.
+
+        Args:
+            document_dict (_type_): _description_
+        """
+        document = Document(
+            title=document_dict['title'],
+            content=document_dict['content'],
+            fmt_content=document_dict['fmt_content'],
+            metadata=document_dict['metadata']
+        )
+        return document

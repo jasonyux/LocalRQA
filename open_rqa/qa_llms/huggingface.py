@@ -94,8 +94,7 @@ class HuggingFaceQAModel(BaseQAModel):
         # format documents
         formatted_documents = ""
         for doc in docs:
-            # formatted_documents += f"content: {doc.page_content}\n"
-            formatted_documents += f"title: {doc.title} content: {doc.content}\n"
+            formatted_documents += f"{doc.fmt_content}\n"
         formatted_documents = formatted_documents.strip()
 
         formatted_chat = f"{chat_history_str} {self.user_prefix}: {question}".strip()

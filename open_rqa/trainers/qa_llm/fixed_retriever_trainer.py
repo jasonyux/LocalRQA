@@ -60,7 +60,7 @@ class FixedRetrieverTrainer(Trainer):
             optimizers=optimizers,
             preprocess_logits_for_metrics=preprocess_logits_for_metrics
         )
-        self.retriever_model = retriever_model  # already wrapped
+        self.retriever_model = retriever_model  # already wrapped retriever model
         self.evaluator_config = eval_config
         self.eval_wrapper_class = eval_wrapper_class
         return
@@ -158,7 +158,7 @@ class FixedRetrieverTrainer(Trainer):
         output.metrics.update(performance)
 
         if self.args.write_predictions:
-            save_name = f'step-{self.state.global_step}-predictions.pkl'
+            save_name = f'step-{self.state.global_step}-{metric_key_prefix}-predictions.pkl'
             save_path = os.path.join(self.args.output_dir, save_name)
             with open(save_path, 'wb') as f:
                 pickle.dump(predictions, f)
