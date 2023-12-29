@@ -17,7 +17,7 @@ def default_document_formatter(document):
     if 'title' in document.metadata:
         formatted_str += f'Title: {document.metadata["title"]}\n'
     formatted_str += 'Content:\n'
-    formatted_str += document.content
+    formatted_str += document.page_content
     return formatted_str.strip()
 
 
@@ -25,8 +25,7 @@ def default_document_formatter(document):
 class Document:
     """representing a chunk of text, along with its metadata (e.g. title, author, url, etc.)
     """
-    title: str  # TODO: remove. title, subtitle, url, etc. This is REQUIRED for RQA prompts
-    content: str
+    page_content: str
     fmt_content: str = field(default='')  # content formatted with metadata information
     metadata: dict = field(default_factory=dict)
 

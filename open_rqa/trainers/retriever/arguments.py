@@ -1,7 +1,7 @@
 import argparse
 from dataclasses import dataclass, field
 from transformers import TrainingArguments
-from config.retriever_config import SEARCH_CONFIG
+from open_rqa.config.retriever_config import SEARCH_CONFIG
 
 class Options:
     def __init__(self):
@@ -46,13 +46,13 @@ class Options:
 
         # trainer args
         self.parser.add_argument(
-            '--lr', type=float, default=1e-5,
+            '--lr', type=float, default=1e-4,
         )
         self.parser.add_argument(
             '--max_steps', type=int, default=400,
         )
         self.parser.add_argument(
-            '--per_device_train_batch_size', type=int, default=4,
+            '--per_device_train_batch_size', type=int, default=256,
         )
         self.parser.add_argument(
             '--no_gradient_checkpointing', action='store_true'
@@ -69,14 +69,14 @@ class Options:
         
         # additional contrastive training args
         self.parser.add_argument(
-            '--hard_neg_ratio', type=float, default=0.1,
+            '--hard_neg_ratio', type=float, default=0.05,
         )
         self.parser.add_argument(
             '--contrastive_loss', type=str, default='constructed_contrastive',
             choices=['inbatch_contrastive', 'constructed_contrastive'],
         )
         self.parser.add_argument(
-            '--temperature', type=float, default=1,
+            '--temperature', type=float, default=0.05,
         )
 
     def parse(self):

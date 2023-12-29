@@ -1,8 +1,8 @@
 from typing import Any, List
 from langchain.document_loaders import *
 from langchain.text_splitter import *
-from langchain.schema import Document
 from transformers import AutoTokenizer
+from open_rqa.schema.document import Document
 from open_rqa.text_loaders.base import BaseTextLoader
 import pickle
 import os
@@ -46,6 +46,7 @@ class LangChainTextLoader(BaseTextLoader):
         docs = self.loader_func(**loader_parameters).load()
         text_splitter = self.splitter_func(**splitter_parameters)
         texts = text_splitter.split_documents(docs)
+        texts = self._convert_doc(texts)
 
         self.save_texts(texts)
 
@@ -105,6 +106,7 @@ class DirectoryTextLoader(LangChainTextLoader):
         docs = self.loader_func(**loader_parameters).load()
         text_splitter = self.splitter_func.from_tiktoken_encoder(**splitter_parameters)
         texts = text_splitter.split_documents(docs)
+        texts = self._convert_doc(texts)
         
         self.save_texts(texts)
 

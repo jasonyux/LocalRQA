@@ -1,6 +1,7 @@
 from langchain.document_loaders import *
 from langchain.text_splitter import *
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.embeddings import *
 from transformers import AutoTokenizer
 
 from open_rqa.pipelines.retrieval_qa import SimpleRQA, AutoRQA
@@ -29,17 +30,27 @@ if __name__ == "__main__":
     # retriever: BaseRetriever = DummyRetriever()
 
     # FaissRetriever by using different embeddings provided in Langchain, the embedding index will be cached for faster later use case
+    # retriever = FaissRetriever(
+    #     documents,
+    #     embeddings=OpenAIEmbeddings(
+    #         model='text-embedding-ada-002',
+    #         organization=os.environ['OPENAI_ORGANIZATION']
+    #     ),
+    #     index_path="/local2/data/shared/rqa/index"
+    # )
+
+    # Finetuned
     retriever = FaissRetriever(
         documents,
-        embeddings=OpenAIEmbeddings(
-            model='text-embedding-ada-002',
-            organization=os.environ['OPENAI_ORGANIZATION']
-        ),
+        embeddings=HuggingFaceEmbeddings(
+                model_name="/local2/data/shared/rqa/retriever_model/contriever-ms_databricks_inbatch256_hard0.05_test/checkpoint-300"
+            ),
         index_path="/local2/data/shared/rqa/index"
     )
+
     
     # testcase
-    output = retriever.retrieve(batch_questions=['what does Revvo do?'])
+    output = retriever.retrieve(batch_questions=['What are some changes in behavior in Databricks Runtime 8.0?'])
     print(output.batch_source_documents)
 
     # pick a QA model
