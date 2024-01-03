@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 import torch
 from langchain.embeddings.base import Embeddings
 
-from open_rqa.train.utils import dist_utils
+from open_rqa.trainers import dist_utils
 
 
 logger = logging.getLogger(__name__)

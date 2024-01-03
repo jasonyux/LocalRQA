@@ -17,7 +17,10 @@ class Options:
             help="the final output dir will be output_base_dir/exp_name"
         )
         self.parser.add_argument(
-            "--eval_only", action='store_true',
+            "--do_train", action='store_true',
+        )
+        self.parser.add_argument(
+            "--do_eval", action='store_true',
         )
         self.parser.add_argument(
             '--model_path', type=str, default='facebook/contriever-msmarco',
