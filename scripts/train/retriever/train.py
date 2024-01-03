@@ -41,8 +41,8 @@ if __name__ == "__main__":
 	tokenizer = AutoTokenizer.from_pretrained(args.model_path)
 
 	training_args = RetrievalQATrainingArguments(
-		do_train=True,
-		do_eval=True,
+		do_train=args.do_train,
+		do_eval=args.do_eval,
 		output_dir = os.path.join(args.output_base_dir, args.exp_name),
 		remove_unused_columns = False,
 		gradient_checkpointing = not args.no_gradient_checkpointing,
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 		tokenizer=tokenizer,
 	)
 
-	if args.eval_only:
+	if args.do_eval and not args.do_train:
 		trainer.evaluate()
 	else:
 		trainer.train()
