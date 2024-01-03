@@ -138,7 +138,7 @@ class RetrieverEvaluator(Evaluator):
             performance.update(metric_performance)
         return performance
 
-    def evaluate(self, wrapped_model: RetrievalModel, prefix='eval') -> Tuple[Dict[str, Any], List[Dict]]:
+    def evaluate(self, wrapped_model, prefix='eval') -> Tuple[Dict[str, Any], List[Dict]]:
         test_data_iterator = self._get_data_iterator()
         self.reset_all_metrics()
 
@@ -158,7 +158,7 @@ class RetrieverEvaluator(Evaluator):
                 if isinstance(metric, MonitoringMetric):
                     metric.start()
             retr_output: RetrievalOutput = wrapped_model.retrieve(batch, self.documents, self.indexes)
-            retrieved_docs: List[List[Document]] = retr_output.retrieved_docs
+            retrieved_docs: List[List[Document]] = retr_output.batch_source_documents
 
             gold_docs = batch["gold_docs"]
 

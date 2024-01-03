@@ -6,11 +6,11 @@ import os
 from transformers import BertModel, BertForMaskedLM, AutoTokenizer
 import wandb
 
-from open_rqa.train.utils.arguments import Options, RetrievalQATrainingArguments, ContrasitiveTrainingArgs
-from open_rqa.train.dataset import ContrastiveRetrievalDataset, NoopDataCollator
-from open_rqa.train.retriever_trainer import RetrieverTrainer, EvaluatorConfig
+from open_rqa.trainers.retriever.arguments import Options, RetrievalQATrainingArguments, ContrasitiveTrainingArgs
+from open_rqa.trainers.retriever.datasets import ContrastiveRetrievalDataset, NoopDataCollator
+from open_rqa.trainers.retriever.retriever_trainer import RetrieverTrainer, EvaluatorConfig
 from open_rqa.config.retriever_config import SEARCH_CONFIG
-from open_rqa.train.model.wrappers import RetrievalModel, RetrieverfromBertModel, RetrieverfromBertMLMModel
+from open_rqa.trainers.retriever.model.wrappers import RetrievalModel, RetrieverfromBertModel, RetrieverfromBertMLMModel
 
 
 if __name__ == "__main__":
@@ -39,8 +39,6 @@ if __name__ == "__main__":
 	else:
 		raise NotImplementedError(f"{args.args.model_type} is not supported")
 	tokenizer = AutoTokenizer.from_pretrained(args.model_path)
-
-	# model = InBatch(args, retriever, tokenizer)
 
 	training_args = RetrievalQATrainingArguments(
 		do_train=True,
@@ -80,6 +78,20 @@ if __name__ == "__main__":
 	)
 	model.additional_training_args = additional_training_args
 	search_kwargs = SEARCH_CONFIG[args.search_algo]
+
+	## temporary code for debug
+	if 'wandb' in training_args.report_to:
+		all_args = {
+			'training_args': training_args.to_dict(),
+			'cmd_args': vars(args),
+		}
+		run = wandb.init(
+			project='tamarin',
+			entity='tamarin',
+			name=training_args.output_dir.split("/")[-1] or None,
+			group='databricks',
+			config=all_args,
+		)
 	
 	wrapper_class: Type[RetrievalModel]
 	if args.model_type == "bert":

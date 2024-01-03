@@ -1,21 +1,13 @@
-from langchain.schema import Document, BaseRetriever
-from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores.faiss import FAISS
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from typing import Dict, Any, List, Optional
 from abc import ABC, abstractmethod
-from retry import retry
 
 from open_rqa.retrievers.base import RetrievalOutput
 from open_rqa.schema.dialogue import RQAOutput
-from open_rqa.train.embeddings import EmbeddingsWrapper, LocalEmbeddings, LocalBERTMLMEmbeddings
+from open_rqa.schema.document import Document
+from open_rqa.trainers.retriever.embeddings import EmbeddingsWrapper, LocalEmbeddings, LocalBERTMLMEmbeddings
 import torch
-import nltk
-import pickle
-import requests
-import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,14 +27,6 @@ class RetrievalModel(ABC):
 	def retrieve(self, batch_inputs, documents=None, indices=None) -> RetrievalOutput:
 		raise NotImplementedError
 
-class RetrievalQAModel(RetrievalModel):
-	@abstractmethod
-	def generate_from_docs(self, batch_inputs, retr_output: RetrievalOutput) -> RQAOutput:
-		raise NotImplementedError
-	
-	@abstractmethod
-	def answer_guardrail(self, raw_gen_output: RQAOutput) -> RQAOutput:
-		raise NotImplementedError
 
 class RetrieverfromBertModel(RetrievalModel):
 	def __init__(self, model, tokenizer, search_kwargs):
@@ -64,16 +48,6 @@ class RetrieverfromBertModel(RetrievalModel):
 		self.retriever = docsearch.as_retriever(search_type="similarity", search_kwargs={'k': 4})
 		embedding_tensor = torch.tensor(self.embeddings.document_embeddings)
 		return embedding_tensor
-
-		# # now build index manually
-		# passages = [format_str.format(title=doc.metadata['title'], text=doc.page_content) for doc in documents]
-
-		# if len(passages) == 0:
-		# 	return torch.tensor([])
-		# list_embeddings = self.embeddings.build_index_from_texts(passages)
-		# # [len(passages), 768]
-		# doc_embeddings = torch.tensor(list_embeddings)
-		# return doc_embeddings
 	
 	def _get_docs(self, question: str, inputs: Dict[str, Any]) -> List[Document]:
 		docs = self.retriever.get_relevant_documents(question)

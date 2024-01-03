@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import List, Dict
-from open_rqa.schema.document import Document
+# from open_rqa.schema.document import Document
+from langchain.schema import Document
 import torch
 import random
 
@@ -38,15 +39,19 @@ class ContrastiveRetrievalDataset(torch.utils.data.Dataset):
 			processed_sample = {}
 			for k, v in sample.items():
 				if isinstance(v, Document):
+					# processed_sample[k] = v.fmt_content  # TODO, new document schema, not finish yet
 					processed_sample[k] = self.document_fmt_str.format(
-						title = v.title,
-						content = v.content
+						title = v.metadata["title"],
+						content = v.page_content
 					)
 				elif isinstance(v, list) and isinstance(v[0], Document):
+					# processed_sample[k] = [
+					# 	vv.fmt_content for vv in v
+					# ]  # TODO, new document schema, not finish yet
 					processed_sample[k] = [
 						self.document_fmt_str.format(
-							title = vv.title,
-							content = vv.content
+							title = vv.metadata["title"],
+							content = vv.page_content
 						) for vv in v
 					]
 				else:

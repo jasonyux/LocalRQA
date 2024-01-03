@@ -37,7 +37,7 @@ class FaissRetriever(BaseRetriever):
         
         fs = LocalFileStore(index_path)
         cached_embedder = CacheBackedEmbeddings.from_bytes_store(
-            embeddings, fs, namespace=embeddings.model
+            embeddings, fs, namespace="customized"
         )
         super().__init__(texts, cached_embedder)
         self.retriever = self._init_retriever()

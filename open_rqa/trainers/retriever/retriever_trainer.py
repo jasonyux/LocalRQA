@@ -7,10 +7,10 @@ from transformers.trainer_utils import EvalPrediction, EvalLoopOutput
 from transformers.trainer_callback import TrainerCallback
 from torch.utils.data import Dataset
 from typing import Optional, List, Union, Dict, Any, Tuple, Type, Callable
-from open_rqa.schema import Document
-from open_rqa.train.model.wrappers import RetrievalModel
+from open_rqa.schema.document import Document
+from open_rqa.trainers.retriever.model.wrappers import RetrievalModel
 from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
-from open_rqa.train.utils.arguments import RetrievalQATrainingArguments
+from open_rqa.trainers.retriever.arguments import RetrievalQATrainingArguments
 import torch
 import torch.nn as nn
 import random
