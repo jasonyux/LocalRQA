@@ -137,9 +137,7 @@ class HuggingFaceQAModel(BaseQAModel):
             tokenization_kwargs=tokenization_kwargs,
             generation_kwargs=generation_kwargs
         )
-        return GenerationOutput(
-            batch_answers=answers.batch_answers,
-        )
+        return answers
 
 
 class HuggingFaceFiDQAModel(BaseQAModel):

@@ -24,7 +24,7 @@ The following steps take place when you launch a Databricks Container Services c
 #. <DBR> code is copied into the Docker container.
 #. The init scrips are executed. See [_](/clusters/init-scripts.md#execution-order).
 ------
-Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered by the texts above.
+Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered using the texts above.
 Question 1: Can user configure init script on docker pull image cluster?
 Question 2: How do I specify init scripts in a cluster spec in Databricks Container Services?
 ------
@@ -36,7 +36,7 @@ Content:
 - [[SPARK-37904]](https://issues.apache.org/jira/browse/SPARK-37904) [SQL] Improve RebalancePartitions in rules of Optimizer
 - [[SPARK-38236]](https://issues.apache.org/jira/browse/SPARK-38236) [SQL][3.2][3.1] Check if table location is absolute by "new Path(locationUri).isAbsolute" in create/alter table
 ------
-Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered by the texts above.
+Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered using the texts above.
 Question 1: What are some improvements made in databricks runtime 7.3 to 11.3?
 Question 2: What are some of the SQL issues fixed in databricks runtime 7.3 to 11.3?
 ------
@@ -62,18 +62,38 @@ The output of the `history` operation has the following columns.
 | timestamp | timestamp | When this version was committed. |
 | userId | string | ID of the user that ran the operation. |
 ------
-Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered by the texts above.
+Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered using the texts above.
 Question 1: How can I check the delta version of a table?
 Question 2: Can I see the timestamps of when changes were made to a delta table?
 ------
 {fmt_content}
 ------
-Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered by the texts above.
+Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered using the texts above.
 Question 1:
 """.strip()
 
 
-def databricks_filter_doc_fn(doc: Document):
+def databricks_filter_fn(doc: Document):
+    if len(doc.page_content.split()) <= 50:
+        return False  # remove documents that are too short
+    
+    # probability to be included: some domains are not very interesting for a user
+    include_weights = {
+        "migration-notes/": 0.05,
+        "release-notes/runtime": 0.05,
+        "sql/language-manual": 0.3,
+        "kb.databricks.com/": 0.7,  # we don't need to sum to 1.0
+    }
+    url = doc.metadata['source']
+
+    weight = 1.0
+    for key, _weight in include_weights.items():
+        if key in url:
+            weight = _weight
+            break
+    
+    if random.random() < weight:
+        return True
     return False
 
 
@@ -84,7 +104,7 @@ def main(args: argparse.Namespace):
     if args.mode in ["init_eval_dset", "all"]:
         documents_dataset = create_positive_n_negative_examples(
             args=args,
-            filter_fn=databricks_filter_doc_fn  # customized
+            filter_fn=databricks_filter_fn  # customized
         )
         logger.info(f"Created {len(documents_dataset)} <gold document, hard negative documents> pairs.")
     if args.mode in ["create_eval_dset", "all"]:
@@ -100,20 +120,16 @@ def main(args: argparse.Namespace):
             doc2q_prompt=DATABRICKS_DOC2Q_PROMPT  # customized
         )
         logger.info(f"Number of train samples: {len(train_dataset)}")
-    else:
-        raise NotImplementedError(f"Mode {args.mode} not implemented")
     return
 
 
 if __name__ == "__main__":
+    # main script is from doc_to_q, here we just customize the `filter_fn` and the `doc2q_prompt`
     parser = argparse.ArgumentParser(
         description="Generate (document, question) pairs given a (chunked) document database. This can be used for generating both testing (q, doc) pairs AND training (q, doc) pairs."
     )
     parser = add_parser_arguments(parser)
-
-    args = parser.parse_args()
-    if args.num_train_data == -1:
-        args.num_train_data = None
+    args = parse_arguments(parser)
     
     logger = init_logger(filename=None)
 

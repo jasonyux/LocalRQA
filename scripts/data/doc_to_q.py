@@ -21,13 +21,59 @@ logger: logging.Logger
 
 
 BASE_DOC2Q_PROMPT = """
-The following texts extracted from a company's documentations. Your task is to create questions that users might ask if they have not read the documentations.
+The following texts are extracted from a company's documentations. Your task is to create questions that users might ask if they have not read the documentations.
 ------
 {fmt_content}
 ------
-Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered by the texts above.
+Create two questions that a user might ask if they have not read these texts. Only create questions that can be answered using the texts above.
 Question 1:
-""".replace('\t','').strip()
+""".strip()
+
+
+def add_parser_arguments(parser):
+    parser.add_argument(
+        "-mode", type=str, required=True,
+        choices = ["all", "init_eval_dset", "create_eval_dset", "create_train_dset"],
+        help=("Mode to run. Ideally the order would be (manually): init_eval_dset + manually check eval sets -> create_eval_dset + manually check eval sets -> create_train_dset. "
+        "The quick version to just run everything would be: all = init_eval_dset + create_eval_dset + create_train_dset")
+    )
+    parser.add_argument(
+        "--document_path", type=str, required=True,
+        help="Path to the chunked documents, i.e., the pickle file used as database for retriever"
+    )
+    parser.add_argument(
+        "--prompt_model", type=str, default="gpt-3.5-turbo",
+        help=("Model to prompt for getting questions from documents. Can be either openai models or huggingface models. "
+        "For huggingface models, make sure you adjust the batch size to accomodate for GPU memory usage.")
+    )
+    parser.add_argument(
+        "--batch_size", type=int, default=2,
+        help="Batch size for question generation. If we are using vicuna than about 2 takes 70+GB of GPU memory."
+    )
+    parser.add_argument(
+        "--num_hard_negs_per_doc", type=int, default=100,
+        help="Number of hard negative examples per gold document"
+    )
+    parser.add_argument(
+        "--num_train_data", type=int, default=1000,
+        help="Number of data to generate for training. Specify -1 to use all (non eval or test) data"
+    )
+    parser.add_argument(
+        "--num_eval_test_data", type=int, default=200,
+        help="Number of data to generate for eval and test."
+    )
+    parser.add_argument(
+        "--save_dir", type=str, required=True,
+        help="Path to save ALL the generated data"
+    )
+    return parser
+
+
+def parse_arguments(parser: argparse.ArgumentParser):
+    args = parser.parse_args()
+    if args.num_train_data == -1:
+        args.num_train_data = None
+    return args
 
 
 def load_documents(args: argparse.Namespace) -> Dict[str, Document]:
@@ -55,37 +101,6 @@ def init_prompting_model(args: argparse.Namespace):
             model_name_or_path = args.prompt_model
         )
     return prompting_model
-
-
-def add_parser_arguments(parser):
-    parser.add_argument(
-        "-mode", type=str, required=True,
-        choices = ["all", "init_eval_dset", "create_eval_dset", "create_train_dset"],
-        help=("Mode to run. Ideally the order would be (manually): init_eval_dset + manually check eval sets -> create_eval_dset + manually check eval sets -> create_train_dset. "
-        "The quick version to just run everything would be: all = init_eval_dset + create_eval_dset + create_train_dset")
-    )
-    parser.add_argument(
-        "--prompt_model", type=str, default="gpt-3.5-turbo",
-        help=("Model to prompt for getting questions from documents. Can be either openai models or huggingface models. "
-        "For huggingface models, make sure you adjust the batch size to accomodate for GPU memory usage.")
-    )
-    parser.add_argument(
-        "--batch_size", type=int, default=2,
-        help="Batch size for question generation. If we are using vicuna than about 2 takes 70+GB of GPU memory."
-    )
-    parser.add_argument(
-        "--num_neg_per_source", type=int, default=100,
-        help="Number of negative examples per source"
-    )
-    parser.add_argument(
-        "--num_train_data", type=int, default=1000,
-        help="Number of data to generate for training. Specify -1 to use all (non eval or test) data"
-    )
-    parser.add_argument(
-        "--num_eval_test_data", type=int, default=200,
-        help="Number of data to generate for eval and test."
-    )
-    return parser
 
 
 def _get_unique_documents(documents: List[Document]):
@@ -121,7 +136,7 @@ def create_positive_n_negative_examples(args: argparse.Namespace, filter_fn: Cal
         # pairs where we CAN create gold and hard negatives
         # further more, we can create pairs for EVERY document in unique_documents_per_source
         for j, pos_doc in enumerate(unique_documents_per_source):
-            if filter_fn(pos_doc):
+            if not filter_fn(pos_doc):
                 continue
 
             # sample hard negative
@@ -251,7 +266,6 @@ def _batch_generate_questions_from_dataset(prompting_model: BaseQAModel, documen
 def create_heldout_test_dset(args, doc2q_prompt):
     prompting_model = init_prompting_model(args)
 
-    # with open("dataset/databricks/contrastive/held_out_q2doc_filtered.pkl", "rb") as fread:
     all_doc2q_path = os.path.join(args.save_dir, "all_doc2q.pkl")
     with open(all_doc2q_path, "rb") as fread:
         all_documents_dataset = pickle.load(fread)
@@ -396,10 +410,6 @@ def create_train_dset(args, doc2q_prompt):
     return train_dataset
 
 
-def exclude_doc_fn(doc: Document):
-    return False  # always include
-
-
 def main(args: argparse.Namespace):
     """to customize how (doc, q) pairs would be created, simply copy this function over and modify the "# customizable" parts
     """
@@ -407,7 +417,7 @@ def main(args: argparse.Namespace):
     if args.mode in ["init_eval_dset", "all"]:
         documents_dataset = create_positive_n_negative_examples(
             args=args,
-            filter_fn=exclude_doc_fn  # customizable
+            filter_fn=lambda doc: True  # customizable
         )
         logger.info(f"Created {len(documents_dataset)} <gold document, hard negative documents> pairs.")
     if args.mode in ["create_eval_dset", "all"]:
@@ -423,20 +433,16 @@ def main(args: argparse.Namespace):
             doc2q_prompt=BASE_DOC2Q_PROMPT  # customizable
         )
         logger.info(f"Number of train samples: {len(train_dataset)}")
-    else:
-        raise NotImplementedError(f"Mode {args.mode} not implemented")
     return
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Generate (document, question) pairs given a (chunked) document database. This can be used for generating both testing (q, doc) pairs AND training (q, doc) pairs."
+        description=("Generate (document, question) pairs given a (chunked) document database. This can be used for generating both testing (q, doc) pairs AND training (q, doc) pairs. "
+        "NOTE: for this script to work properly, we assume document.metadata['source'] is NOT EMPTY (e.g., can be the url of the unchunked document, the first level title, etc.)" )
     )
     parser = add_parser_arguments(parser)
-
-    args = parser.parse_args()
-    if args.num_train_data == -1:
-        args.num_train_data = None
+    args = parse_arguments(parser)
     
     logger = init_logger(filename=None)
 
