@@ -42,8 +42,7 @@ class Document:
         """
         # return asdict(self)  # this also encodes the to_string function
         return {
-            'title': self.title,
-            'content': self.content,
+            'page_content': self.page_content,
             'fmt_content': self.fmt_content,
             'metadata': self.metadata
         }
@@ -56,9 +55,8 @@ class Document:
             document_dict (_type_): _description_
         """
         document = Document(
-            title=document_dict['title'],
-            content=document_dict['content'],
-            fmt_content=document_dict['fmt_content'],
+            page_content=document_dict['page_content'],
+            fmt_content=document_dict.get('fmt_content', ''),
             metadata=document_dict['metadata']
         )
         return document

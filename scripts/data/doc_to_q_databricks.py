@@ -1,6 +1,9 @@
 from scripts.data.doc_to_q import *
 
 
+logger = logging.getLogger(__name__)
+
+
 DATABRICKS_DOC2Q_PROMPT = """
 The following texts are from Databricks, a company that combines data warehouses and data lakes into a lakehouse architecture.
 Your task is to create questions that users might ask if they have not read the documentations.

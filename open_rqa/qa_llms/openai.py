@@ -82,7 +82,7 @@ class OpenAIQAModel(BaseQAModel):
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt},
-                ]
+                ],
                 **_gen_kwargs
             )
             extracted_message = response.choices[0].message.content
