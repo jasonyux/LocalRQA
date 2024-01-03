@@ -76,9 +76,9 @@ def document_similarity(src_doc, target_doc):
     return cover_percent
 
 
-def is_almost_same_document(retrieved_doc, gold_doc):
+def is_almost_same_document(retrieved_doc, gold_doc, threshold=0.7):
     cover_percent = document_similarity(retrieved_doc, gold_doc)
-    if cover_percent > 0.7:
+    if cover_percent > threshold:
         return True
     return False
 
