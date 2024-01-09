@@ -1,4 +1,5 @@
 transformers
+sentence-transformers
 evaluate
 sentencepiece
 deepspeed
@@ -9,3 +10,4 @@ wandb
 langchain
 llama-index
 rouge_score
+flash_attn>=2.1.0

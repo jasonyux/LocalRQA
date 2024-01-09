@@ -46,7 +46,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "Total number of training epochs to perform."}
     )
     learning_rate: float = field(
-        default=1e-6,
+        default=1e-5,
         metadata={"help": "The peak learning rate for the scheduler."}
     )
     per_device_eval_batch_size: int = field(
@@ -58,7 +58,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "The scheduler type to use."}
     )
     warmup_ratio: float = field(
-        default=0.2,
+        default=0.1,
         metadata={"help": "Ratio of warmup steps to total steps."}
     )
     weight_decay: float = field(

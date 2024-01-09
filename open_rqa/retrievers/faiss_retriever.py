@@ -1,23 +1,20 @@
 from typing import List
-from abc import ABC, abstractmethod
-
-from langchain.prompts import PromptTemplate
-from langchain.prompts.base import BasePromptTemplate
-from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
-from langchain.chains import LLMChain
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain.storage import (
-    InMemoryStore,
     LocalFileStore,
-    RedisStore,
-    UpstashRedisStore,
 )
 from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.schema.document import Document as LangChainDocument
 from open_rqa.schema.document import Document
-from open_rqa.retrievers.base import BaseRetriever
-from open_rqa.retrievers.base import RetrievalOutput
-# from open_rqa.vectorstore.faiss import MyFAISS
+from open_rqa.retrievers.base import BaseRetriever, RetrievalOutput
+
+
+def langchain_doc_to_open_rqa_doc(langchain_doc: LangChainDocument):
+    return Document.from_dict({
+        'page_content': langchain_doc.page_content,
+        'metadata': langchain_doc.metadata
+    })
 
 
 class FaissRetriever(BaseRetriever):
@@ -67,6 +64,7 @@ class FaissRetriever(BaseRetriever):
         all_docs = []
         for query in batch_questions:
             docs = self.retriever.get_relevant_documents(query)
+            docs = [langchain_doc_to_open_rqa_doc(doc) for doc in docs]
             all_docs.append(docs)
 
         output = RetrievalOutput(

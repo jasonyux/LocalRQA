@@ -106,7 +106,7 @@ class FixedRetrieverTrainer(Trainer):
                 flattened_eval_data.append(new_data)
         return flattened_eval_data
 
-    def wrap_model(
+    def wrap_model_for_eval(
         self,
         retriever: FaissRetriever,
         qa_model,
@@ -143,7 +143,7 @@ class FixedRetrieverTrainer(Trainer):
                 metric_key_prefix=metric_key_prefix
             )
 
-        wrapped_model_for_eval = self.wrap_model(
+        wrapped_model_for_eval = self.wrap_model_for_eval(
             retriever=self.retriever_model,
             qa_model=model,
             tokenizer=self.tokenizer,

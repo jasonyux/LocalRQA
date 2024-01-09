@@ -4,6 +4,7 @@ notebooks
 .hypothesis
 .vscode
 data
+wandb
 
 # environmental variables
 .envs 
