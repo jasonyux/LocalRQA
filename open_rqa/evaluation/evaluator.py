@@ -102,9 +102,9 @@ class Evaluator(ABC):
     
 
 class RetrieverEvaluator(Evaluator):
-    def __init__(self, 
+    def __init__(self,
         config: EvaluatorConfig,
-        test_data: List[Dict], 
+        test_data: List[Dict],
         documents = None, indexes = None):
         super().__init__(config, test_data, documents, indexes)
         self.retr_metrics = self.init_metrics(metric_type="retr")
@@ -241,7 +241,8 @@ class E2EEvaluator(Evaluator):
             metric.start()
         
         num_samples_seen = 0
-        for batch in test_data_iterator:
+        num_batches = math.ceil(len(self.test_data) / self.config.batch_size)
+        for batch in tqdm(test_data_iterator, desc="Evaluating Performance", total=num_batches):
             num_samples_seen += batch['__len__']
             gold_docs: List[List[Document]] = batch["gold_docs"]
             gold_answers: List[str] = batch["gold_answer"]

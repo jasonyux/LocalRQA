@@ -1,10 +1,8 @@
 from typing import List, Optional
-from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from open_rqa.schema.dialogue import DialogueSession, RQAOutput
-from open_rqa.schema.document import Document
 from open_rqa.guardrails.base import BaseAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever
-from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.qa_llms.base import BaseQAModel
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
 from open_rqa.guardrails.base import NoopAnswerGuardrail
@@ -45,8 +43,8 @@ class SimpleRQA(BaseRQA):
         self._default_tokenization_kwargs = {}
         self._default_generate_kwargs = {
             "max_new_tokens": 512,
-            "do_sample": False,
-            "early_stopping": True,
+            "do_sample": True,
+            "temperature": 0.7,
         }
         # for rephrasing questions
         self._default_rephrase_kwargs = {

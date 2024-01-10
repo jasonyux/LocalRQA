@@ -218,10 +218,12 @@ def main(model_args: ModelArguments, data_args: DataArguments, logger_args: Logg
         )
     
     eval_config = EvaluatorConfig(  # type: ignore
+        retr_latency = False,
         gen_f1 = True,
         gen_precision = True,
         gen_rouge = True,
         gen_latency = True,
+        e2e_latency = True,
     )
 
     if training_args.deepspeed is not None:

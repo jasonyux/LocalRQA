@@ -5,6 +5,7 @@ from open_rqa.trainers.utils import init_logger
 from open_rqa.schema.document import Document
 from open_rqa.evaluation.utils import normalize_answer
 from open_rqa.evaluation.metrics import is_almost_same_document
+from open_rqa.constants import OPENAI_MODEL_NAMES
 from collections import defaultdict
 from tqdm.auto import tqdm
 from typing import Dict, List, Callable
@@ -94,7 +95,7 @@ def load_documents(args: argparse.Namespace) -> Dict[str, Document]:
 def init_prompting_model(args: argparse.Namespace):
     prompting_model: BaseQAModel
 
-    if args.prompt_model in ['gpt-4-1106-preview', 'gpt-4', 'gpt-3.5-turbo']:
+    if args.prompt_model in OPENAI_MODEL_NAMES:
         prompting_model = OpenAIQAModel(
             model_name = args.prompt_model
         )

@@ -24,6 +24,7 @@ def init_logger(is_main=True, is_distributed=False, filename=None):
     logging.getLogger("transformers.tokenization_utils").setLevel(logging.ERROR)
     logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR)
     logging.getLogger("sentence_transformers.SentenceTransformer").setLevel(logging.ERROR)
+    logging.getLogger("rouge_score.rouge_scorer").setLevel(logging.ERROR)
     return logger
 
 

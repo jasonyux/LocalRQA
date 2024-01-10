@@ -26,10 +26,10 @@ class HuggingFaceQAModel(BaseQAModel):
         ## configs
         self._default_generate_kwargs = {
             "max_new_tokens": 512,
-            "do_sample": False,
+            "do_sample": True,
+            "temperature": 0.7,
             "num_beams": 1,
             "eos_token_id": self.tokenizer.eos_token_id, 
-            "early_stopping": True,
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
@@ -41,17 +41,19 @@ class HuggingFaceQAModel(BaseQAModel):
         if model is None and model_name_or_path == "":
             raise ValueError("Either model or model_name_or_path must be provided")
         
-        # intialize model
+        ### intialize model
         if model is None:
             model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
-            model.cuda()
             model.eval()
-        # initialize tokenizer
+        if not next(model.parameters()).is_cuda:
+            model = model.cuda()
+
+        ### initialize tokenizer
         if tokenizer is None:
             tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
-            tokenizer.padding_side = "left"
+        tokenizer.padding_side = "left"  # left for generation
         return model, tokenizer
 
     def generate(self, batched_prompts: List[str], tokenization_kwargs: dict, generation_kwargs: dict) -> GenerationOutput:
