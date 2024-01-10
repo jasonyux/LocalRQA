@@ -1,6 +1,6 @@
 from typing import List
 from better_abc import abstract_attribute
-from dataclasses import asdict
+from dataclasses import fields
 from open_rqa.base import Component
 from open_rqa.schema.dialogue import DialogueSession, RQAOutput
 import logging
@@ -78,7 +78,8 @@ class RQAPipeline(Component):
             module_output = module.run(**processed_input_dict)
 
             # update any existing keys in the input dict with the output dict
-            output_dict = asdict(module_output)
+            # do not use asdict(), which is recursive!
+            output_dict = {f.name: getattr(module_output, f.name) for f in fields(module_output)}
             input_dict.update(output_dict)
 
         self.update_dialogue_session(
@@ -88,8 +89,8 @@ class RQAPipeline(Component):
         )
 
         return RQAOutput(
-            batch_answers=module_output.batched_answers,
-            batch_source_documents=module_output.batched_source_documents,
+            batch_answers=module_output.batch_answers,
+            batch_source_documents=module_output.batch_source_documents,
             batch_dialogue_session=batch_dialogue_session,
         )
 

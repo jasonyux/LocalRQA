@@ -251,8 +251,8 @@ class E2EEvaluator(Evaluator):
                     metric.start()
             
             gen_outputs: RQAOutput = wrapped_model.qa(
-                batch_questions=batch["batch_questions"],
-                batch_dialogue_session=batch["batch_dialogue_session"],
+                batch_questions=batch["question"],
+                batch_dialogue_session=batch["dialogue_session"],
             )
             retrieved_docs: List[List[Document]] = gen_outputs.batch_source_documents
             generated_answers: List[str] = gen_outputs.batch_answers
@@ -269,6 +269,7 @@ class E2EEvaluator(Evaluator):
             
             predictions.append({
                 "batch": batch,
+                "questions": batch["question"],
                 "retrieved_docs": retrieved_docs,
                 "gold_docs": gold_docs,
                 "generated_answers": generated_answers,

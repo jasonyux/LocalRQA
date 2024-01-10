@@ -43,8 +43,8 @@ if __name__ == "__main__":
     retriever = FaissRetriever(
         documents,
         embeddings=HuggingFaceEmbeddings(
-                model_name="/local2/data/shared/rqa/retriever_model/contriever-ms_databricks_inbatch256_hard0.05_test/checkpoint-300"
-            ),
+            model_name="/local2/data/shared/rqa/retriever_model/contriever-ms_databricks_inbatch256_hard0.05_test/checkpoint-300"
+        ),
         index_path="/local2/data/shared/rqa/index"
     )
 

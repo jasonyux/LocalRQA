@@ -9,7 +9,7 @@ class RetrievalQATrainingArguments(TrainingArguments):
         metadata={"help": "Path to the file which contains List[Document] for building a database index"},
     )
     retriever_format: str = field(
-        default="title: {title} content: {text}",
+        default="source: {title} content: {text}",
         metadata={"help": "Format string for building a database index"},
     )
     eval_data_path: str = field(

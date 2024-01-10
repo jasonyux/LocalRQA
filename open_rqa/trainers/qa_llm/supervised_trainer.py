@@ -1,4 +1,3 @@
-from copy import deepcopy
 from transformers import Trainer
 from transformers.modeling_utils import PreTrainedModel
 from transformers.data.data_collator import DataCollator
@@ -8,12 +7,15 @@ from transformers.trainer_callback import TrainerCallback
 from torch.utils.data import Dataset
 from typing import Optional, List, Union, Dict, Any, Tuple, Callable
 from open_rqa.retrievers.base import BaseRetriever
+from open_rqa.schema.document import Document
+from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.pipelines.retrieval_qa import SimpleRQA
 from open_rqa.evaluation.evaluator import E2EEvaluator, EvaluatorConfig
 from open_rqa.trainers.qa_llm.arguments import RetrievalQATrainingArguments
 import torch
 import torch.nn as nn
 import os
+import jsonlines
 import pickle
 
 
@@ -74,17 +76,19 @@ class SupervisedTrainer(Trainer):
         return loss, None, None
     
     def _load_eval_data(self, eval_data_path) -> List[Dict]:
-        # TODO: this is bad
-        with open(eval_data_path, "rb") as f:
-            eval_data = pickle.load(f)
-        flattened_eval_data = []
+        with jsonlines.open(eval_data_path) as fread:
+            eval_data = list(fread)
+        formatted_eval_data = []
         for d in eval_data:
-            for q, a in zip(d['questions'], d['gold_answers']):
-                new_data = deepcopy(d)
-                new_data['question'] = q
-                new_data['gold_answer'] = a
-                flattened_eval_data.append(new_data)
-        return flattened_eval_data
+            gold_doc = Document.from_dict(d['gold_doc'])
+            formatted_eval_data.append({
+                'question': d['question'],
+                'gold_doc': gold_doc,
+                'gold_docs': [gold_doc],  # compatibiliy with E2EEvaluator
+                'gold_answer': d['gold_answer'],
+                'dialogue_session': DialogueSession.from_list(d['chat_history_str']),
+            })
+        return formatted_eval_data
 
     def wrap_model_for_eval(
         self,

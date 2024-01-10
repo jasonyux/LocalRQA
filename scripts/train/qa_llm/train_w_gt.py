@@ -226,6 +226,7 @@ def main(model_args: ModelArguments, data_args: DataArguments, logger_args: Logg
 
     if training_args.deepspeed is not None:
         training_args.distributed_state.distributed_type = DistributedType.DEEPSPEED
+    training_args.eval_data_path = data_args.eval_file
     trainer = SupervisedTrainer(
         model=model,
         train_args=training_args,
@@ -241,6 +242,7 @@ def main(model_args: ModelArguments, data_args: DataArguments, logger_args: Logg
         remove_optimizer_weights(training_args.output_dir)
 
     # test
+    trainer.args.eval_data_path = data_args.test_file
     trainer.predict(test_dset)
 
     if 'wandb' in training_args.report_to:
