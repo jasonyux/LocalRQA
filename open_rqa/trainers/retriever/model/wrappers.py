@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from open_rqa.retrievers.base import RetrievalOutput
 from open_rqa.schema.dialogue import RQAOutput
 from open_rqa.schema.document import Document
-from open_rqa.trainers.retriever.embeddings import EmbeddingsWrapper, LocalEmbeddings, LocalBERTMLMEmbeddings
+from open_rqa.trainers.retriever.embeddings import EmbeddingsWrapper, LocalEmbeddings
 import torch
 import logging
 
@@ -70,24 +70,3 @@ class RetrieverfromBertModel(RetrievalModel):
             batch_source_documents=docs
         )
 		return output
-	
-
-class RetrieverfromBertMLMModel(RetrieverfromBertModel):
-	def __init__(self, model, tokenizer, search_kwargs):
-		self.model = model
-		self.tokenizer = tokenizer
-		self.search_args = search_kwargs
-		self.embeddings: LocalBERTMLMEmbeddings = None
-		return
-	
-	def build_index(self, documents: List[Document] = [], format_str='title: {title} content: {text}') -> torch.Tensor:
-		embeddings = LocalBERTMLMEmbeddings(self.model, self.tokenizer, index_path=None, device = "cuda")
-
-		# asuming we are doing an inner product search, then normalize_L2=False
-		normalize_L2 = self.search_args['search_kwargs'].pop('normalize_L2', False)
-		docsearch = FAISS.from_documents(documents, embeddings)
-		self.embeddings = embeddings
-		
-		self.retriever = docsearch.as_retriever(**self.search_args)
-		embedding_tensor = torch.tensor(self.embeddings.document_embeddings)
-		return embedding_tensor

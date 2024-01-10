@@ -160,7 +160,9 @@ class RetrieverEvaluator(Evaluator):
             retr_output: RetrievalOutput = wrapped_model.retrieve(batch, self.documents, self.indexes)
             retrieved_docs: List[List[Document]] = retr_output.batch_source_documents
 
-            gold_docs = batch["gold_docs"]
+            gold_docs = []
+            for gdoc in batch["gold_docs"]:
+                gold_docs.append([Document.from_dict(gdoc[0])])
 
             for metric in self.retr_metrics:
                 if isinstance(metric, MonitoringMetric):

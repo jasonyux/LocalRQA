@@ -58,6 +58,9 @@ class Options:
             '--per_device_train_batch_size', type=int, default=256,
         )
         self.parser.add_argument(
+            '--per_device_eval_batch_size', type=int, default=8,
+        )
+        self.parser.add_argument(
             '--no_gradient_checkpointing', action='store_true'
         )
         self.parser.add_argument(
@@ -68,6 +71,9 @@ class Options:
         )
         self.parser.add_argument(
             "--save_steps", type=int, default=50,
+        )
+        self.parser.add_argument(
+            "--eval_bsz", type=int, default=4,
         )
         
         # additional contrastive training args

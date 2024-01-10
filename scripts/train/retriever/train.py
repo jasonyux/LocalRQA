@@ -2,40 +2,36 @@ from typing import List, Dict, Type
 import pickle
 import argparse
 import os
+import json
 
-from transformers import BertModel, BertForMaskedLM, AutoTokenizer
+from transformers import BertModel, AutoTokenizer, AutoModel
 import wandb
 
 from open_rqa.trainers.retriever.arguments import Options, RetrievalQATrainingArguments, ContrasitiveTrainingArgs
 from open_rqa.trainers.retriever.datasets import ContrastiveRetrievalDataset, NoopDataCollator
 from open_rqa.trainers.retriever.retriever_trainer import RetrieverTrainer, EvaluatorConfig
+from open_rqa.trainers.utils import read_jsonl
 from open_rqa.config.retriever_config import SEARCH_CONFIG
-from open_rqa.trainers.retriever.model.wrappers import RetrievalModel, RetrieverfromBertModel, RetrieverfromBertMLMModel
+from open_rqa.trainers.retriever.model.wrappers import RetrievalModel, RetrieverfromBertModel
 
 
 if __name__ == "__main__":
 	options = Options()
 	args = options.parse()
 
-	with open(args.train_file, "rb") as f:
-		train_data = pickle.load(f)
-	
-	with open(args.eval_file, "rb") as f:
-		eval_data = pickle.load(f)
-
+	train_data = read_jsonl(args.train_file)
+	eval_data = read_jsonl(args.eval_file)
 
 	train_dataset = ContrastiveRetrievalDataset(
 		train_data, shuffle=True
 	)
 	eval_dataset = ContrastiveRetrievalDataset(
-		eval_data, shuffle=False
+		eval_data, shuffle=True
 	)
 
 
 	if args.model_type == "bert":
-		model = BertModel.from_pretrained(args.model_path)
-	elif args.model_type == "bert_mlm":
-		model = BertForMaskedLM.from_pretrained(args.model_path)
+		model = AutoModel.from_pretrained(args.model_path)
 	else:
 		raise NotImplementedError(f"{args.args.model_type} is not supported")
 	tokenizer = AutoTokenizer.from_pretrained(args.model_path)
@@ -48,6 +44,7 @@ if __name__ == "__main__":
 		gradient_checkpointing = not args.no_gradient_checkpointing,
 		learning_rate = args.lr,
 		per_device_train_batch_size = args.per_device_train_batch_size,
+		per_device_eval_batch_size = args.per_device_eval_batch_size,
 		warmup_ratio = 0.1,
 		lr_scheduler_type = "cosine",
 		max_steps = args.max_steps,
@@ -70,6 +67,7 @@ if __name__ == "__main__":
 	)
 	eval_config = EvaluatorConfig(  # type: ignore
 		gen_latency = False,
+		batch_size = args.eval_bsz
 	)
 	additional_training_args = ContrasitiveTrainingArgs(
 		hard_neg_ratio=args.hard_neg_ratio,
@@ -96,8 +94,8 @@ if __name__ == "__main__":
 	wrapper_class: Type[RetrievalModel]
 	if args.model_type == "bert":
 		wrapper_class = RetrieverfromBertModel
-	elif args.model_type == "bert_mlm":
-		wrapper_class = RetrieverfromBertMLMModel
+	else:
+		raise NotImplementedError
 
 	trainer = RetrieverTrainer(
 		model=model,

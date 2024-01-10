@@ -88,45 +88,7 @@ class LocalEmbeddings(EmbeddingsWrapper):
 		batches = self.batch_iterator(texts, batch_size)
 		embeddings = []
 		for batch in tqdm(batches, total=num_batches, desc="Embedding documents"):
-			inputs = self.tokenizer(batch, padding=True, truncation=True, return_tensors='pt')
-			batch_embedding = self.__embed_document_batch(inputs)
-			embeddings.extend(batch_embedding)
-		return embeddings
-
-	def embed_documents(self, texts: List[str]) -> List[List[float]]:
-		if self.document_embeddings is not None:
-			return self.document_embeddings
-
-		if self.index_path is not None:
-			print(f"Loading index from {self.index_path}")
-			embeddings = self.load_index()
-		else:
-			embeddings = self.build_index_from_texts(texts)
-		self.document_embeddings = embeddings
-		return embeddings
-
-	def embed_query(self, text) -> List[float]:
-		inputs = self.tokenizer([text], padding=True, truncation=True, return_tensors='pt')
-		batch_embedding = self.__embed_document_batch(inputs)
-		return batch_embedding[0]
-	
-
-class LocalBERTMLMEmbeddings(LocalEmbeddings):	
-	def __embed_document_batch(self, batch):
-		for k, v in batch.items():
-			batch[k] = v.to(self.device)
-		outputs = self.model(**batch, output_hidden_states=True)
-		embeddings = outputs.hidden_states[-1][:, 0,:]  # take the CLS token
-		# [len(texts), 768)]
-		return embeddings.tolist()
-	
-	def build_index_from_texts(self, texts: List[str]):
-		batch_size = 8
-		num_batches = math.ceil(len(texts) / batch_size)
-		batches = self.batch_iterator(texts, batch_size)
-		embeddings = []
-		for batch in tqdm(batches, total=num_batches, desc="Embedding documents"):
-			inputs = self.tokenizer(batch, padding=True, truncation=True, return_tensors='pt')
+			inputs = self.tokenizer(batch, return_tensors='pt', padding='max_length', max_length=512, truncation=True)
 			batch_embedding = self.__embed_document_batch(inputs)
 			embeddings.extend(batch_embedding)
 		return embeddings
