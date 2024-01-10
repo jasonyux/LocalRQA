@@ -5,6 +5,7 @@ from open_rqa.guardrails.base import BaseAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever
 from open_rqa.qa_llms.base import BaseQAModel
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
+from open_rqa.qa_llms.openai import OpenAIQAModel
 from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.pipelines.base import RQAPipeline
 from open_rqa.pipelines.prompts import REPHRASE_QUESTION_PROMPT
@@ -170,6 +171,40 @@ class SimpleRQA(BaseRQA):
             model=qa_model,
             tokenizer=qa_tokenizer,
             model_name_or_path=qa_model_name_or_path,
+            user_prefix=user_prefix,
+            assistant_prefix=assistant_prefix,
+        )
+        answer_guardrail = NoopAnswerGuardrail()
+
+        rqa = SimpleRQA(
+            retriever=retriever,
+            qa_llm=qa_llm,
+            answer_guardrail=answer_guardrail,
+            verbose=False
+        )
+        return rqa
+
+    
+    @staticmethod
+    def from_openai(
+        retriever: BaseRetriever,
+        qa_model_name: str,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+    ):
+        """initialize simple RQA given an already initialized retriever model + openai-based qa model (e.g. gpt-3.5-turbo)
+
+        Args:
+            retriever (BaseRetriever): _description_
+            qa_model_name (str): _description_
+            user_prefix (str, optional): _description_. Defaults to "USER".
+            assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+        
+        Returns:
+            _type_: _description_
+        """
+        qa_llm = OpenAIQAModel(
+            model_name=qa_model_name,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
         )

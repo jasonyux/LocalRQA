@@ -8,7 +8,7 @@ import os
 
 
 class OpenAIQAModel(BaseQAModel):
-    def __init__(self, model_name: str) -> None:
+    def __init__(self, model_name: str, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
         super().__init__()
         self.client = OpenAI(
             api_key = os.environ.get("OPENAI_API_KEY"),
@@ -19,6 +19,8 @@ class OpenAIQAModel(BaseQAModel):
             "temperature": 0.7,
             "timeout": 10.0,
         }
+        self.user_prefix = user_prefix
+        self.assistant_prefix = assistant_prefix
         return
 
     def _prepare_question_w_docs(self, question: str, docs: List[Document], chat_history_str: str):

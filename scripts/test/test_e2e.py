@@ -75,7 +75,10 @@ def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_
     ### init qa model
     logger.info(f"Initializing qa model with {model_args.qa_model_name_or_path}")
     if model_args.qa_model_name_or_path in OPENAI_MODEL_NAMES:
-        raise NotImplementedError
+        rqa_model = SimpleRQA.from_openai(
+            retriever=retriever,
+            qa_model_name=model_args.qa_model_name_or_path,
+        )
     else:
         rqa_model = SimpleRQA.from_huggingface(
             retriever=retriever,
