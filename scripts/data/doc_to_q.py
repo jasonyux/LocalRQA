@@ -172,7 +172,7 @@ def create_positive_n_negative_examples(args: argparse.Namespace, filter_fn: Cal
 
             # create examples
             sample = {
-                "gold_doc": gold_doc,
+                "gold_docs": [gold_doc],
                 "hard_neg_docs": hard_neg_docs,
                 "chat_history": [],  # one turn QA. Used by our evaluation interface
             }
@@ -259,7 +259,7 @@ def _batch_generate_questions_from_dataset(args, prompting_model: BaseQAModel, d
     for i, batched_samples in enumerate(iterator):
         questions = _batch_generate_questions(
             prompting_model,
-            [s['gold_doc'] for s in batched_samples],
+            [s['gold_docs'][0] for s in batched_samples],
             prompt = prompt,
         )
 
@@ -270,7 +270,7 @@ def _batch_generate_questions_from_dataset(args, prompting_model: BaseQAModel, d
             
             # since these will be used in training, save as JSONL
             new_sample = {
-                'gold_doc': sample['gold_doc'].to_dict(),
+                'gold_docs': [sample['gold_docs'][0].to_dict()],
                 'hard_neg_docs': [d.to_dict() for d in sample['hard_neg_docs']],
                 'chat_history': sample['chat_history'],
                 'questions': q,
@@ -331,7 +331,7 @@ def gather_n_save_documents(args, eval_dataset, save_name: str):
 
     all_docs_used = []
     for d in eval_dataset:
-        all_curr_docs = [Document.from_dict(d['gold_doc'])]
+        all_curr_docs = [Document.from_dict(d['gold_docs'][0])]
         all_curr_docs.extend([Document.from_dict(doc) for doc in d['hard_neg_docs']])
 
         for doc in all_curr_docs:
@@ -372,7 +372,7 @@ def create_train_dset(args, doc2q_prompt):
     ### make sure eval and test test are not in the training set: either same document but NEW questions, or new documents
     eval_n_test_doc2q_mapping: Dict[str, set] = {}
     for sample in held_out_documents_dataset:
-        gold_doc = Document.from_dict(sample['gold_doc'])
+        gold_doc = Document.from_dict(sample['gold_docs'][0])
         doc_id = _hash_document(gold_doc)
         if doc_id not in eval_n_test_doc2q_mapping:
             eval_n_test_doc2q_mapping[doc_id] = set()
@@ -394,7 +394,7 @@ def create_train_dset(args, doc2q_prompt):
     train_dataset = []
     removed_duplicates = 0
     for sample in potential_train_dataset:
-        gold_doc = Document.from_dict(sample['gold_doc'])
+        gold_doc = Document.from_dict(sample['gold_docs'][0])
         doc_id = _hash_document(gold_doc)
         if doc_id not in eval_n_test_doc2q_mapping:
             train_dataset.append(sample)
