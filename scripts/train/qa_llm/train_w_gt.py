@@ -137,7 +137,7 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
         max_length=data_args.max_seq_length,
-        end_data_idx=200,
+        end_data_idx=None,
         shuffle=True
     )
     eval_index_save_path = os.path.join(tmp_output_dir, 'eval_index')
@@ -149,7 +149,7 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         tokenizer=tokenizer,
         max_length=data_args.max_seq_length,
         end_data_idx=None,
-        shuffle=False
+        shuffle=True
     )
     test_index_save_path = os.path.join(tmp_output_dir, 'test_index')
     test_dset = SupervisedRQAwRetrieverDataset(
@@ -160,7 +160,7 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         tokenizer=tokenizer,
         max_length=data_args.max_seq_length,
         end_data_idx=None,
-        shuffle=False
+        shuffle=True
     )
     return train_dset, eval_dset, test_dset
 

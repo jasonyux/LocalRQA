@@ -13,6 +13,7 @@ from multiprocessing import Pool
 import argparse
 import os
 import pickle
+import jsonlines
 import re
 import logging
 import random
@@ -173,7 +174,7 @@ def create_positive_n_negative_examples(args: argparse.Namespace, filter_fn: Cal
             sample = {
                 "gold_doc": gold_doc,
                 "hard_neg_docs": hard_neg_docs,
-                "chat_history_str": "",  # one turn QA. Used by our evaluation interface
+                "chat_history": [],  # one turn QA. Used by our evaluation interface
             }
             documents_dataset.append(sample)
     
@@ -222,14 +223,13 @@ def _batch_generate_questions(prompting_model: BaseQAModel, documents: List[Docu
             'return_tensors': "pt",
         }
         generate_kwargs = {
-            "max_new_tokens": 256,
+            "max_new_tokens": 128,
             "num_beams": 1,
-            "early_stopping": True,
         }
     elif isinstance(prompting_model, OpenAIQAModel):
         tokenize_kwargs = {}
         generate_kwargs = {
-            "max_tokens": 256,
+            "max_tokens": 128,
         }
     else:
         raise ValueError(f"Unknown prompting model type: {type(prompting_model)}")
@@ -250,7 +250,7 @@ def _batch_generate_questions(prompting_model: BaseQAModel, documents: List[Docu
     return extracted_questions
 
 
-def _batch_generate_questions_from_dataset(prompting_model: BaseQAModel, documents_dataset, prompt, batch_size=8, num_data=1000):
+def _batch_generate_questions_from_dataset(args, prompting_model: BaseQAModel, documents_dataset, prompt, batch_size=8, num_data=1000):
     dataset = []
     num_steps = math.ceil(len(documents_dataset) / batch_size) if num_data is None else math.ceil(num_data / batch_size)
     iterator = _list_to_iterator(documents_dataset, batch_size=batch_size)
@@ -268,8 +268,11 @@ def _batch_generate_questions_from_dataset(prompting_model: BaseQAModel, documen
             if len(q) == 0:
                 continue
             
+            # since these will be used in training, save as JSONL
             new_sample = {
-                **sample,
+                'gold_doc': sample['gold_doc'].to_dict(),
+                'hard_neg_docs': [d.to_dict() for d in sample['hard_neg_docs']],
+                'chat_history': sample['chat_history'],
                 'questions': q,
             }
             dataset.append(new_sample)
@@ -298,7 +301,7 @@ def create_heldout_test_dset(args, doc2q_prompt):
     # create pairs for eval or test
     random.shuffle(all_documents_dataset)
     non_train_dset = _batch_generate_questions_from_dataset(
-        prompting_model, all_documents_dataset,
+        args, prompting_model, all_documents_dataset,
         prompt=doc2q_prompt,
         batch_size=args.batch_size,
         num_data=args.num_eval_test_data
@@ -309,14 +312,14 @@ def create_heldout_test_dset(args, doc2q_prompt):
     test_dataset = non_train_dset[half_size:]
 
     ### save
-    logger.info(f"Saving to {args.save_dir} named eval.pkl, test.pkl, nontrain.pkl")
-    with open(os.path.join(args.save_dir, "nontrain.pkl"), "wb") as f:
-        pickle.dump(non_train_dset, f)
-    with open(os.path.join(args.save_dir, "eval.pkl"), "wb") as f:
-        pickle.dump(eval_dataset, f)
-    with open(os.path.join(args.save_dir, "test.pkl"), "wb") as f:
-        pickle.dump(test_dataset, f)
-    
+    logger.info(f"Saving to {args.save_dir} named eval.jsonl, test.jsonl, nontrain.jsonl")
+    with jsonlines.open(os.path.join(args.save_dir, "nontrain.jsonl"), "w") as fwrite:
+        fwrite.write_all(non_train_dset)
+    with jsonlines.open(os.path.join(args.save_dir, "eval.jsonl"), "w") as fwrite:
+        fwrite.write_all(eval_dataset)
+    with jsonlines.open(os.path.join(args.save_dir, "test.jsonl"), "w") as fwrite:
+        fwrite.write_all(test_dataset)
+
     ### since evaluation need to reembed the entire dataset, we consider a smaller document set for an optional fast evaluation
     gather_n_save_documents(args, eval_dataset, "eval_documents.pkl")
     gather_n_save_documents(args, test_dataset, "test_documents.pkl")
@@ -328,8 +331,8 @@ def gather_n_save_documents(args, eval_dataset, save_name: str):
 
     all_docs_used = []
     for d in eval_dataset:
-        all_curr_docs = [d['gold_doc']]
-        all_curr_docs.extend(d['hard_neg_docs'])
+        all_curr_docs = [Document.from_dict(d['gold_doc'])]
+        all_curr_docs.extend([Document.from_dict(doc) for doc in d['hard_neg_docs']])
 
         for doc in all_curr_docs:
             url = doc.metadata['source']
@@ -362,14 +365,14 @@ def create_train_dset(args, doc2q_prompt):
     with open(os.path.join(args.save_dir, "all_doc_neg_pairs.pkl"), "rb") as fread:
         documents_dataset = pickle.load(fread)
     logger.info(f"Loaded all (doc, neg_docs) pairs: {len(documents_dataset)}")
-    with open(os.path.join(args.save_dir, "nontrain.pkl"), "rb") as fread:
-        held_out_documents_dataset = pickle.load(fread)
+    with jsonlines.open(os.path.join(args.save_dir, "nontrain.jsonl"), "r") as fread:
+        held_out_documents_dataset = list(fread)
     logger.info(f"Loaded held out q2docs pairs: {len(held_out_documents_dataset)}")
 
     ### make sure eval and test test are not in the training set: either same document but NEW questions, or new documents
     eval_n_test_doc2q_mapping: Dict[str, set] = {}
     for sample in held_out_documents_dataset:
-        gold_doc = sample['gold_doc']
+        gold_doc = Document.from_dict(sample['gold_doc'])
         doc_id = _hash_document(gold_doc)
         if doc_id not in eval_n_test_doc2q_mapping:
             eval_n_test_doc2q_mapping[doc_id] = set()
@@ -379,18 +382,19 @@ def create_train_dset(args, doc2q_prompt):
 
     random.shuffle(documents_dataset)
     potential_train_dataset = _batch_generate_questions_from_dataset(
-        prompting_model, documents_dataset, 
+        args, prompting_model, documents_dataset, 
         prompt=doc2q_prompt,
         batch_size=args.batch_size,
         num_data=args.num_train_data
     )
 
     ### make sure eval and test set are not in the training set
+    logger.info(f"Removing duplicates")
     rouge = evaluate.load('rouge')
     train_dataset = []
     removed_duplicates = 0
     for sample in potential_train_dataset:
-        gold_doc = sample['gold_doc']
+        gold_doc = Document.from_dict(sample['gold_doc'])
         doc_id = _hash_document(gold_doc)
         if doc_id not in eval_n_test_doc2q_mapping:
             train_dataset.append(sample)
@@ -402,7 +406,9 @@ def create_train_dset(args, doc2q_prompt):
 
             for i, q in enumerate(normalized_questions):
                 # dont include questions if rougeL > 0.5, otherwise we might "see the eval/test set"
-                rg_scores = [rouge.compute(predictions=[q], references=[qq])['rougeL'] for qq in eval_n_test_doc2q_mapping[doc_id]]
+                rg_scores = [
+                    rouge.compute(predictions=[q], references=[qq])['rougeL'] for qq in eval_n_test_doc2q_mapping[doc_id]
+                ]
                 if all(sc < 0.5 for sc in rg_scores):
                     new_questions.append(original_questions[i])
 
@@ -416,9 +422,9 @@ def create_train_dset(args, doc2q_prompt):
     logger.info(f"Removed {removed_duplicates} duplicates")
 
     ## save
-    logger.info(f"Saving to {args.save_dir} named train.pkl")
-    with open(os.path.join(args.save_dir, "train.pkl"), "wb") as f:
-        pickle.dump(train_dataset, f)
+    logger.info(f"Saving to {args.save_dir} named train.jsonl")
+    with jsonlines.open(os.path.join(args.save_dir, "train.jsonl"), "w") as fwrite:
+        fwrite.write_all(train_dataset)
     return train_dataset
 
 

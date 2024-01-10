@@ -10,6 +10,8 @@ docker run -it --gpus all --shm-size=256m \
 jasonyux/nvcr_torch:23.08 bash
 ```
 
+Let's use GPT-3.5 to generate questions, and GPT-4-turbo to generate answers.
+
 generate questions:
 ```bash
 python scripts/data/doc_to_q_databricks.py \

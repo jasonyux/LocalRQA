@@ -86,7 +86,7 @@ class SupervisedTrainer(Trainer):
                 'gold_doc': gold_doc,
                 'gold_docs': [gold_doc],  # compatibiliy with E2EEvaluator
                 'gold_answer': d['gold_answer'],
-                'dialogue_session': DialogueSession.from_list(d['chat_history_str']),
+                'dialogue_session': DialogueSession.from_list(d['chat_history']),
             })
         return formatted_eval_data
 

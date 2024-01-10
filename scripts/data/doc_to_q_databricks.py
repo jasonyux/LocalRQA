@@ -78,14 +78,14 @@ Question 1:
 
 def databricks_filter_fn(doc: Document):
     if len(doc.page_content.split()) <= 50:
-        return False  # remove documents that are too short
+        return False  # skip documents that are too short, as they probably only contain metadata
     
     # probability to be included: some domains are not very interesting for a user
     include_weights = {
-        "migration-notes/": 0.05,
-        "release-notes/runtime": 0.05,
-        "sql/language-manual": 0.3,
-        "kb.databricks.com/": 0.7,  # we don't need to sum to 1.0
+        "migration-notes/": 0.15,
+        "release-notes/runtime": 0.01,
+        "sql/language-manual": 0.3, # we don't need to sum to 1.0
+        # "kb.databricks.com/": 0.9,
     }
     url = doc.metadata['source']
 
