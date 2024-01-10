@@ -11,6 +11,7 @@ from open_rqa.schema.document import Document
 from open_rqa.trainers.retriever.model.wrappers import RetrievalModel
 from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
 from open_rqa.trainers.retriever.arguments import RetrievalQATrainingArguments
+from open_rqa.trainers.utils import read_jsonl
 import torch
 import torch.nn as nn
 import random
@@ -88,7 +89,8 @@ class RetrieverTrainer(Trainer):
 		for bb in b:
 			encoded_inputs = self.tokenizer(
 				bb, return_tensors="pt",
-				padding='longest'
+				padding='max_length', max_length=512,
+				truncation=True
 			)
 			for k, v in encoded_inputs.items():
 				encoded_inputs[k] = v.to(model.device)
@@ -102,33 +104,8 @@ class RetrieverTrainer(Trainer):
 	def compute_loss(self, model, inputs, return_outputs=False):
 		if model.additional_training_args.contrastive_loss == 'inbatch_contrastive':
 			loss = self._inbatch_contrastive_w_hardneg(model, inputs, return_outputs)
-		elif model.additional_training_args.contrastive_loss == 'constructed_contrastive':
-			loss = self._constructed_contrastive(model, inputs, return_outputs)
 		else:
 			raise NotImplementedError
-		return loss
-	
-	def _constructed_contrastive(self, model, inputs, return_outputs=False):
-		temperature = model.additional_training_args.temperature
-
-		loss = torch.tensor(0., device=model.device)
-		for d in inputs:
-			query = d['question']
-			gold_doc = d['pos_doc']
-			negatives = d['hard_neg_docs'] + d['easy_neg_docs']
-
-			all_texts = [query, gold_doc] + negatives
-			# batch it here
-			embeddings = self.embed_document_batch(model, all_texts, batch_size=4)
-
-			query_embedding = torch.unsqueeze(embeddings[0], dim=0)
-			key_embedding = embeddings[1:]
-
-			# similiarty is doc product
-			labels = torch.zeros(1, dtype=torch.long, device=model.device)
-			scores = torch.einsum('id, jd->ij', query_embedding / temperature, key_embedding)
-			loss += torch.nn.functional.cross_entropy(scores, labels)
-		loss /= len(inputs)
 		return loss
 	
 	def _inbatch_contrastive_w_hardneg(self, model, inputs, return_outputs=False):
@@ -142,23 +119,21 @@ class RetrieverTrainer(Trainer):
 		gathered_query = []
 		gathered_gold_doc = []
 		gathered_hard_neg_doc = []
-		gathered_easy_neg_doc = []
 		for d in inputs:
 			query = d['question']
-			gold_doc = d['pos_doc']
+			gold_doc = d['gold_docs'][0]  # there is only one gold_doc in the list
 			hard_neg_doc = d['hard_neg_docs']
-			easy_neg_doc = gold_doc  # in-batch contrastive
 			gathered_query.append(query)
 			gathered_gold_doc.append(gold_doc)
 			gathered_hard_neg_doc.extend(hard_neg_doc)
-			gathered_easy_neg_doc.append(easy_neg_doc)
 
+		gathered_hard_neg_doc = [hard_neg for hard_neg in gathered_hard_neg_doc if hard_neg not in gathered_gold_doc]
 		included_hard_negs = random.sample(gathered_hard_neg_doc, num_hard_negs)
-		all_docs = gathered_gold_doc + included_hard_negs + gathered_easy_neg_doc
+		all_docs = gathered_gold_doc + included_hard_negs
 		labels = torch.arange(0, bsz, dtype=torch.long, device=model.device)
 
-		query_embeddings = self.embed_document_batch(model, gathered_query, batch_size=4)
-		key_embeddings = self.embed_document_batch(model, all_docs, batch_size=4)
+		query_embeddings = self.embed_document_batch(model, gathered_query, batch_size=bsz)
+		key_embeddings = self.embed_document_batch(model, all_docs, batch_size=bsz)
 
 		score = torch.einsum('id, jd->ij', query_embeddings / temperature, key_embeddings)
 		loss = torch.nn.functional.cross_entropy(score, labels)
@@ -181,8 +156,7 @@ class RetrieverTrainer(Trainer):
 		return documents
 	
 	def _load_eval_data(self, eval_data_path) -> List[Dict]:
-		with open(eval_data_path, "rb") as f:
-			eval_data = pickle.load(f)
+		eval_data = read_jsonl(eval_data_path)
 		flattened_eval_data = []
 		for d in eval_data:
 			for q in d['questions']:
