@@ -1,11 +1,12 @@
 from transformers import (
-    AutoTokenizer, AutoModelForCausalLM,
+    AutoTokenizer,
     HfArgumentParser
 )
 from accelerate.utils import DistributedType
 from dataclasses import dataclass, field
-from open_rqa.trainers.qa_llm.datasets import SupervisedRQAwRetrieverDataset
-from open_rqa.trainers.qa_llm.supervised_trainer import SupervisedTrainer
+from open_rqa.qa_llms.fid import FiDT5
+from open_rqa.trainers.qa_llm.datasets import SupervisedFiDRQAwRetrieverDataset
+from open_rqa.trainers.qa_llm.supervised_fid_trainer import SupervisedFiDTrainer
 from open_rqa.trainers.qa_llm.arguments import E2EQATrainingArguments
 from open_rqa.trainers.utils import (
     remove_optimizer_weights,
@@ -18,7 +19,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from functools import partial
 import open_rqa.trainers.dist_utils as dist_utils
-import torch
 import wandb
 import random
 import logging
@@ -53,11 +53,6 @@ class ModelArguments:
         default="lmsys/vicuna-7b-v1.5",
         metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"},
     )
-    use_flash_attention: bool = field(
-        default=False,
-        metadata={"help": "Whether to use flash attention (if supported)"},
-    )
-
 
 @dataclass
 class DataArguments:
@@ -85,9 +80,13 @@ class DataArguments:
         default='data/database/databricks/databricks_400_tmp',
         metadata={"help": "Path for cached full dataset index"},
     )
-    max_seq_length: int = field(
-        default=2048,
-        metadata={"help": "The maximum total input sequence length, INCLUDING source documents"},
+    max_encoder_seq_length: int = field(
+        default=512,
+        metadata={"help": "The maximum total input sequence length = one document + question"},
+    )
+    max_decoder_seq_length: int = field(
+        default=256,
+        metadata={"help": "The maximum total input sequence length = answer"},
     )
     embedding_model: str = field(
         default="",
@@ -130,35 +129,38 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         test_data = list(fread)
     
     train_index_save_path = os.path.join(tmp_output_dir, 'train_index')
-    train_dset = SupervisedRQAwRetrieverDataset(
+    train_dset = SupervisedFiDRQAwRetrieverDataset(
         qa_w_doc_data=train_data,
         embedding_model=embedding_model,
         retriever_init_fn=partial(retriever_init_fn, index_path=train_index_save_path),
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
-        max_length=data_args.max_seq_length,
+        encoder_max_length=data_args.max_encoder_seq_length,
+        decoder_max_length=data_args.max_decoder_seq_length,
         end_data_idx=None,
         shuffle=True
     )
     eval_index_save_path = os.path.join(tmp_output_dir, 'eval_index')
-    eval_dset = SupervisedRQAwRetrieverDataset(
+    eval_dset = SupervisedFiDRQAwRetrieverDataset(
         qa_w_doc_data=eval_data,
         embedding_model=embedding_model,
         retriever_init_fn=partial(retriever_init_fn, index_path=eval_index_save_path),
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
-        max_length=data_args.max_seq_length,
+        encoder_max_length=data_args.max_encoder_seq_length,
+        decoder_max_length=data_args.max_decoder_seq_length,
         end_data_idx=None,
         shuffle=True
     )
     test_index_save_path = os.path.join(tmp_output_dir, 'test_index')
-    test_dset = SupervisedRQAwRetrieverDataset(
+    test_dset = SupervisedFiDRQAwRetrieverDataset(
         qa_w_doc_data=test_data,
         embedding_model=embedding_model,
         retriever_init_fn=partial(retriever_init_fn, index_path=test_index_save_path),
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
-        max_length=data_args.max_seq_length,
+        encoder_max_length=data_args.max_encoder_seq_length,
+        decoder_max_length=data_args.max_decoder_seq_length,
         end_data_idx=None,
         shuffle=True
     )
@@ -182,7 +184,7 @@ def init_retriever_for_eval(data_args: DataArguments, embedding_model):
 def main(model_args: ModelArguments, data_args: DataArguments, logger_args: LoggerArguments, training_args: E2EQATrainingArguments):
     random.seed(0)
 
-    logger.info('training with retrieved documents from embedding model')
+    logger.info('training FiD with retrieved documents from embedding model')
     tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -190,16 +192,9 @@ def main(model_args: ModelArguments, data_args: DataArguments, logger_args: Logg
     train_dset, eval_dset, test_dset = init_datasets(data_args, tokenizer, training_args.output_dir, embedding_model)
     eval_retriever = init_retriever_for_eval(data_args, embedding_model)
     
-    if model_args.use_flash_attention:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_args.model_name_or_path,
-            torch_dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2"
-        )
-    else:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_args.model_name_or_path,
-        )
+    model = FiDT5.from_t5(
+        model_args.model_name_or_path,
+    )
 
     ### if it is already initialized, huggingface will use it
     all_args = {
@@ -229,7 +224,7 @@ def main(model_args: ModelArguments, data_args: DataArguments, logger_args: Logg
     if training_args.deepspeed is not None:
         training_args.distributed_state.distributed_type = DistributedType.DEEPSPEED
     training_args.eval_data_path = data_args.eval_file
-    trainer = SupervisedTrainer(
+    trainer = SupervisedFiDTrainer(
         model=model,
         train_args=training_args,
         eval_config=eval_config,

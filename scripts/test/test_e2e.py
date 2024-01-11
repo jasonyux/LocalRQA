@@ -26,6 +26,10 @@ class ModelArguments:
         default="lmsys/vicuna-7b-v1.5",
         metadata={"help": "QA model name or path. Huggingface model or OpenAI model"},
     )
+    qa_is_fid: bool = field(
+        default=False,
+        metadata={"help": "Whether the QA model is a FiD model"},
+    )
     embedding_model_name_or_path: str = field(
         default="intfloat/e5-base",
         metadata={"help": "Embedding model name or path. Huggingface model or OpenAI model"},
@@ -34,15 +38,15 @@ class ModelArguments:
 @dataclass
 class TestArguments:
     document_path: str = field(
-        default='data/training/databricks_sources_official_short.pkl',
+        default='data/database/databricks/databricks_400.pkl',
         metadata={"help": "Path to the file which contains List[Document] for building a database index"},
     )
     index_path: str = field(
-        default='data/training/databricks_sources_official_short_index',
+        default='data/database/databricks/databricks_400_e5-base',
         metadata={"help": "Path to the file which will store/contains the index of documents in document_path"},
     )
     eval_data_path: str = field(
-        default='data/training/databricks_clean/test_q_doc_a.jsonl',
+        default='data/training/databricks_new/test_w_qa.jsonl',
         metadata={
             "help": ("Path to the eval data JSONL file. It needs to contain fields including 'gold_docs' for retriever, "
                     "and 'gold_docs' and 'gold_answers' for E2E QA.")
@@ -80,12 +84,20 @@ def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_
             qa_model_name=model_args.qa_model_name_or_path,
         )
     else:
-        rqa_model = SimpleRQA.from_huggingface(
-            retriever=retriever,
-            qa_model_name_or_path=model_args.qa_model_name_or_path,
-            user_prefix="USER",  # doesn't really matter as evaluation during training is single turn
-            assistant_prefix="ASSISTANT",
-        )
+        if model_args.qa_is_fid:
+            rqa_model = SimpleRQA.from_huggingface_fid(
+                retriever=retriever,
+                qa_model_name_or_path=model_args.qa_model_name_or_path,
+                user_prefix="USER",  # doesn't really matter as evaluation during training is single turn
+                assistant_prefix="ASSISTANT",
+            )
+        else:
+            rqa_model = SimpleRQA.from_huggingface(
+                retriever=retriever,
+                qa_model_name_or_path=model_args.qa_model_name_or_path,
+                user_prefix="USER",
+                assistant_prefix="ASSISTANT",
+            )
     return rqa_model
 
 
@@ -94,11 +106,9 @@ def load_eval_data(eval_data_path) -> List[Dict]:
         eval_data = list(fread)
     formatted_eval_data = []
     for d in eval_data:
-        gold_doc = Document.from_dict(d['gold_doc'])
         formatted_eval_data.append({
             'question': d['question'],
-            'gold_doc': gold_doc,
-            'gold_docs': [gold_doc],  # compatibiliy with E2EEvaluator
+            'gold_docs': [Document.from_dict(doc) for doc in d['gold_docs']],
             'gold_answer': d['gold_answer'],
             'dialogue_session': DialogueSession.from_list(d['chat_history']),
         })
@@ -132,9 +142,9 @@ def test(model_args: ModelArguments, test_args: TestArguments):
     logger.info(f"Performance: {json.dumps(performance, indent=2, sort_keys=True)}")
 
     ### write prections
-    save_path = os.path.join(test_args.output_dir, 'test-predictions.pkl')
-    with open(save_path, 'wb') as fwrite:
-        pickle.dump(predictions, fwrite)
+    save_path = os.path.join(test_args.output_dir, 'test-predictions.jsonl')
+    with jsonlines.open(save_path, 'w') as fwrite:
+        fwrite.write_all(predictions)
     # also save performance
     with open(os.path.join(test_args.output_dir, 'score.json'), 'w', encoding='utf-8') as fwrite:
         json.dump(performance, fwrite, indent=2, sort_keys=True)

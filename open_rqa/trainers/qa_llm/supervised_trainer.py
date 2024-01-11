@@ -16,7 +16,6 @@ import torch
 import torch.nn as nn
 import os
 import jsonlines
-import pickle
 
 
 class SupervisedTrainer(Trainer):
@@ -61,7 +60,7 @@ class SupervisedTrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
         # supervised loss
-        loss = super().compute_loss(model, inputs, return_outputs)
+        loss = super().compute_loss(model, inputs, return_outputs)  # pylint: disable=no-member
         return loss
     
     def prediction_step(
@@ -80,11 +79,9 @@ class SupervisedTrainer(Trainer):
             eval_data = list(fread)
         formatted_eval_data = []
         for d in eval_data:
-            gold_doc = Document.from_dict(d['gold_doc'])
             formatted_eval_data.append({
                 'question': d['question'],
-                'gold_doc': gold_doc,
-                'gold_docs': [gold_doc],  # compatibiliy with E2EEvaluator
+                'gold_docs': [Document.from_dict(doc) for doc in d['gold_docs']],
                 'gold_answer': d['gold_answer'],
                 'dialogue_session': DialogueSession.from_list(d['chat_history']),
             })
@@ -119,7 +116,7 @@ class SupervisedTrainer(Trainer):
             output = EvalLoopOutput(predictions=[], label_ids=None, metrics={}, num_samples=len(dataloader.dataset))
         else:
             model = self._wrap_model(self.model, training=False, dataloader=dataloader)
-            output = super().evaluation_loop(
+            output = super().evaluation_loop(  # pylint: disable=no-member
                 dataloader,
                 description=description,
                 prediction_loss_only=prediction_loss_only,
@@ -142,8 +139,8 @@ class SupervisedTrainer(Trainer):
         output.metrics.update(performance)
 
         if self.args.write_predictions:
-            save_name = f'step-{self.state.global_step}-{metric_key_prefix}-predictions.pkl'
+            save_name = f'step-{self.state.global_step}-{metric_key_prefix}-predictions.jsonl'
             save_path = os.path.join(self.args.output_dir, save_name)
-            with open(save_path, 'wb') as f:
-                pickle.dump(predictions, f)
+            with jsonlines.open(save_path, 'w') as fwrite:
+                fwrite.write_all(predictions)
         return output

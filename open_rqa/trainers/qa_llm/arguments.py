@@ -8,10 +8,6 @@ class RetrievalQATrainingArguments(TrainingArguments):
         default="",
         metadata={"help": "Path to the file which contains List[Document] for building a database index"},
     )
-    retriever_format: str = field(
-        default="source: {title} content: {text}",
-        metadata={"help": "Format string for building a database index"},
-    )
     eval_data_path: str = field(
         default="",
         metadata={
@@ -42,7 +38,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "Whether to run eval on the dev set."}
     )
     num_train_epochs: int = field(
-        default=10,
+        default=6,
         metadata={"help": "Total number of training epochs to perform."}
     )
     learning_rate: float = field(
@@ -70,7 +66,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "Report to wandb or not"}
     )
     logging_steps: int = field(
-        default=100,
+        default=10,
         metadata={"help": "Log every X updates steps."}
     )
     evaluation_strategy: str = field(
@@ -78,7 +74,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "Evaluation strategy to adopt during training."}
     )
     eval_steps: int = field(
-        default=200,
+        default=100,
         metadata={"help": "Run an evaluation every X steps."}
     )
     metric_for_best_model: str = field(
@@ -90,7 +86,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "Save strategy to adopt during training."}
     )
     save_steps: int = field(
-        default=200,
+        default=100,
         metadata={"help": "Save checkpoint every X steps."}
     )
     save_total_limit: int = field(

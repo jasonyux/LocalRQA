@@ -8,7 +8,7 @@ DATABRICKS_DOC2Q_PROMPT = """
 The following texts are from Databricks, a company that combines data warehouses and data lakes into a lakehouse architecture.
 Your task is to create questions that users might ask if they have not read the documentations.
 ------
-Title: https://docs.databricks.com/clusters/custom-containers.html
+Source: https://docs.databricks.com/clusters/custom-containers.html
 Content:
 ## Use an init script
 Databricks Container Services clusters enable customers to include init scripts in the Docker container. In most cases, you should avoid init scripts and instead make customizations through Docker directly (using the Dockerfile). However, certain tasks must be executed when the container starts, instead of when the container is built. Use an init script for these tasks.
@@ -31,7 +31,7 @@ Create two questions that a user might ask if they have not read these texts. On
 Question 1: Can user configure init script on docker pull image cluster?
 Question 2: How do I specify init scripts in a cluster spec in Databricks Container Services?
 ------
-Title: https://docs.databricks.com/migration-notes/dbr7.3-11.3.html
+Source: https://docs.databricks.com/migration-notes/dbr7.3-11.3.html
 Content:
 - [[SPARK-38229]](https://issues.apache.org/jira/browse/SPARK-38229) [SQL] Should't check temp/external/ifNotExists with visitReplaceTable when parser
 - [[SPARK-34183]](https://issues.apache.org/jira/browse/SPARK-34183) [SS] DataSource V2: Required distribution and ordering in micro-batch execution
@@ -43,7 +43,7 @@ Create two questions that a user might ask if they have not read these texts. On
 Question 1: What are some improvements made in databricks runtime 7.3 to 11.3?
 Question 2: What are some of the SQL issues fixed in databricks runtime 7.3 to 11.3?
 ------
-Title: https://docs.databricks.com/delta/history.html
+Source: https://docs.databricks.com/delta/history.html
 Content:
 ## Retrieve Delta table history
 You can retrieve information on the operations, user, timestamp, and so on for each write to a Delta table
