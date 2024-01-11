@@ -4,6 +4,7 @@ from open_rqa.qa_llms.base import BaseQAModel, GenerationOutput
 from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.schema.document import Document
 from open_rqa.qa_llms.prompts import RQA_PROMPT
+from open_rqa.constants import QA_ERROR_MSG
 import os
 
 
@@ -17,7 +18,7 @@ class OpenAIQAModel(BaseQAModel):
         self.model_name = model_name
         self._default_generate_kwargs = {
             "temperature": 0.7,
-            "timeout": 20.0,
+            "timeout": 30.0,
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
@@ -79,15 +80,19 @@ class OpenAIQAModel(BaseQAModel):
             **generation_kwargs
         }
         for prompt in batched_prompts:
-            response = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt},
-                ],
-                **_gen_kwargs
-            )
-            extracted_message = response.choices[0].message.content
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    **_gen_kwargs
+                )
+                extracted_message = response.choices[0].message.content
+            except Exception as e:
+                print(e)
+                extracted_message = QA_ERROR_MSG
             responses.append(extracted_message)
         return GenerationOutput(
             batch_answers=responses,

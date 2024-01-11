@@ -5,7 +5,7 @@ from open_rqa.trainers.utils import init_logger
 from open_rqa.schema.document import Document
 from open_rqa.evaluation.utils import normalize_answer
 from open_rqa.evaluation.metrics import is_almost_same_document
-from open_rqa.constants import OPENAI_MODEL_NAMES
+from open_rqa.constants import OPENAI_MODEL_NAMES, QA_ERROR_MSG
 from collections import defaultdict
 from tqdm.auto import tqdm
 from typing import Dict, List, Callable
@@ -186,7 +186,11 @@ def create_positive_n_negative_examples(args: argparse.Namespace, filter_fn: Cal
     return documents_dataset
 
 
-def _extract_questions(generated_output):
+def _extract_questions(generated_output: str):
+    if QA_ERROR_MSG in generated_output:
+        logger.warning(f"Found error in generation:\n {generated_output}")
+        return []
+    
     lines = generated_output.split("\n")
     if not lines[0].strip().endswith("?"):
         return []

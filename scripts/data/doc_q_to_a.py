@@ -3,6 +3,7 @@ from open_rqa.qa_llms.openai import OpenAIQAModel
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
 from open_rqa.constants import OPENAI_MODEL_NAMES
 from open_rqa.trainers.utils import init_logger
+from open_rqa.constants import QA_ERROR_MSG
 from typing import Dict, List
 from tqdm.auto import tqdm
 from copy import deepcopy
@@ -162,18 +163,16 @@ def _generate_questions_from_dataset(args, prompting_model: BaseQAModel, doc_w_q
 
     pbar = tqdm(total=num_steps, desc="Generating answers")
     for i, batch in enumerate(iterator):
-        try:
-            answers = _batch_generate_answers(
-                prompting_model = prompting_model,
-                batch = batch,
-                prompt = prompt,
-            )
-        except Exception as e:
-            logger.error(f"Error at step {i}, skipping")
-            pbar.update(1)
-            continue
+        answers = _batch_generate_answers(
+            prompting_model = prompting_model,
+            batch = batch,
+            prompt = prompt,
+        )
         
         for sample, answer in zip(batch, answers):
+            if QA_ERROR_MSG in answer:
+                logger.warning(f"Found error in answer:\n {answer}")
+                continue
             sample['gold_answer'] = answer
             dataset.append(sample)
 
