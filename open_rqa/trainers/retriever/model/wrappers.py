@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from open_rqa.retrievers.base import RetrievalOutput
 from open_rqa.schema.dialogue import RQAOutput
 from open_rqa.schema.document import Document
-from open_rqa.trainers.retriever.embeddings import EmbeddingsWrapper, LocalEmbeddings
+from open_rqa.trainers.retriever.embeddings import LocalEmbeddings
 import torch
 import logging
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class RetrievalModel(ABC):
-	embeddings: Optional[EmbeddingsWrapper] = None
+	embeddings = None
 
 	def __init__(self, *args, **kwargs):
 		return
@@ -37,7 +37,7 @@ class RetrieverfromBertModel(RetrievalModel):
 		return
 	
 	def build_index(self, documents: List[Document] = [], format_str='title: {title} content: {text}') -> torch.Tensor:
-		embeddings = LocalEmbeddings(self.model, self.tokenizer, index_path=None, device = "cuda")
+		embeddings = LocalEmbeddings(self.model, self.tokenizer, index_path=None)
 
 		# asuming we are doing an inner product search, then normalize_L2=False
 		normalize_L2 = self.search_args['search_kwargs'].pop('normalize_L2', False)

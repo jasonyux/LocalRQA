@@ -11,23 +11,13 @@ from open_rqa.schema.document import Document
 from open_rqa.trainers.retriever.model.wrappers import RetrievalModel
 from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
 from open_rqa.trainers.retriever.arguments import RetrievalQATrainingArguments
+from open_rqa.trainers.retriever.embeddings import embed_document_batch
 from open_rqa.trainers.utils import read_jsonl
 import torch
 import torch.nn as nn
 import random
 import os
 import pickle
-
-
-def batch_iterator(dset, batch_size, drop_last=False, shuffle=False):
-	batch = []
-	for item in dset:
-		batch.append(item)
-		if len(batch) == batch_size:
-			yield batch
-			batch = []
-	if len(batch) > 0 and not drop_last:
-		yield batch
 
 
 class RetrieverTrainer(Trainer):
@@ -68,38 +58,6 @@ class RetrieverTrainer(Trainer):
 		if not isinstance(self.model, _supported_encoders):
 			raise NotImplementedError(f"Model architecture is not supported.")
 		return
-	
-	def mean_pooling(self, token_embeddings, mask):
-		token_embeddings = token_embeddings.masked_fill(~mask[..., None].bool(), 0.)
-		sentence_embeddings = token_embeddings.sum(dim=1) / mask.sum(dim=1)[..., None]
-		return sentence_embeddings
-	
-	def compute_embedding(self, encoded_inputs, outputs):
-		if isinstance(self.model, BertModel):
-			embedding = self.mean_pooling(outputs.last_hidden_state, encoded_inputs['attention_mask'])
-		elif isinstance(self.model, BertForMaskedLM):
-			embedding = outputs.hidden_states[-1][:, 0, :]  # take the CLS token
-		else:
-			raise NotImplementedError
-		return embedding
-	
-	def embed_document_batch(self, model, batch, batch_size=8):
-		b = batch_iterator(batch, batch_size=batch_size, shuffle=False)
-		embeddings = []
-		for bb in b:
-			encoded_inputs = self.tokenizer(
-				bb, return_tensors="pt",
-				padding='max_length', max_length=512,
-				truncation=True
-			)
-			for k, v in encoded_inputs.items():
-				encoded_inputs[k] = v.to(model.device)
-			outputs = model(**encoded_inputs, output_hidden_states=True)
-			# [len(texts), 768)]
-			embedding = self.compute_embedding(encoded_inputs, outputs)
-			embeddings.append(embedding)
-		embeddings = torch.concat(embeddings, dim=0)
-		return embeddings
 
 	def compute_loss(self, model, inputs, return_outputs=False):
 		if model.additional_training_args.contrastive_loss == 'inbatch_contrastive':
@@ -132,9 +90,9 @@ class RetrieverTrainer(Trainer):
 		all_docs = gathered_gold_doc + included_hard_negs
 		labels = torch.arange(0, bsz, dtype=torch.long, device=model.device)
 
-		query_embeddings = self.embed_document_batch(model, gathered_query, batch_size=bsz)
-		key_embeddings = self.embed_document_batch(model, all_docs, batch_size=bsz)
-
+		query_embeddings = embed_document_batch(self.tokenizer, model, gathered_query, batch_size=bsz)
+		key_embeddings = embed_document_batch(self.tokenizer, model, all_docs, batch_size=bsz)
+        
 		score = torch.einsum('id, jd->ij', query_embeddings / temperature, key_embeddings)
 		loss = torch.nn.functional.cross_entropy(score, labels)
 		return loss
@@ -191,11 +149,7 @@ class RetrieverTrainer(Trainer):
 		loaded_eval_data = self._load_eval_data(self.args.eval_data_path)
 
 		wrapped_model: RetrievalModel
-		if is_test_only_mode and hasattr(model, 'wrapped_model'):
-			# we may have preloaded the index
-			wrapped_model = model.wrapped_model
-		else:
-			wrapped_model = self.eval_wrapper_class(model, tokenizer=self.tokenizer, search_kwargs=self.eval_search_kwargs)
+		wrapped_model = self.eval_wrapper_class(model, tokenizer=self.tokenizer, search_kwargs=self.eval_search_kwargs)
 		indices = wrapped_model.build_index(loaded_documents, format_str=self.args.retriever_format)
 		
 		evaluator = RetrieverEvaluator(
