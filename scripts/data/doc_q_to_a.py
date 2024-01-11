@@ -162,11 +162,16 @@ def _generate_questions_from_dataset(args, prompting_model: BaseQAModel, doc_w_q
 
     pbar = tqdm(total=num_steps, desc="Generating answers")
     for i, batch in enumerate(iterator):
-        answers = _batch_generate_answers(
-            prompting_model = prompting_model,
-            batch = batch,
-            prompt = prompt,
-        )
+        try:
+            answers = _batch_generate_answers(
+                prompting_model = prompting_model,
+                batch = batch,
+                prompt = prompt,
+            )
+        except Exception as e:
+            logger.error(f"Error at step {i}, skipping")
+            pbar.update(1)
+            continue
         
         for sample, answer in zip(batch, answers):
             sample['gold_answer'] = answer

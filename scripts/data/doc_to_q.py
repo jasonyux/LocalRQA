@@ -312,12 +312,12 @@ def create_heldout_test_dset(args, doc2q_prompt):
     test_dataset = non_train_dset[half_size:]
 
     ### save
-    logger.info(f"Saving to {args.save_dir} named eval.jsonl, test.jsonl, nontrain.jsonl")
-    with jsonlines.open(os.path.join(args.save_dir, "nontrain.jsonl"), "w") as fwrite:
+    logger.info(f"Saving to {args.save_dir} named eval_w_q.jsonl, test_w_q.jsonl, nontrain_w_q.jsonl")
+    with jsonlines.open(os.path.join(args.save_dir, "nontrain_w_q.jsonl"), "w") as fwrite:
         fwrite.write_all(non_train_dset)
-    with jsonlines.open(os.path.join(args.save_dir, "eval.jsonl"), "w") as fwrite:
+    with jsonlines.open(os.path.join(args.save_dir, "eval_w_q.jsonl"), "w") as fwrite:
         fwrite.write_all(eval_dataset)
-    with jsonlines.open(os.path.join(args.save_dir, "test.jsonl"), "w") as fwrite:
+    with jsonlines.open(os.path.join(args.save_dir, "test_w_q.jsonl"), "w") as fwrite:
         fwrite.write_all(test_dataset)
 
     ### since evaluation need to reembed the entire dataset, we consider a smaller document set for an optional fast evaluation
@@ -365,7 +365,7 @@ def create_train_dset(args, doc2q_prompt):
     with open(os.path.join(args.save_dir, "all_doc_neg_pairs.pkl"), "rb") as fread:
         documents_dataset = pickle.load(fread)
     logger.info(f"Loaded all (doc, neg_docs) pairs: {len(documents_dataset)}")
-    with jsonlines.open(os.path.join(args.save_dir, "nontrain.jsonl"), "r") as fread:
+    with jsonlines.open(os.path.join(args.save_dir, "nontrain_w_q.jsonl"), "r") as fread:
         held_out_documents_dataset = list(fread)
     logger.info(f"Loaded held out q2docs pairs: {len(held_out_documents_dataset)}")
 
@@ -422,8 +422,8 @@ def create_train_dset(args, doc2q_prompt):
     logger.info(f"Removed {removed_duplicates} duplicates")
 
     ## save
-    logger.info(f"Saving to {args.save_dir} named train.jsonl")
-    with jsonlines.open(os.path.join(args.save_dir, "train.jsonl"), "w") as fwrite:
+    logger.info(f"Saving to {args.save_dir} named train_w_q.jsonl")
+    with jsonlines.open(os.path.join(args.save_dir, "train_w_q.jsonl"), "w") as fwrite:
         fwrite.write_all(train_dataset)
     return train_dataset
 
