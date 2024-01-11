@@ -66,23 +66,23 @@ class DataArguments:
     """
 
     train_file: str = field(
-        default="data/training/databricks_clean/train_q_doc_a.jsonl",
+        default="data/training/databricks_new/train_w_qa.jsonl",
         metadata={"help": "Path for cached train dataset"},
     )
     eval_file: str = field(
-        default='data/training/databricks_clean/eval_q_doc_a.jsonl',
+        default='data/training/databricks_new/eval_w_qa.jsonl',
         metadata={"help": "Path for cached eval dataset"},
     )
     test_file: str = field(
-        default='data/training/databricks_clean/test_q_doc_a.jsonl',
+        default='data/training/databricks_new/test_w_qa.jsonl',
         metadata={"help": "Path for cached test dataset"},
     )
     full_dataset_file_path: str = field(
-        default='data/training/databricks_sources_official_short.pkl',
+        default='data/database/databricks/databricks_400.pkl',
         metadata={"help": "Path for cached full dataset file"},
     )
     full_dataset_index_path: str = field(
-        default='data/training/databricks_sources_official_short_index',
+        default='data/database/databricks/databricks_400_tmp',
         metadata={"help": "Path for cached full dataset index"},
     )
     max_seq_length: int = field(
@@ -94,7 +94,7 @@ class DataArguments:
         metadata={"help": "What embedding model to train with (e.g., intfloat/e5-base). If empty, train with ground truth."},
     )
     embedding_max_num_to_retrieve: int = field(
-        default=2,
+        default=3,
         metadata={"help": "Max number of documents to retrieve (excluding the gold doc), if embedding_model is none empty"},
     )
 

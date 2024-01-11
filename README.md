@@ -10,6 +10,7 @@ docker run -it --gpus all --shm-size=256m \
 jasonyux/nvcr_torch:23.08 bash
 ```
 
+# Data Generation
 Let's use GPT-3.5 to generate questions, and GPT-4-turbo to generate answers.
 
 generate questions:
@@ -34,7 +35,7 @@ python scripts/data/doc_q_to_a_databricks.py \
 --end_data_idx 4  # a small number to test if it works
 ```
 
-# Tests
+# Testing
 
 E2E test GPT-3.5 + Text ada:
 ```bash
@@ -45,4 +46,44 @@ python scripts/test/test_e2e.py \
 --index_path data/database/databricks/databricks_400_textada \
 --eval_data_path data/training/databricks_new/test_w_qa.jsonl \
 --output_dir model_checkpoints/databricks_e2e_tests/gpt3.5-turbo_textada
+```
+
+# Training
+
+Fusion-in-decoder training
+```bash
+python scripts/train/qa_llm/train_w_gt_fid.py \
+--per_device_train_batch_size 4 \
+--per_device_eval_batch_size 4 \
+--deepspeed scripts/train/ds_config.json \
+--bf16 true --learning_rate 1e-5 \
+--gradient_accumulation_steps 2 \
+--model_name_or_path google/flan-t5-xl \
+--embedding_model model_checkpoints/retriever_model/contriever-ms_databricks_inbatch256_chunk400_fulldoc_hard0.05_train/checkpoint-65 \
+--embedding_max_num_to_retrieve 3 \
+--logging_steps 10 \
+--eval_steps 100 \
+--save_steps 100 \
+--output_dir model_checkpoints/databricks_flant5-xl_contriever-ft \
+--run_group databricks_fid \
+--train_file data/training/databricks_new/train_w_qa.jsonl \
+--eval_file data/training/databricks_new/eval_w_qa.jsonl \
+--test_file data/training/databricks_new/test_w_qa.jsonl \
+--full_dataset_file_path data/database/databricks/databricks_400.pkl \
+--full_dataset_index_path data/database/databricks/databricks_400_contriever-inbatch256hard0.05checkpoint-65
+```
+
+
+# References
+
+G. Izacard, E. Grave [Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering](https://arxiv.org/abs/2007.01282)
+
+```
+@misc{izacard2020leveraging,
+      title={Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering},
+      author={Gautier Izacard and Edouard Grave},
+      url = {https://arxiv.org/abs/2007.0128},
+      year={2020},
+      publisher = {arXiv},
+}
 ```

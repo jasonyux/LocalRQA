@@ -16,7 +16,6 @@ import torch
 import torch.nn as nn
 import os
 import jsonlines
-import pickle
 
 
 class SupervisedTrainer(Trainer):
@@ -61,7 +60,7 @@ class SupervisedTrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
         # supervised loss
-        loss = super().compute_loss(model, inputs, return_outputs)
+        loss = super().compute_loss(model, inputs, return_outputs)  # pylint: disable=no-member
         return loss
     
     def prediction_step(
@@ -117,7 +116,7 @@ class SupervisedTrainer(Trainer):
             output = EvalLoopOutput(predictions=[], label_ids=None, metrics={}, num_samples=len(dataloader.dataset))
         else:
             model = self._wrap_model(self.model, training=False, dataloader=dataloader)
-            output = super().evaluation_loop(
+            output = super().evaluation_loop(  # pylint: disable=no-member
                 dataloader,
                 description=description,
                 prediction_loss_only=prediction_loss_only,

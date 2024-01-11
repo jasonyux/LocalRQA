@@ -5,7 +5,7 @@ from transformers import (
 from accelerate.utils import DistributedType
 from dataclasses import dataclass, field
 from open_rqa.qa_llms.fid import FiDT5
-from open_rqa.trainers.qa_llm.datasets import SupervisedRQAwRetrieverFiDDataset
+from open_rqa.trainers.qa_llm.datasets import SupervisedFiDRQAwRetrieverDataset
 from open_rqa.trainers.qa_llm.supervised_fid_trainer import SupervisedFiDTrainer
 from open_rqa.trainers.qa_llm.arguments import E2EQATrainingArguments
 from open_rqa.trainers.utils import (
@@ -61,23 +61,23 @@ class DataArguments:
     """
 
     train_file: str = field(
-        default="data/training/databricks_clean/train_q_doc_a.jsonl",
+        default="data/training/databricks_new/train_w_qa.jsonl",
         metadata={"help": "Path for cached train dataset"},
     )
     eval_file: str = field(
-        default='data/training/databricks_clean/eval_q_doc_a.jsonl',
+        default='data/training/databricks_new/eval_w_qa.jsonl',
         metadata={"help": "Path for cached eval dataset"},
     )
     test_file: str = field(
-        default='data/training/databricks_clean/test_q_doc_a.jsonl',
+        default='data/training/databricks_new/test_w_qa.jsonl',
         metadata={"help": "Path for cached test dataset"},
     )
     full_dataset_file_path: str = field(
-        default='data/training/databricks_sources_official_short.pkl',
+        default='data/database/databricks/databricks_400.pkl',
         metadata={"help": "Path for cached full dataset file"},
     )
     full_dataset_index_path: str = field(
-        default='data/training/databricks_sources_official_short_index',
+        default='data/database/databricks/databricks_400_tmp',
         metadata={"help": "Path for cached full dataset index"},
     )
     max_encoder_seq_length: int = field(
@@ -93,7 +93,7 @@ class DataArguments:
         metadata={"help": "What embedding model to train with (e.g., intfloat/e5-base). If empty, train with ground truth."},
     )
     embedding_max_num_to_retrieve: int = field(
-        default=2,
+        default=3,
         metadata={"help": "Max number of documents to retrieve (excluding the gold doc), if embedding_model is none empty"},
     )
 
@@ -129,7 +129,7 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         test_data = list(fread)
     
     train_index_save_path = os.path.join(tmp_output_dir, 'train_index')
-    train_dset = SupervisedRQAwRetrieverFiDDataset(
+    train_dset = SupervisedFiDRQAwRetrieverDataset(
         qa_w_doc_data=train_data,
         embedding_model=embedding_model,
         retriever_init_fn=partial(retriever_init_fn, index_path=train_index_save_path),
@@ -141,7 +141,7 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         shuffle=True
     )
     eval_index_save_path = os.path.join(tmp_output_dir, 'eval_index')
-    eval_dset = SupervisedRQAwRetrieverFiDDataset(
+    eval_dset = SupervisedFiDRQAwRetrieverDataset(
         qa_w_doc_data=eval_data,
         embedding_model=embedding_model,
         retriever_init_fn=partial(retriever_init_fn, index_path=eval_index_save_path),
@@ -153,7 +153,7 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         shuffle=True
     )
     test_index_save_path = os.path.join(tmp_output_dir, 'test_index')
-    test_dset = SupervisedRQAwRetrieverFiDDataset(
+    test_dset = SupervisedFiDRQAwRetrieverDataset(
         qa_w_doc_data=test_data,
         embedding_model=embedding_model,
         retriever_init_fn=partial(retriever_init_fn, index_path=test_index_save_path),

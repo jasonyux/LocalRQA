@@ -16,7 +16,6 @@ import torch
 import torch.nn as nn
 import os
 import jsonlines
-import pickle
 
 
 class SupervisedFiDTrainer(Trainer):
@@ -123,7 +122,7 @@ class SupervisedFiDTrainer(Trainer):
             output = EvalLoopOutput(predictions=[], label_ids=None, metrics={}, num_samples=len(dataloader.dataset))
         else:
             model = self._wrap_model(self.model, training=False, dataloader=dataloader)
-            output = super().evaluation_loop(
+            output = super().evaluation_loop(  # pylint: disable=no-member
                 dataloader,
                 description=description,
                 prediction_loss_only=prediction_loss_only,

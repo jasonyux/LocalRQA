@@ -250,7 +250,7 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
         return self.data[idx]
 
 
-class SupervisedRQAwRetrieverFiDDataset(torch.utils.data.Dataset):
+class SupervisedFiDRQAwRetrieverDataset(torch.utils.data.Dataset):
     """train FiD with (a fixed) retriever
 
     Args:
@@ -358,7 +358,7 @@ class SupervisedRQAwRetrieverFiDDataset(torch.utils.data.Dataset):
             gold_docs = [Document.from_dict(doc) for doc in sample['gold_docs']]
             chat_history = sample['chat_history']
             question = sample['question']
-            gold_answer = sample['gold_answer']
+            gold_answer = sample['gold_answer'] + " </s>"
             retrieved_docs = all_retrieved_docs[i]
             # format dialogue
             dialogue_session = DialogueSession.from_list(chat_history)
