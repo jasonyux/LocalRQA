@@ -1,9 +1,9 @@
 from typing import List, Dict, Union, Callable
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, BatchEncoding
 from tqdm.auto import tqdm
 from open_rqa.schema.document import Document
 from open_rqa.schema.dialogue import DialogueSession
-from open_rqa.qa_llms.prompts import RQA_PROMPT_TRAIN
+from open_rqa.qa_llms.prompts import RQA_PROMPT, RQA_PROMPT_TRAIN
 from open_rqa.retrievers.base import BaseRetriever
 from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -240,7 +240,188 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
             tokenized["labels"] = tokenized["input_ids"].clone()
 
             encoded_data.append(tokenized)
-        logger.info(f"Processed {len(encoded_data)} documents")
+        logger.info(f"Processed {len(encoded_data)} RQA inputs")
+        return encoded_data
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+
+class SupervisedRQAwRetrieverFiDDataset(torch.utils.data.Dataset):
+    """train FiD with (a fixed) retriever
+
+    Args:
+        torch (_type_): _description_
+    """
+    def __init__(
+        self,
+        qa_w_doc_data: List[Dict],
+        embedding_model: Union[HuggingFaceEmbeddings, OpenAIEmbeddings],
+        retriever_init_fn: Callable,
+        tokenizer: AutoTokenizer,
+        assistant_prefix: str = "ASSISTANT",
+        user_prefix: str = "USER",
+        max_num_to_retrieve: int = 3,
+        encoder_max_length=512,  # since its FiD, we don't concatenate the documents
+        decoder_max_length=256,
+        start_data_idx=0,
+        end_data_idx=None,
+        shuffle=False
+    ):
+        self.embeddings = embedding_model
+        self.retriever_init_fn = retriever_init_fn
+        self.max_num_to_retrieve = max_num_to_retrieve  # excluding gold doc
+        self.tokenizer = tokenizer
+        self.encoder_max_length = encoder_max_length
+        self.decoder_max_length = decoder_max_length
+        self.start_data_idx = start_data_idx
+        self.end_data_idx = end_data_idx
+        self.assistant_prefix = assistant_prefix
+        self.user_prefix = user_prefix
+
+        flattened_input, flattened_output = self.prepare_data(qa_w_doc_data)
+        self.data = self.encode_data(flattened_input, flattened_output)
+        if shuffle:
+            random.seed(42)
+            random.shuffle(self.data)
+        return
+
+    def pre_retrieve_all_docs(self, retriever: BaseRetriever, all_questions: List[str]):
+        # the queries are searched one by one anyway
+        all_retrieved_docs = retriever.retrieve(
+            batch_questions=all_questions
+        ).batch_source_documents
+        return all_retrieved_docs
+
+    def _combine_retrieved_docs(self, gold_docs: List[Document], retrieved_docs: List[Document]):
+        max_num_docs = self.max_num_to_retrieve + 1
+        combined_docs = []
+        seen_doc_content = set()
+        for doc in gold_docs:
+            if doc.fmt_content not in seen_doc_content:
+                combined_docs.append(doc)
+                seen_doc_content.add(doc.fmt_content)
+        for doc in retrieved_docs:
+            if doc.fmt_content not in seen_doc_content:
+                combined_docs.append(doc)
+                seen_doc_content.add(doc.fmt_content)
+        
+        combined_docs = combined_docs[:max_num_docs]
+        return combined_docs
+
+    def encode_fid_inputs(self, q_w_passages: List[str], max_length):
+        # passage_ids, passage_masks = [], []
+        # for q_w_passsages in batch_q_w_passages:
+        #     # 2D input
+        #     p = self.tokenizer.batch_encode_plus(
+        #         q_w_passsages,
+        #         max_length=max_length,
+        #         pad_to_max_length=True,
+        #         return_tensors='pt',
+        #         truncation=True
+        #     )
+        #     # 3D input, so that during training we have (batch_size, num_passages, max_length)
+        #     passage_ids.append(p['input_ids'][None])
+        #     passage_masks.append(p['attention_mask'][None])
+
+        # passage_ids = torch.cat(passage_ids, dim=0)
+        # passage_masks = torch.cat(passage_masks, dim=0)
+
+        p = self.tokenizer.batch_encode_plus(
+            q_w_passages,
+            max_length=max_length,
+            pad_to_max_length=True,
+            return_tensors='pt',
+            truncation=True
+        )
+        # 3D input, so that during training we have (batch_size, num_passages, max_length)
+        passage_ids = p['input_ids'][None]
+        passage_masks = p['attention_mask'][None]
+        return BatchEncoding({
+            'input_ids': passage_ids,
+            'attention_mask': passage_masks.bool()
+        })
+
+    def prepare_data(self, qa_w_doc_data: List[Dict]):
+        _necessary_fields = ['question', 'chat_history', 'gold_answer', 'gold_docs']
+        assert all([field in qa_w_doc_data[0].keys() for field in _necessary_fields]), \
+            f"Missing necessary fields in qa_w_doc_data: {qa_w_doc_data[0].keys()}"
+        
+        ## init retriever
+        all_docs = []
+        for sample in qa_w_doc_data:
+            all_docs.extend([Document.from_dict(doc) for doc in sample['gold_docs']])
+        retriever: BaseRetriever = self.retriever_init_fn(
+            embedding_model=self.embeddings,
+            documents=all_docs,
+        )
+        all_retrieved_docs = self.pre_retrieve_all_docs(
+            retriever=retriever,
+            all_questions=[sample['question'] for sample in qa_w_doc_data]
+        )
+        
+        formatted_input_data = []
+        formatted_output_data = []
+        for i, sample in enumerate(qa_w_doc_data):
+            gold_docs = [Document.from_dict(doc) for doc in sample['gold_docs']]
+            chat_history = sample['chat_history']
+            question = sample['question']
+            gold_answer = sample['gold_answer']
+            retrieved_docs = all_retrieved_docs[i]
+            # format dialogue
+            dialogue_session = DialogueSession.from_list(chat_history)
+            dialogue_session.assistant_prefix = self.assistant_prefix
+            dialogue_session.user_prefix = self.user_prefix
+            dialogue_session.add_user_message(question)
+            # since FiD is encoder decoder, input do NOT include the answer
+            fmt_dialogue = dialogue_session.to_string()
+
+            ### prompt with retrieved documents
+            # fid does it in parallel
+            to_include_docs = self._combine_retrieved_docs(gold_docs, retrieved_docs)
+            fid_input = []
+            for doc in to_include_docs:
+                # since FiD is encoder decoder, input do NOT include the answer
+                prompt = RQA_PROMPT.format(
+                    formatted_documents = doc.fmt_content,
+                    formatted_chat = fmt_dialogue,
+                    assistant_prefix = self.assistant_prefix,
+                )
+                fid_input.append(prompt)
+            formatted_input_data.append(fid_input)
+            # fid output
+            formatted_output_data.append(gold_answer)
+        # print one example data
+        logger.info("Example formatted data:")
+        logger.info(formatted_input_data[0])
+        logger.info(formatted_output_data[0])
+        return formatted_input_data, formatted_output_data
+    
+    def encode_data(self, encoder_text_data: List[List[str]], decoder_text_data: List[str]):
+        encoded_data = []
+
+        assert len(encoder_text_data) == len(decoder_text_data)
+        for idx in tqdm(range(len(encoder_text_data))[self.start_data_idx:self.end_data_idx], desc="Encoding data"):
+            encoder_input = encoder_text_data[idx]
+            decoder_input = decoder_text_data[idx]
+
+            tokenized = self.encode_fid_inputs(encoder_input, max_length=self.encoder_max_length)
+            tokenized = {k: v.squeeze(0) for k, v in tokenized.items()}
+
+            decoder_tokenized = self.tokenizer(
+                decoder_input,
+                max_length=self.decoder_max_length,
+                truncation=True,
+                padding="max_length",
+                return_tensors="pt"
+            )
+            tokenized["labels"] = decoder_tokenized["input_ids"].squeeze(0).clone()
+
+            encoded_data.append(tokenized)
+        logger.info(f"Processed {len(encoded_data)} FiD inputs")
         return encoded_data
 
     def __len__(self):

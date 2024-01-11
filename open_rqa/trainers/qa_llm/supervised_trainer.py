@@ -80,7 +80,6 @@ class SupervisedTrainer(Trainer):
             eval_data = list(fread)
         formatted_eval_data = []
         for d in eval_data:
-            gold_doc = Document.from_dict(d['gold_doc'])
             formatted_eval_data.append({
                 'question': d['question'],
                 'gold_docs': [Document.from_dict(doc) for doc in d['gold_docs']],
