@@ -175,7 +175,11 @@ class HuggingFaceFiDQAModel(BaseQAModel):
         
         ### intialize model
         if model is None:
-            model = FiDT5.from_t5(model_name_or_path)
+            model, loading_info = FiDT5.from_pretrained(model_name_or_path, output_loading_info=True)
+            if len(loading_info['missing_keys']) > 0:
+                del model
+                print("Found missing keys, loading with FiDT5.from_t5")
+                model = FiDT5.from_t5(model_name_or_path)
             model.eval()
         if not next(model.parameters()).is_cuda:
             model = model.cuda()

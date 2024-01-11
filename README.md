@@ -48,6 +48,29 @@ python scripts/test/test_e2e.py \
 --output_dir model_checkpoints/databricks_e2e_tests/gpt3.5-turbo_textada
 ```
 
+with GPT-4-turbo + Text ada:
+```bash
+python scripts/test/test_e2e.py \
+--qa_model_name_or_path gpt-4-1106-preview \
+--embedding_model_name_or_path text-embedding-ada-002 \
+--document_path data/database/databricks/databricks_400.pkl \
+--index_path data/database/databricks/databricks_400_textada \
+--eval_data_path data/training/databricks_new/test_w_qa.jsonl \
+--output_dir model_checkpoints/databricks_e2e_tests/gpt4-turbo_textada
+```
+
+with T5-FiD + Contriever:
+```bash
+python scripts/test/test_e2e.py \
+--qa_model_name_or_path model_checkpoints/databricks_flant5-xl_contriever-ft/checkpoint-800 \
+--qa_is_fid true \
+--embedding_model_name_or_path model_checkpoints/retriever_model/contriever-ms_databricks_inbatch256_chunk400_fulldoc_hard0.05_train/checkpoint-65 \
+--document_path data/database/databricks/databricks_400.pkl \
+--index_path data/database/databricks/databricks_400_contriever-inbatch256hard0.05checkpoint-65 \
+--eval_data_path data/training/databricks_new/test_w_qa.jsonl \
+--output_dir model_checkpoints/databricks_e2e_tests/flant5-xl_contriever-ft
+```
+
 # Training
 
 Fusion-in-decoder training

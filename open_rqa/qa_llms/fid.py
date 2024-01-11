@@ -126,8 +126,8 @@ class FiDT5(transformers.T5ForConditionalGeneration):
             attn.forward = types.MethodType(cross_attention_forward, attn)
 
     @staticmethod
-    def from_t5(model_name_or_path):
-        t5 = transformers.T5ForConditionalGeneration.from_pretrained(model_name_or_path)
+    def from_t5(model_name_or_path, **kwargs):
+        t5 = transformers.T5ForConditionalGeneration.from_pretrained(model_name_or_path, **kwargs)
         model = FiDT5(t5.config)
         model.load_t5(t5.state_dict())
         return model

@@ -26,6 +26,10 @@ class ModelArguments:
         default="lmsys/vicuna-7b-v1.5",
         metadata={"help": "QA model name or path. Huggingface model or OpenAI model"},
     )
+    qa_is_fid: bool = field(
+        default=False,
+        metadata={"help": "Whether the QA model is a FiD model"},
+    )
     embedding_model_name_or_path: str = field(
         default="intfloat/e5-base",
         metadata={"help": "Embedding model name or path. Huggingface model or OpenAI model"},
@@ -80,12 +84,20 @@ def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_
             qa_model_name=model_args.qa_model_name_or_path,
         )
     else:
-        rqa_model = SimpleRQA.from_huggingface(
-            retriever=retriever,
-            qa_model_name_or_path=model_args.qa_model_name_or_path,
-            user_prefix="USER",  # doesn't really matter as evaluation during training is single turn
-            assistant_prefix="ASSISTANT",
-        )
+        if model_args.qa_is_fid:
+            rqa_model = SimpleRQA.from_huggingface_fid(
+                retriever=retriever,
+                qa_model_name_or_path=model_args.qa_model_name_or_path,
+                user_prefix="USER",  # doesn't really matter as evaluation during training is single turn
+                assistant_prefix="ASSISTANT",
+            )
+        else:
+            rqa_model = SimpleRQA.from_huggingface(
+                retriever=retriever,
+                qa_model_name_or_path=model_args.qa_model_name_or_path,
+                user_prefix="USER",
+                assistant_prefix="ASSISTANT",
+            )
     return rqa_model
 
 
