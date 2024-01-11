@@ -170,11 +170,15 @@ class RetrieverEvaluator(Evaluator):
                 else:
                     metric.update(retrieved_docs, gold_docs)
             
-            predictions.append({
-                "batch": batch,
-                "retrieved_docs": retrieved_docs,
-                "gold_docs": gold_docs,
-            })
+            for idx in range(batch['__len__']):
+                question = batch["question"][idx]
+                gold_doc = gold_docs[idx]
+                retrieved_doc = retrieved_docs[idx]
+                predictions.append({
+                    "question": question,
+                    "gold_docs": [doc.to_dict() for doc in gold_doc],
+                    "retrieved_docs": [doc.to_dict() for doc in retrieved_doc],
+                })
 
         for metric in self.e2e_metrics:
             metric.stop(num_samples_seen)
@@ -277,7 +281,6 @@ class E2EEvaluator(Evaluator):
                 retrieved_doc = retrieved_docs[idx]
                 gold_answer = gold_answers[idx]
                 generated_answer = generated_answers[idx]
-                # TODO: change this to jsonline saveable format as well. See E2EEvaluator for example
                 predictions.append({
                     "question": question,
                     "gold_docs": [doc.to_dict() for doc in gold_doc],

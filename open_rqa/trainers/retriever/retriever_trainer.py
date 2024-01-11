@@ -17,6 +17,7 @@ import torch.nn as nn
 import random
 import os
 import pickle
+import jsonlines
 
 
 def batch_iterator(dset, batch_size, drop_last=False, shuffle=False):
@@ -208,8 +209,8 @@ class RetrieverTrainer(Trainer):
 		output.metrics.update(performance)
 
 		if self.args.write_predictions:
-			save_name = f'step-{self.state.global_step}-predictions.pkl'
+			save_name = f'step-{self.state.global_step}-predictions.jsonl'
 			save_path = os.path.join(self.args.output_dir, save_name)
-			with open(save_path, 'wb') as f:
-				pickle.dump(predictions, f)
+			with jsonlines.open(save_path, 'w') as fwrite:
+				fwrite.write_all(predictions)
 		return output
