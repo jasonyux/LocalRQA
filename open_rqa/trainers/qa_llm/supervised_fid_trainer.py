@@ -146,8 +146,8 @@ class SupervisedFiDTrainer(Trainer):
         output.metrics.update(performance)
 
         if self.args.write_predictions:
-            save_name = f'step-{self.state.global_step}-{metric_key_prefix}-predictions.pkl'
+            save_name = f'step-{self.state.global_step}-{metric_key_prefix}-predictions.jsonl'
             save_path = os.path.join(self.args.output_dir, save_name)
-            with open(save_path, 'wb') as f:
-                pickle.dump(predictions, f)
+            with jsonlines.open(save_path, 'w') as fwrite:
+                fwrite.write_all(predictions)
         return output

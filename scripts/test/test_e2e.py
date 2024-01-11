@@ -130,9 +130,9 @@ def test(model_args: ModelArguments, test_args: TestArguments):
     logger.info(f"Performance: {json.dumps(performance, indent=2, sort_keys=True)}")
 
     ### write prections
-    save_path = os.path.join(test_args.output_dir, 'test-predictions.pkl')
-    with open(save_path, 'wb') as fwrite:
-        pickle.dump(predictions, fwrite)
+    save_path = os.path.join(test_args.output_dir, 'test-predictions.jsonl')
+    with jsonlines.open(save_path, 'w') as fwrite:
+        fwrite.write_all(predictions)
     # also save performance
     with open(os.path.join(test_args.output_dir, 'score.json'), 'w', encoding='utf-8') as fwrite:
         json.dump(performance, fwrite, indent=2, sort_keys=True)

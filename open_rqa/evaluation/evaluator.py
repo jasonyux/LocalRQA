@@ -270,14 +270,21 @@ class E2EEvaluator(Evaluator):
                 else:
                     metric.update(generated_answers, gold_answers, retrieved_docs, gold_docs)
             
-            predictions.append({
-                "batch": batch,
-                "questions": batch["question"],
-                "retrieved_docs": retrieved_docs,
-                "gold_docs": gold_docs,
-                "generated_answers": generated_answers,
-                "gold_answers": gold_answers,
-            })
+            # flatten and make it savable with jsonlines
+            for idx in range(batch['__len__']):
+                question = batch["question"][idx]
+                gold_doc = gold_docs[idx]
+                retrieved_doc = retrieved_docs[idx]
+                gold_answer = gold_answers[idx]
+                generated_answer = generated_answers[idx]
+                # TODO: change this to jsonline saveable format as well. See E2EEvaluator for example
+                predictions.append({
+                    "question": question,
+                    "gold_docs": [doc.to_dict() for doc in gold_doc],
+                    "retrieved_docs": [doc.to_dict() for doc in retrieved_doc],
+                    "gold_answer": gold_answer,
+                    "generated_answer": generated_answer,
+                })
 
         for metric in self.e2e_metrics:
             metric.stop(num_samples_seen)
