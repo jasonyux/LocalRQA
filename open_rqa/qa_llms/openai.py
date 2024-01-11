@@ -17,7 +17,7 @@ class OpenAIQAModel(BaseQAModel):
         self.model_name = model_name
         self._default_generate_kwargs = {
             "temperature": 0.7,
-            "timeout": 10.0,
+            "timeout": 20.0,
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix

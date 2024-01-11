@@ -83,8 +83,7 @@ class SupervisedTrainer(Trainer):
             gold_doc = Document.from_dict(d['gold_doc'])
             formatted_eval_data.append({
                 'question': d['question'],
-                'gold_doc': gold_doc,
-                'gold_docs': [gold_doc],  # compatibiliy with E2EEvaluator
+                'gold_docs': [Document.from_dict(doc) for doc in d['gold_docs']],
                 'gold_answer': d['gold_answer'],
                 'dialogue_session': DialogueSession.from_list(d['chat_history']),
             })

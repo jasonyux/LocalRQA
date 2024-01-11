@@ -34,15 +34,15 @@ class ModelArguments:
 @dataclass
 class TestArguments:
     document_path: str = field(
-        default='data/training/databricks_sources_official_short.pkl',
+        default='data/database/databricks/databricks_400.pkl',
         metadata={"help": "Path to the file which contains List[Document] for building a database index"},
     )
     index_path: str = field(
-        default='data/training/databricks_sources_official_short_index',
+        default='data/database/databricks/databricks_400_e5-base',
         metadata={"help": "Path to the file which will store/contains the index of documents in document_path"},
     )
     eval_data_path: str = field(
-        default='data/training/databricks_clean/test_q_doc_a.jsonl',
+        default='data/training/databricks_new/test_w_qa.jsonl',
         metadata={
             "help": ("Path to the eval data JSONL file. It needs to contain fields including 'gold_docs' for retriever, "
                     "and 'gold_docs' and 'gold_answers' for E2E QA.")
@@ -94,11 +94,9 @@ def load_eval_data(eval_data_path) -> List[Dict]:
         eval_data = list(fread)
     formatted_eval_data = []
     for d in eval_data:
-        gold_doc = Document.from_dict(d['gold_doc'])
         formatted_eval_data.append({
             'question': d['question'],
-            'gold_doc': gold_doc,
-            'gold_docs': [gold_doc],  # compatibiliy with E2EEvaluator
+            'gold_docs': [Document.from_dict(doc) for doc in d['gold_docs']],
             'gold_answer': d['gold_answer'],
             'dialogue_session': DialogueSession.from_list(d['chat_history']),
         })

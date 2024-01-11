@@ -61,29 +61,30 @@ class SupervisedRQADataset(torch.utils.data.Dataset):
         return
     
     def prepare_data(self, qa_w_doc_data: List[Dict]):
-        _necessary_fields = ['question', 'chat_history_str', 'gold_answer', 'gold_doc']
-        assert(all([field in qa_w_doc_data[0].keys() for field in _necessary_fields]))
+        _necessary_fields = ['question', 'chat_history', 'gold_answer', 'gold_docs']
+        assert all([field in qa_w_doc_data[0].keys() for field in _necessary_fields]), \
+            f"Missing necessary fields in qa_w_doc_data: {qa_w_doc_data[0].keys()}"
         
         formatted_data = []
         for sample in qa_w_doc_data:
-            gold_doc: Document = sample['gold_doc']
-            chat_history_str = sample['chat_history_str']
+            gold_docs = [Document.from_dict(doc) for doc in sample['gold_docs']]
+            chat_history = sample['chat_history']
             question = sample['question']
             gold_answer = sample['gold_answer']
             # format dialogue
-            dialogue_session = DialogueSession.from_list(chat_history_str)
+            dialogue_session = DialogueSession.from_list(chat_history)
             dialogue_session.assistant_prefix = self.assistant_prefix
             dialogue_session.user_prefix = self.user_prefix
             dialogue_session.add_user_message(question)
             dialogue_session.add_system_message(
                 system_message=gold_answer,
-                source_documents=[gold_doc]
+                source_documents=gold_docs
             )
             fmt_dialogue = dialogue_session.to_string()
 
             # gold prompt
             fmt_prompt = RQA_PROMPT_TRAIN.format(
-                formatted_documents=gold_doc.fmt_content,
+                formatted_documents='\n'.join([d.fmt_content for d in gold_docs]),
                 formatted_chat=fmt_dialogue,
             )
             formatted_data.append(fmt_prompt)
@@ -158,13 +159,13 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
             random.shuffle(self.data)
         return
 
-    def _format_retrieved_docs(self, gold_doc: Document, retrieved_docs: List[Document]):
-        formatted_docs = []
-        formatted_docs.append(gold_doc.fmt_content)
+    def _format_retrieved_docs(self, gold_docs: List[Document], retrieved_docs: List[Document]):
+        max_num_docs = self.max_num_to_retrieve + 1
+        formatted_docs = [doc.fmt_content.strip() for doc in gold_docs][:max_num_docs]
         for doc in retrieved_docs:
-            if len(formatted_docs) == self.max_num_to_retrieve + 1:
+            if len(formatted_docs) == max_num_docs:
                 break
-            if doc.fmt_content == gold_doc.fmt_content:
+            if doc.fmt_content in set(formatted_docs):
                 continue
             formatted_docs.append(doc.fmt_content.strip())
         formatted_docs_string = "\n".join(formatted_docs)
@@ -178,12 +179,17 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
         return all_retrieved_docs
 
     def prepare_data(self, qa_w_doc_data: List[Dict]):
-        _necessary_fields = ['question', 'chat_history_str', 'gold_answer', 'gold_doc']
-        assert(all([field in qa_w_doc_data[0].keys() for field in _necessary_fields]))
+        _necessary_fields = ['question', 'chat_history', 'gold_answer', 'gold_docs']
+        assert all([field in qa_w_doc_data[0].keys() for field in _necessary_fields]), \
+            f"Missing necessary fields in qa_w_doc_data: {qa_w_doc_data[0].keys()}"
         
+        ## init retriever
+        all_docs = []
+        for sample in qa_w_doc_data:
+            all_docs.extend([Document.from_dict(doc) for doc in sample['gold_docs']])
         retriever: BaseRetriever = self.retriever_init_fn(
             embedding_model=self.embeddings,
-            documents=[Document.from_dict(sample['gold_doc']) for sample in qa_w_doc_data],
+            documents=all_docs,
         )
         all_retrieved_docs = self.pre_retrieve_all_docs(
             retriever=retriever,
@@ -192,24 +198,24 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
         
         formatted_data = []
         for i, sample in enumerate(qa_w_doc_data):
-            gold_doc = Document.from_dict(sample['gold_doc'])
-            chat_history_str = sample['chat_history_str']
+            gold_docs = [Document.from_dict(doc) for doc in sample['gold_docs']]
+            chat_history = sample['chat_history']
             question = sample['question']
             gold_answer = sample['gold_answer']
             retrieved_docs = all_retrieved_docs[i]
             # format dialogue
-            dialogue_session = DialogueSession.from_list(chat_history_str)
+            dialogue_session = DialogueSession.from_list(chat_history)
             dialogue_session.assistant_prefix = self.assistant_prefix
             dialogue_session.user_prefix = self.user_prefix
             dialogue_session.add_user_message(question)
             dialogue_session.add_system_message(
                 system_message=gold_answer,
-                source_documents=[gold_doc]
+                source_documents=gold_docs
             )
             fmt_dialogue = dialogue_session.to_string()
 
             # prompt with retrieved documents
-            fmt_retrieved_docs_w_gold = self._format_retrieved_docs(gold_doc, retrieved_docs)
+            fmt_retrieved_docs_w_gold = self._format_retrieved_docs(gold_docs, retrieved_docs)
             fmt_prompt = RQA_PROMPT_TRAIN.format(
                 formatted_documents=fmt_retrieved_docs_w_gold,
                 formatted_chat_w_answer=fmt_dialogue,
