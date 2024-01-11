@@ -159,8 +159,8 @@ class HuggingFaceFiDQAModel(BaseQAModel):
         self.model, self.tokenizer = self._init(model, tokenizer, model_name_or_path)
         ## configs
         self._default_generate_kwargs = {
-            "max_new_tokens": 512,
-            "do_sample": False,
+            "max_length": 256,
+            "do_sample": False,  # FiD does not support sampling
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
@@ -210,9 +210,9 @@ class HuggingFaceFiDQAModel(BaseQAModel):
             p = self.tokenizer.batch_encode_plus(
                 q_w_passsages,
                 max_length=max_length,
-                pad_to_max_length=True,
+                truncation=True,
+                padding='max_length',
                 return_tensors='pt',
-                truncation=True
             )
             # 3D input, so that during training we have (batch_size, num_passages, max_length)
             passage_ids.append(p['input_ids'][None])

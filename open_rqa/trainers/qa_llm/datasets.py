@@ -309,37 +309,26 @@ class SupervisedRQAwRetrieverFiDDataset(torch.utils.data.Dataset):
                 combined_docs.append(doc)
                 seen_doc_content.add(doc.fmt_content)
         
-        combined_docs = combined_docs[:max_num_docs]
+        # FiD requires all batches have the same number of documents
+        if len(combined_docs) > max_num_docs:
+            combined_docs = combined_docs[:max_num_docs]
+        else:
+            # we pad
+            num_to_pad = max_num_docs - len(combined_docs)
+            combined_docs += [combined_docs[-1]] * num_to_pad
         return combined_docs
 
     def encode_fid_inputs(self, q_w_passages: List[str], max_length):
-        # passage_ids, passage_masks = [], []
-        # for q_w_passsages in batch_q_w_passages:
-        #     # 2D input
-        #     p = self.tokenizer.batch_encode_plus(
-        #         q_w_passsages,
-        #         max_length=max_length,
-        #         pad_to_max_length=True,
-        #         return_tensors='pt',
-        #         truncation=True
-        #     )
-        #     # 3D input, so that during training we have (batch_size, num_passages, max_length)
-        #     passage_ids.append(p['input_ids'][None])
-        #     passage_masks.append(p['attention_mask'][None])
-
-        # passage_ids = torch.cat(passage_ids, dim=0)
-        # passage_masks = torch.cat(passage_masks, dim=0)
-
         p = self.tokenizer.batch_encode_plus(
             q_w_passages,
             max_length=max_length,
-            pad_to_max_length=True,
+            padding="max_length",
+            truncation=True,
             return_tensors='pt',
-            truncation=True
         )
         # 3D input, so that during training we have (batch_size, num_passages, max_length)
-        passage_ids = p['input_ids'][None]
-        passage_masks = p['attention_mask'][None]
+        passage_ids = p['input_ids']
+        passage_masks = p['attention_mask']
         return BatchEncoding({
             'input_ids': passage_ids,
             'attention_mask': passage_masks.bool()
@@ -409,7 +398,7 @@ class SupervisedRQAwRetrieverFiDDataset(torch.utils.data.Dataset):
             decoder_input = decoder_text_data[idx]
 
             tokenized = self.encode_fid_inputs(encoder_input, max_length=self.encoder_max_length)
-            tokenized = {k: v.squeeze(0) for k, v in tokenized.items()}
+            # tokenized = {k: v.squeeze(0) for k, v in tokenized.items()}
 
             decoder_tokenized = self.tokenizer(
                 decoder_input,

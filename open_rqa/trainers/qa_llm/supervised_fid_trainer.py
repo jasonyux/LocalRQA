@@ -61,7 +61,13 @@ class SupervisedFiDTrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
         # supervised loss
-        loss = super().compute_loss(model, inputs, return_outputs)
+        # loss = super().compute_loss(model, inputs, return_outputs)
+        loss = model(
+            input_ids=inputs['input_ids'].to(model.device),
+            attention_mask=inputs['attention_mask'].to(model.device),
+            labels=inputs['labels'].to(model.device),
+            return_dict=False
+        )[0]
         return loss
     
     def prediction_step(
