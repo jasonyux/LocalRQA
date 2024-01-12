@@ -38,7 +38,7 @@ class E2EQATrainingArguments(RetrievalQATrainingArguments):
         metadata={"help": "Whether to run eval on the dev set."}
     )
     num_train_epochs: int = field(
-        default=6,
+        default=5,
         metadata={"help": "Total number of training epochs to perform."}
     )
     learning_rate: float = field(

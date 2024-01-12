@@ -386,7 +386,7 @@ def create_train_dset(args, doc2q_prompt):
 
     random.shuffle(documents_dataset)
     potential_train_dataset = _batch_generate_questions_from_dataset(
-        args, prompting_model, documents_dataset, 
+        args, prompting_model, documents_dataset,
         prompt=doc2q_prompt,
         batch_size=args.batch_size,
         num_data=args.num_train_data

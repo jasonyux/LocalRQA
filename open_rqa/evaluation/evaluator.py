@@ -162,7 +162,7 @@ class RetrieverEvaluator(Evaluator):
 
             gold_docs = []
             for gdoc in batch["gold_docs"]:
-                gold_docs.append([Document.from_dict(gdoc[0])])
+                gold_docs.append([Document.from_dict(doc) for doc in gdoc])
 
             for metric in self.retr_metrics:
                 if isinstance(metric, MonitoringMetric):

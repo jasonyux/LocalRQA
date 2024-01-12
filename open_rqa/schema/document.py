@@ -1,5 +1,7 @@
+from langchain.schema.document import Document as LangChainDocument
 from dataclasses import dataclass, field
 from typing import Dict, Any
+from copy import deepcopy
 
 
 def default_document_formatter(document):
@@ -60,3 +62,32 @@ class Document:
             metadata=document_dict['metadata']
         )
         return document
+
+    @staticmethod
+    def from_langchain_doc(document: LangChainDocument):
+        """converts a langchain Document object to our Document object
+
+        Args:
+            document (_type_): _description_
+
+        Returns:
+            Document: _description_
+        """
+        return Document.from_dict({
+            'page_content': document.page_content,
+            'metadata': document.metadata
+        })
+
+    def to_langchain_doc(self) -> LangChainDocument:
+        """converts our Document object to a langchain Document object
+
+        Returns:
+            _type_: _description_
+        """
+        metadata = deepcopy(self.metadata)
+        if 'fmt_content' not in metadata:
+            metadata['fmt_content'] = self.fmt_content  # add the extra field into metadata
+        return LangChainDocument(
+            page_content=self.page_content,
+            metadata=metadata
+        )
