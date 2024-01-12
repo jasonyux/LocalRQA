@@ -17,12 +17,22 @@ generate questions:
 ```bash
 python scripts/data/doc_to_q_databricks.py \
 -mode all \
--document_path data/training/databricks_sources_official_short.pkl \
+-document_path data/database/databricks/databricks_400.pkl \
 --prompt_model gpt-3.5-turbo \
 --num_hard_negs_per_doc 2 \
---num_train_data 10 \  # a small number to test if it works
---num_eval_test_data 10 \  # a small number to test if it works
---save_dir data/training/databricks_new
+--num_train_data 1200 \  # use a small number to test if it works first
+--num_eval_test_data 150 \  # use a small number to test if it works first
+--save_dir data/training/databricks_tmp
+```
+```bash
+python scripts/data/doc_to_q.py \
+-mode all \
+-document_path data/database/faire/faire_400.pkl \
+--prompt_model gpt-3.5-turbo \
+--num_hard_negs_per_doc 2 \
+--num_train_data 600 \
+--num_eval_test_data 150 \
+--save_dir data/training/faire_tmp
 ```
 
 generate answers:
@@ -33,6 +43,14 @@ python scripts/data/doc_q_to_a_databricks.py \
 --save_name train_w_qa.jsonl \
 --save_dir data/training/databricks_new \
 --end_data_idx 4  # a small number to test if it works
+```
+```bash
+python scripts/data/doc_q_to_a.py \
+> --prompt_model gpt-4-1106-preview \
+> --dataset_w_q data/training/faire_new/train_w_q.jsonl \
+> --save_name train_w_qa.jsonl \
+> --save_dir data/training/faire_new \
+> --end_data_idx 4
 ```
 
 # Testing
@@ -69,6 +87,11 @@ python scripts/test/test_e2e.py \
 --index_path data/database/databricks/databricks_400_contriever-inbatch256hard0.05checkpoint-65 \
 --eval_data_path data/training/databricks_new/test_w_qa.jsonl \
 --output_dir model_checkpoints/databricks_e2e_tests/flant5-xl_contriever-ft
+```
+
+```
+best e5 = model_checkpoints/retriever_model/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05_retriever_train/checkpoint-120
+best contriever = model_checkpoints/retriever_model/contriever-ms_databricks_inbatch256_chunk400_fulldoc_hard0.05_train/checkpoint-65
 ```
 
 # Training

@@ -77,6 +77,12 @@ def parse_arguments(parser: argparse.ArgumentParser):
     args = parser.parse_args()
     if args.num_train_data == -1:
         args.num_train_data = None
+    if args.num_train_data is not None:
+        assert args.num_train_data % 2 == 0, "Number of training data must be even, since we generate 2 questions per document"
+        # the rest of the code is calculated based on number of documents to gen question
+        args.num_train_data = args.num_train_data // 2
+    assert args.num_eval_test_data % 2 == 0, "Number of eval/test data must be even, since we generate 2 questions per document"
+    args.num_eval_test_data = args.num_eval_test_data // 2
     return args
 
 
@@ -454,7 +460,7 @@ def main(args: argparse.Namespace):
             args,
             doc2q_prompt=BASE_DOC2Q_PROMPT  # customizable
         )
-        logger.info(f"Number of train samples: {len(train_dataset)}")
+        logger.info(f"Number of train samples per document: {len(train_dataset)}")
     return
 
 
