@@ -153,6 +153,7 @@ class SimpleRQA(BaseRQA):
         qa_model_name_or_path: str = "",
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + huggingface-based qa model
 
@@ -163,6 +164,7 @@ class SimpleRQA(BaseRQA):
             qa_model_name_or_path (str, optional): _description_. Defaults to "".
             user_prefix (str, optional): _description_. Defaults to "USER".
             assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            verbose (bool, optional): _description_. Defaults to False.
 
         Returns:
             _type_: _description_
@@ -180,11 +182,11 @@ class SimpleRQA(BaseRQA):
             retriever=retriever,
             qa_llm=qa_llm,
             answer_guardrail=answer_guardrail,
-            verbose=False
+            verbose=verbose
         )
         return rqa
 
-    
+    @staticmethod
     def from_huggingface_fid(
         retriever: BaseRetriever,
         qa_model: Optional[AutoModelForCausalLM] = None,
@@ -192,6 +194,7 @@ class SimpleRQA(BaseRQA):
         qa_model_name_or_path: str = "",
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + huggingface-based qa model
 
@@ -202,6 +205,7 @@ class SimpleRQA(BaseRQA):
             qa_model_name_or_path (str, optional): _description_. Defaults to "".
             user_prefix (str, optional): _description_. Defaults to "USER".
             assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            verbose (bool, optional): _description_. Defaults to False.
 
         Returns:
             _type_: _description_
@@ -219,7 +223,7 @@ class SimpleRQA(BaseRQA):
             retriever=retriever,
             qa_llm=qa_llm,
             answer_guardrail=answer_guardrail,
-            verbose=False
+            verbose=verbose
         )
         return rqa
 
@@ -230,6 +234,7 @@ class SimpleRQA(BaseRQA):
         qa_model_name: str,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + openai-based qa model (e.g. gpt-3.5-turbo)
 
@@ -238,6 +243,7 @@ class SimpleRQA(BaseRQA):
             qa_model_name (str): _description_
             user_prefix (str, optional): _description_. Defaults to "USER".
             assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            verbose (bool, optional): _description_. Defaults to False.
         
         Returns:
             _type_: _description_
@@ -253,7 +259,7 @@ class SimpleRQA(BaseRQA):
             retriever=retriever,
             qa_llm=qa_llm,
             answer_guardrail=answer_guardrail,
-            verbose=False
+            verbose=verbose
         )
         return rqa
 
