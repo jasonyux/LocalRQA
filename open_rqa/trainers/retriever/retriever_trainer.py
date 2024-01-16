@@ -8,11 +8,10 @@ from transformers.trainer_callback import TrainerCallback
 from torch.utils.data import Dataset
 from typing import Optional, List, Union, Dict, Any, Tuple, Type, Callable
 from open_rqa.schema.document import Document
-from open_rqa.trainers.retriever.model.wrappers import RetrievalModel
+from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
-from open_rqa.trainers.retriever.arguments import RetrievalQATrainingArguments
-from open_rqa.trainers.retriever.embeddings import embed_document_batch
-from open_rqa.trainers.utils import read_jsonl
+from open_rqa.trainers.retriever.arguments import DataArguments, ContrasitiveTrainingArgs, RetrievalQATrainingArguments
+from open_rqa.trainers.retriever.embeddings import embed_document_batch, LocalEmbeddings
 import torch
 import torch.nn as nn
 import random
@@ -25,9 +24,10 @@ class RetrieverTrainer(Trainer):
 	def __init__(
 		self,
 		model: Union[PreTrainedModel, nn.Module],
-		args: RetrievalQATrainingArguments,
+		training_args: RetrievalQATrainingArguments,
+		data_args: DataArguments,
+		contrastive_args: ContrasitiveTrainingArgs,
 		eval_config: EvaluatorConfig,
-		eval_wrapper_class: Type[RetrievalModel],
 		eval_search_kwargs: Dict[str, Any],
 		data_collator: Optional[DataCollator] = None,
 		train_dataset: Optional[Dataset] = None,
@@ -41,7 +41,7 @@ class RetrieverTrainer(Trainer):
 	):
 		super().__init__(
 			model=model,
-			args=args,
+			args=training_args,
 			data_collator=data_collator,
 			train_dataset=train_dataset,
 			eval_dataset=eval_dataset,
@@ -52,8 +52,9 @@ class RetrieverTrainer(Trainer):
 			optimizers=optimizers,
 			preprocess_logits_for_metrics=preprocess_logits_for_metrics
 		)
+		self.data_args = data_args
+		self.contrastive_args = contrastive_args
 		self.evaluator_config = eval_config
-		self.eval_wrapper_class = eval_wrapper_class
 		self.eval_search_kwargs = eval_search_kwargs
 		_supported_encoders = (BertModel, BertForMaskedLM)
 		if not isinstance(self.model, _supported_encoders):
@@ -61,15 +62,15 @@ class RetrieverTrainer(Trainer):
 		return
 
 	def compute_loss(self, model, inputs, return_outputs=False):
-		if model.additional_training_args.contrastive_loss == 'inbatch_contrastive':
+		if self.contrastive_args.contrastive_loss == 'inbatch_contrastive':
 			loss = self._inbatch_contrastive_w_hardneg(model, inputs, return_outputs)
 		else:
 			raise NotImplementedError
 		return loss
 	
 	def _inbatch_contrastive_w_hardneg(self, model, inputs, return_outputs=False):
-		hard_neg_ratio = model.additional_training_args.hard_neg_ratio
-		temperature = model.additional_training_args.temperature
+		hard_neg_ratio = self.contrastive_args.hard_neg_ratio
+		temperature = self.contrastive_args.temperature
 
 		bsz = len(inputs)
 		num_hard_negs = int(hard_neg_ratio * bsz)
@@ -109,13 +110,27 @@ class RetrieverTrainer(Trainer):
 			loss = self.compute_loss(model, inputs, return_outputs=False)
 		return loss, None, None
 	
+	def wrap_model_for_eval(
+		self,
+		documents,
+        embeddings,
+        index_path,
+	) -> FaissRetriever:
+		wrapped_model = FaissRetriever(
+			documents,
+        	embeddings=embeddings,
+        	index_path=index_path
+		)
+		return wrapped_model
+	
 	def _load_all_docs(self, document_path) -> List[Document]:
 		with open(document_path, "rb") as f:
 			documents = pickle.load(f)
 		return documents
 	
 	def _load_eval_data(self, eval_data_path) -> List[Dict]:
-		eval_data = read_jsonl(eval_data_path)
+		with jsonlines.open(eval_data_path) as fread:
+			eval_data = list(fread)
 		flattened_eval_data = []
 		for d in eval_data:
 			for q in d['questions']:
@@ -146,18 +161,19 @@ class RetrieverTrainer(Trainer):
 				metric_key_prefix=metric_key_prefix
 			)
 
-		loaded_documents = self._load_all_docs(self.args.documents_path)
-		loaded_eval_data = self._load_eval_data(self.args.eval_data_path)
+		loaded_documents = self._load_all_docs(self.data_args.full_dataset_file_path)
+		loaded_eval_data = self._load_eval_data(self.data_args.eval_file)
 
-		wrapped_model: RetrievalModel
-		wrapped_model = self.eval_wrapper_class(model, tokenizer=self.tokenizer, search_kwargs=self.eval_search_kwargs)
-		indices = wrapped_model.build_index(loaded_documents, format_str=self.args.retriever_format)
+		wrapped_model = self.wrap_model_for_eval(
+			loaded_documents, 
+			LocalEmbeddings(model, self.tokenizer), 
+			index_path=os.path.join(self.args.output_dir, f"step-{self.state.global_step}-index")
+		)
 		
 		evaluator = RetrieverEvaluator(
 			config=self.evaluator_config,
 			test_data=loaded_eval_data,
-			documents=loaded_documents,
-			indexes=indices
+			documents=loaded_documents
 		)
 		performance, predictions = evaluator.evaluate(wrapped_model, prefix=metric_key_prefix)
 		output.metrics.update(performance)

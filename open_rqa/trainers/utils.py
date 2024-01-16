@@ -49,12 +49,3 @@ def remove_optimizer_weights(save_dir):
                     print('removing', optimizer_file)
                     os.remove(optimizer_file)
     return
-
-
-def read_jsonl(file_path):
-    data = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            json_obj = json.loads(line)
-            data.append(json_obj)
-    return data

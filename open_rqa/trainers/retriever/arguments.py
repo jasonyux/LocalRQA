@@ -3,102 +3,45 @@ from dataclasses import dataclass, field
 from transformers import TrainingArguments
 from open_rqa.config.retriever_config import SEARCH_CONFIG
 
-class Options:
-    def __init__(self):
-        self.parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        self.initialize()
+@dataclass
+class ModelArguments:
+	model_name_or_path: str = field(
+		default="facebook/contriever-msmarco",
+		metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"},
+	)
 
-    def initialize(self):
-        self.parser.add_argument(
-		    "--exp_name", type=str, default="contriever_contrastive_ft",
-        )
-        self.parser.add_argument(
-            "--output_base_dir", type=str, default="result/model_checkpoints/contriever",
-            help="the final output dir will be output_base_dir/exp_name"
-        )
-        self.parser.add_argument(
-            "--do_train", action='store_true',
-        )
-        self.parser.add_argument(
-            "--do_eval", action='store_true',
-        )
-        self.parser.add_argument(
-            '--model_path', type=str, default='facebook/contriever-msmarco',
-        )
-        self.parser.add_argument(
-            '--model_type', type=str, default='bert',
-            choices=['bert', 'bert_mlm'],
-        )
-        self.parser.add_argument(
-            '--documents_path', type=str, 
-            default="assets/inventory/contrastive/eval_documents.pkl",  # 12k documents = a subset of the above
-            help="Path to the pickle file that stores List[Documents] representing the database to search from during eval/test",
-        )
-        self.parser.add_argument(
-            '--train_file', type=str, default='assets/inventory/contrastive/train.json',
-            help="Path to the json file that stores List[Dict] representing the training data. Fields include question, positive_ctxs, negative_ctxs, hard_negative_ctxs.",
-        )
-        self.parser.add_argument(
-            '--eval_file', type=str, default='assets/inventory/contrastive/eval.json',
-            help="Path to the json file that stores List[Dict] representing the eval data. Fields include question, positive_ctxs, negative_ctxs, hard_negative_ctxs.",
-        )
-        self.parser.add_argument(
-            '--search_algo', type=str, default='inner_product',
-            choices = list(SEARCH_CONFIG.keys()),
-        )
 
-        # trainer args
-        self.parser.add_argument(
-            '--lr', type=float, default=1e-4,
-        )
-        self.parser.add_argument(
-            '--max_steps', type=int, default=400,
-        )
-        self.parser.add_argument(
-            '--per_device_train_batch_size', type=int, default=256,
-        )
-        self.parser.add_argument(
-            '--per_device_eval_batch_size', type=int, default=8,
-        )
-        self.parser.add_argument(
-            '--no_gradient_checkpointing', action='store_true'
-        )
-        self.parser.add_argument(
-            "--logging_steps", type=int, default=10,
-        )
-        self.parser.add_argument(
-            "--eval_steps", type=int, default=50,
-        )
-        self.parser.add_argument(
-            "--save_steps", type=int, default=50,
-        )
-        self.parser.add_argument(
-            "--eval_bsz", type=int, default=4,
-        )
-        
-        # additional contrastive training args
-        self.parser.add_argument(
-            '--hard_neg_ratio', type=float, default=0.05,
-        )
-        self.parser.add_argument(
-            '--contrastive_loss', type=str, default='constructed_contrastive',
-            choices=['inbatch_contrastive', 'constructed_contrastive'],
-        )
-        self.parser.add_argument(
-            '--temperature', type=float, default=0.05,
-        )
+@dataclass
+class DataArguments:
+	"""
+	Arguments pertaining to what data we are going to input our model for training and eval.
+	"""
 
-    def parse(self):
-        args = self.parser.parse_args()
-        return args
-    
+	train_file: str = field(
+		default="data/training/databricks_new/train_w_qa.jsonl",
+		metadata={"help": "Path for cached train dataset"},
+	)
+	eval_file: str = field(
+		default='data/training/databricks_new/eval_w_qa.jsonl',
+		metadata={"help": "Path for cached eval dataset"},
+	)
+	test_file: str = field(
+		default='data/training/databricks_new/test_w_qa.jsonl',
+		metadata={"help": "Path for cached test dataset"},
+	)
+	full_dataset_file_path: str = field(
+		default='data/database/databricks/databricks_400.pkl',
+		metadata={"help": "Path for cached full dataset file"},
+	)
+
+
 @dataclass
 class ContrasitiveTrainingArgs:
 	hard_neg_ratio: float = field(
 		default=0.05,
 		metadata={"help": "Ratio of hard negatives to sample from the batch"},
 	)
-	contrastive_loss: str = field(
+	contrastive_loss: str = field(  # No Need, since this is the only option for now
 		default='inbatch_contrastive',
 		metadata={"help": "Type of contrastive loss to use"},
 	)
@@ -106,26 +49,102 @@ class ContrasitiveTrainingArgs:
 		default=0.05,
 		metadata={"help": "Temperature for contrastive loss"},
 	)
+	search_algo: str = field(
+		default='inner_product',
+		metadata={"help": "choose from 'cosine', 'inner_product', 'cosine_w_bm25', 'inner_product_w_bm25'"}
+	)
 
 
 @dataclass
 class RetrievalQATrainingArguments(TrainingArguments):
-	documents_path: str = field(
-		default="",
-		metadata={"help": "Path to the file which contains List[Document] for building a database index"},
+
+	"""
+	Arguments overriding some default TrainingArguments
+	"""
+	output_dir: str = field(
+		 default="result/model_checkpoints/contriever/contriever_contrastive_ft",
+		 metadata={"help": "The final output dir to save the model and prediction result"}
 	)
-	retriever_format: str = field(
-		default="title: {title} content: {text}",
-		metadata={"help": "Format string for building a database index"},
+	do_train: bool = field(
+		default=True,
+		metadata={"help": "Whether to run training."}
 	)
-	eval_data_path: str = field(
-		default="",
-		metadata={
-			"help": ("Path to the eval data JSONL file. It needs to contain fields including 'gold_docs' for retriever, "
-					"and 'gold_docs' and 'gold_answers' for E2E QA.")
-		},
+	remove_unused_columns: bool = field(
+		default=False, 
+		metadata={"help": "Remove columns not required by the model when using an nlp.Dataset."}
+	)
+	do_eval: bool = field(
+		default=True,
+		metadata={"help": "Whether to run eval on the dev set."}
+	)
+	learning_rate: float = field(
+		default=1e-5,
+		metadata={"help": "The peak learning rate for the scheduler."}
+	)
+	weight_decay: float = field(
+		default=0.01,
+		metadata={"help": "Weight decay to apply to the optimizer."}
+	)
+	max_steps: int = field(
+		 default=200,
+		 metadata={"help": "The total number of training steps to perform."}
+	)
+	per_device_train_batch_size: int = field(
+		default=256,
+		metadata={"help": "Batch size per GPU/TPU core/CPU for training."}
+	)
+	per_device_eval_batch_size: int = field(
+		default=8,
+		metadata={"help": "Batch size per GPU/TPU core/CPU for evaluation."}
+	)
+	warmup_ratio: float = field(
+		default=0.1,
+		metadata={"help": "Ratio of warmup steps to total steps."}
+	)
+	gradient_checkpointing: bool = field(
+		default=True,
+		metadata={"help": "Whether use gradient checkpointing"},
+	)
+	lr_scheduler_type: str = field(
+		default="cosine",
+		metadata={"help": "The scheduler type to use."}
+	)
+	logging_steps: int = field(
+		default=10,
+		metadata={"help": "Log every X updates steps."}
+	)
+	eval_steps: int = field(
+		default=100,
+		metadata={"help": "Run an evaluation every X steps."}
+	)
+	save_steps: int = field(
+		default=100,
+		metadata={"help": "Save checkpoint every X steps."}
+	)
+	report_to: str = field(
+		default="wandb",
+		metadata={"help": "Report to wandb or not"}
 	)
 	write_predictions: bool = field(
 		default=True,
 		metadata={"help": "Whether to save the predictions to a file"},
+	)
+	evaluation_strategy: str = field(
+		default="steps",
+		metadata={"help": "Evaluation strategy to adopt during training."}
+	)
+	metric_for_best_model: str = field(
+		default="eval_loss",
+		metadata={"help": "The metric to use to compare two different models."}
+	)
+	save_strategy: str = field(
+		default="steps",
+		metadata={"help": "Save strategy to adopt during training."}
+	)
+	save_total_limit: int = field(
+		default=1,
+		metadata={"help": "Limit the total amount of checkpoints, delete the older checkpoints in the output_dir."}
+	)
+	seed: int = field(
+		default=42,
 	)
