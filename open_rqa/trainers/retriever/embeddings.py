@@ -58,25 +58,17 @@ def embed_document_batch(tokenizer, model, batch, batch_size=8, to_list=False):
 
 
 class LocalEmbeddings(Embeddings):
-	def __init__(self, model, tokenizer, index_path = None, device = "cuda:0"):
+	def __init__(self, model, tokenizer, device = "cuda:0"):
 		model.eval()
 		model.to(device)
 		self.device = device
 		self.model = model
 		self.tokenizer = tokenizer
-		self.index_path = index_path
-
-		self.document_embeddings = None
 		return
 
 	def embed_documents(self, texts: List[str]) -> List[List[float]]:
-		if self.document_embeddings is not None:
-			return self.document_embeddings
-
-		embeddings = embed_document_batch(self.tokenizer, self.model, texts, batch_size=len(texts), to_list=True)
-		self.document_embeddings = embeddings
+		embeddings = embed_document_batch(self.tokenizer, self.model, texts, to_list=True)
 		return embeddings
 
 	def embed_query(self, text) -> List[float]:
-		batch_embedding = embed_document_batch(self.tokenizer, self.model, [text], batch_size=1, to_list=True)
-		return batch_embedding[0]
+		return self.embed_documents([text])[0]

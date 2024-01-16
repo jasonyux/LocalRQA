@@ -63,13 +63,11 @@ class Evaluator(ABC):
         self, 
         config: EvaluatorConfig,
         test_data: List[Dict], 
-        documents = None,
-        indexes = None
+        documents = None
     ):
         self.config = config
         self.test_data = test_data
         self.documents = documents
-        self.indexes = indexes
         return
     
     def _get_data_iterator(self):
@@ -105,8 +103,8 @@ class RetrieverEvaluator(Evaluator):
     def __init__(self,
         config: EvaluatorConfig,
         test_data: List[Dict],
-        documents = None, indexes = None):
-        super().__init__(config, test_data, documents, indexes)
+        documents = None):
+        super().__init__(config, test_data, documents)
         self.retr_metrics = self.init_metrics(metric_type="retr")
         self.e2e_metrics = self.init_metrics(metric_type="e2e")
         return
@@ -157,7 +155,7 @@ class RetrieverEvaluator(Evaluator):
             for metric in self.retr_metrics:
                 if isinstance(metric, MonitoringMetric):
                     metric.start()
-            retr_output: RetrievalOutput = wrapped_model.retrieve(batch, self.documents, self.indexes)
+            retr_output: RetrievalOutput = wrapped_model.retrieve(batch["question"])
             retrieved_docs: List[List[Document]] = retr_output.batch_source_documents
 
             gold_docs = []
