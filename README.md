@@ -248,3 +248,10 @@ G. Izacard, E. Grave [Leveraging Passage Retrieval with Generative Models for Op
       publisher = {arXiv},
 }
 ```
+
+## Serving
+
+by default, all server logs will go under `logs` folder. Make sure this folder exists before running the commands below.
+1. `python open_rqa/serve/controller.py`
+2. `export CUDA_VISIBLE_DEVICES=7 && python open_rqa/serve/model_worker.py --model-path lmsys/vicuna-7b-v1.5`
+3. `python open_rqa/serve/gradio_web_server.py`

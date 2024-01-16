@@ -4,6 +4,7 @@ evaluate
 sentencepiece
 deepspeed
 accelerate
+bitsandbytes
 openai
 tiktoken
 wandb
@@ -11,3 +12,5 @@ langchain
 llama-index
 rouge_score
 flash_attn>=2.1.0
+gradio==3.50.2
+gradio_client==0.6.1

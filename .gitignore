@@ -5,6 +5,7 @@ notebooks
 .vscode
 data
 wandb
+logs
 
 # environmental variables
 .envs 
