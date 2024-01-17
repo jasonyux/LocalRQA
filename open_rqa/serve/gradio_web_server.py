@@ -37,16 +37,15 @@ def violates_moderation(text):
         "Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]
     }
     text = text.replace("\n", "")
-    data = "{" + '"input": ' + f'"{text}"' + "}"
-    data = data.encode("utf-8")
+    json_data = {'input': text}
     try:
-        ret = requests.post(url, headers=headers, data=data, timeout=5)
+        # ret = requests.post(url, headers=headers, data=data, timeout=5)
+        ret = requests.post(url, headers=headers, json=json_data, timeout=5)
         flagged = ret.json()["results"][0]["flagged"]
     except requests.exceptions.RequestException as e:
         flagged = False
     except KeyError as e:
         flagged = False
-
     return flagged
 
 
@@ -127,33 +126,32 @@ def regenerate(state: GradioDialogueSession, request: gr.Request):
     # if type(prev_human_msg[1]) in (tuple, list):
     #     prev_human_msg[1] = (*prev_human_msg[1][:2], 'default')
     state.skip_next = False
-    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
 
 
 def clear_history(request: gr.Request):
     logger.info(f"clear_history. ip: {request.client.host}")
     state = default_conversation.clone()
-    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
 
 
 def add_text(state: GradioDialogueSession, text, request: gr.Request):
     logger.info(f"add_text. ip: {request.client.host}. len: {len(text)}")
     if len(text) <= 0:
         state.skip_next = True
-        return (state, state.to_gradio_chatbot(), "", None) + (no_change_btn,) * 5
+        return (state, state.to_gradio_chatbot(), "") + (no_change_btn,) * 6
     if args.moderate:
         flagged = violates_moderation(text)
         if flagged:
             state.skip_next = True
-            return (state, state.to_gradio_chatbot(), QA_MODERATION_MSG, None) + (
-                no_change_btn,) * 5
+            return (state, state.to_gradio_chatbot(), QA_MODERATION_MSG) + (no_change_btn,) * 6
 
     text = text[:1536]  # Hard cut-off
     state.add_user_message(text)
     # state.append_message(state.roles[0], text)
     # state.append_message(state.roles[1], None)
     state.skip_next = False
-    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
 
 
 def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, request: gr.Request):
@@ -163,7 +161,7 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
 
     if state.skip_next:
         # This generate call is skipped due to invalid inputs
-        yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 5
+        yield (state, state.to_gradio_chatbot()) + (no_change_btn,) * 6
         return
 
     if len(state._session.history) == 0:
@@ -200,15 +198,6 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
     {history_str} ASSISTANT:
     """.replace(" "*4, "").strip()
 
-    all_images = state.get_images(return_pil=True)
-    all_image_hash = [hashlib.md5(image.tobytes()).hexdigest() for image in all_images]
-    # for image, hash in zip(all_images, all_image_hash):
-    #     t = datetime.datetime.now()
-    #     filename = os.path.join(SERVER_LOGDIR, "serve_images", f"{t.year}-{t.month:02d}-{t.day:02d}", f"{hash}.jpg")
-    #     if not os.path.isfile(filename):
-    #         os.makedirs(os.path.dirname(filename), exist_ok=True)
-    #         image.save(filename)
-
     # Make requests
     pload = {
         "model": model_name,
@@ -217,15 +206,12 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
         "top_p": float(top_p),
         "max_new_tokens": min(int(max_new_tokens), 1536),
         "stop": state._session.sep_user if state._session.sep_style in [SeparatorStyle.SINGLE] else state._session.sep_sys,
-        "images": f'List of {len(state.get_images())} images: {all_image_hash}',
     }
     logger.info(f"==== request ====\n{pload}")
 
-    pload['images'] = state.get_images()
-
     state.add_system_message("▌", [])
     # state.messages[-1][-1] = "▌"
-    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
+    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 6
 
     try:
         # Stream output
@@ -240,7 +226,7 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
                     output = data["text"][len(prompt):].strip()
                     state._session.history[-1].message = output + "▌"
                     # state.messages[-1][-1] = output + "▌"
-                    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
+                    yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 6
                 else:
                     output = data["text"] + f" (error_code: {data['error_code']})"
                     state._session.history[-1].message = output
@@ -248,15 +234,13 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
                     yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn)
                     return
                 time.sleep(0.03)
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException as _:
         state._session.history[-1].message = SERVER_ERROR_MSG
-        # state.messages[-1][-1] = SERVER_ERROR_MSG
         yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn)
         return
 
     state._session.history[-1].message = state._session.history[-1].message[:-1]
-    # state.messages[-1][-1] = state.messages[-1][-1][:-1]
-    yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 5
+    yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 6
 
     finish_tstamp = time.time()
     logger.info(f"{output}")
@@ -269,7 +253,6 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
             "start": round(start_tstamp, 4),
             "finish": round(finish_tstamp, 4),
             "state": state.to_dict(),
-            "images": all_image_hash,
             "ip": request.client.host,
         }
         fout.write(json.dumps(data) + "\n")
@@ -299,7 +282,6 @@ block_css = """
     min-width: min(120px,100%);
 }
 
-.gradio-container {margin: 100 !important};
 """
 
 def build_demo(embed_mode):
@@ -360,7 +342,7 @@ def build_demo(embed_mode):
         url_params = gr.JSON(visible=False)
 
         # Register listeners
-        btn_list = [upvote_btn, downvote_btn, flag_btn, regenerate_btn, clear_btn]
+        btn_list = [upvote_btn, downvote_btn, flag_btn, regenerate_btn, clear_btn, old_submit_btn]
         upvote_btn.click(
             upvote_last_response,
             [state],
