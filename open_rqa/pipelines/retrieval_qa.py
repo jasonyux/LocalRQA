@@ -3,13 +3,17 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from open_rqa.schema.dialogue import DialogueSession, RQAOutput
 from open_rqa.guardrails.base import BaseAnswerGuardrail
 from open_rqa.retrievers.base import BaseRetriever
+from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.qa_llms.base import BaseQAModel
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel, HuggingFaceFiDQAModel
 from open_rqa.qa_llms.openai import OpenAIQAModel
 from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.pipelines.base import RQAPipeline
 from open_rqa.pipelines.prompts import REPHRASE_QUESTION_PROMPT
+from open_rqa.constants import OPENAI_MODEL_NAMES
+from langchain.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 import logging
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -151,6 +155,7 @@ class SimpleRQA(BaseRQA):
         qa_model: Optional[AutoModelForCausalLM] = None,
         qa_tokenizer: Optional[AutoTokenizer] = None,
         qa_model_name_or_path: str = "",
+        qa_model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
         verbose: bool = False,
@@ -162,6 +167,7 @@ class SimpleRQA(BaseRQA):
             qa_model (Optional[AutoModelForCausalLM], optional): _description_. Defaults to None.
             qa_tokenizer (Optional[AutoTokenizer], optional): _description_. Defaults to None.
             qa_model_name_or_path (str, optional): _description_. Defaults to "".
+            qa_model_init_kwargs (dict, optional): _description_. Defaults to {}.
             user_prefix (str, optional): _description_. Defaults to "USER".
             assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
             verbose (bool, optional): _description_. Defaults to False.
@@ -173,6 +179,7 @@ class SimpleRQA(BaseRQA):
             model=qa_model,
             tokenizer=qa_tokenizer,
             model_name_or_path=qa_model_name_or_path,
+            model_init_kwargs=qa_model_init_kwargs,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
         )
@@ -192,6 +199,7 @@ class SimpleRQA(BaseRQA):
         qa_model: Optional[AutoModelForCausalLM] = None,
         qa_tokenizer: Optional[AutoTokenizer] = None,
         qa_model_name_or_path: str = "",
+        qa_model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
         verbose: bool = False,
@@ -214,6 +222,7 @@ class SimpleRQA(BaseRQA):
             model=qa_model,
             tokenizer=qa_tokenizer,
             model_name_or_path=qa_model_name_or_path,
+            model_init_kwargs=qa_model_init_kwargs,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
         )
@@ -262,6 +271,69 @@ class SimpleRQA(BaseRQA):
             verbose=verbose
         )
         return rqa
+
+    @classmethod
+    def from_scratch(
+        cls,
+        database_path: Optional[str] = None,
+        document_path: Optional[str] = None,
+        index_path: str = "./index",
+        embedding_model_name_or_path = 'text-embedding-ada-002',
+        qa_model_name_or_path: str = "lmsys/vicuna-7b-v1.5",
+        qa_is_fid: bool = False,
+        qa_model_init_kwargs: Optional[dict] = None,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
+    ):
+        ## init embedding model
+        if embedding_model_name_or_path in OPENAI_MODEL_NAMES:
+            embedding_model = OpenAIEmbeddings(
+                model=embedding_model_name_or_path,
+                organization=os.environ['OPENAI_ORGANIZATION']
+            )
+        else:
+            embedding_model = HuggingFaceEmbeddings(
+                model_name=embedding_model_name_or_path
+            )
+        logger.info(f"Initializing retriever with {embedding_model_name_or_path}")
+        retriever = FaissRetriever.from_disk(
+            database_path=database_path,
+            document_path=document_path,
+            index_path=index_path,
+            embeddings=embedding_model,
+        )
+
+        ### init qa model
+        logger.info(f"Initializing qa model with {qa_model_name_or_path}")
+        if qa_model_name_or_path in OPENAI_MODEL_NAMES:
+            return cls.from_openai(
+                retriever=retriever,
+                qa_model_name=qa_model_name_or_path,
+                user_prefix=user_prefix,
+                assistant_prefix=assistant_prefix,
+                verbose=verbose,
+            )
+        else:
+            if qa_is_fid:
+                return cls.from_huggingface_fid(
+                    retriever=retriever,
+                    qa_model_name_or_path=qa_model_name_or_path,
+                    qa_model_init_kwargs=qa_model_init_kwargs,
+                    user_prefix=user_prefix,
+                    assistant_prefix=assistant_prefix,
+                    verbose=verbose,
+                )
+            else:
+                return cls.from_huggingface(
+                    retriever=retriever,
+                    qa_model_name_or_path=qa_model_name_or_path,
+                    qa_model_init_kwargs=qa_model_init_kwargs,
+                    user_prefix=user_prefix,
+                    assistant_prefix=assistant_prefix,
+                    verbose=verbose,
+                )
+        return
 
 
 class AutoRQA(BaseRQA):

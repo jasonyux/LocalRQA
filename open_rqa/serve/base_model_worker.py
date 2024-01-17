@@ -169,6 +169,9 @@ class BaseModelWorker:
     def generate_gate(self, params):
         raise NotImplementedError
 
+    def retrieve(self, params):
+        raise NotImplementedError
+
 
 def release_worker_semaphore():
     worker.semaphore.release()
@@ -200,6 +203,15 @@ async def api_generate(request: Request):
     params = await request.json()
     await acquire_worker_semaphore()
     output = await asyncio.to_thread(worker.generate_gate, params)
+    release_worker_semaphore()
+    return JSONResponse(output)
+
+
+@app.post("/worker_retrieve")
+async def api_retrieval(request: Request):
+    params = await request.json()
+    await acquire_worker_semaphore()
+    output = await asyncio.to_thread(worker.retrieve, params)
     release_worker_semaphore()
     return JSONResponse(output)
 

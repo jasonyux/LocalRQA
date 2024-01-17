@@ -8,11 +8,11 @@ import uuid
 import uvicorn
 import torch
 from typing import Optional
-from transformers import set_seed
-from transformers import TextIteratorStreamer
+from transformers import set_seed, BitsAndBytesConfig, TextIteratorStreamer
 from threading import Thread
 from open_rqa.constants import ErrorCode, SERVER_ERROR_MSG
 from open_rqa.serve.base_model_worker import BaseModelWorker, app
+from open_rqa.serve.gradio_rqa import GradioSimpleRQA
 from open_rqa.utils import init_logger
 
 
@@ -20,7 +20,6 @@ worker_id = str(uuid.uuid4())[:8]
 logger = init_logger(filename=f"logs/model_worker_{worker_id}.log")
 
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 def load_model(
     model_name_or_path,
     load_8bit=False,
@@ -47,10 +46,24 @@ def load_model(
     else:
         kwargs['torch_dtype'] = torch.float16
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=False)
-    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, low_cpu_mem_usage=True, **kwargs)
-    context_len = 2048
-    return model, tokenizer, context_len
+    # tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=False)
+    # model = AutoModelForCausalLM.from_pretrained(model_name_or_path, low_cpu_mem_usage=True, **kwargs)
+    # context_len = 2048
+
+    kwargs['low_cpu_mem_usage'] = True
+    rqa = GradioSimpleRQA.from_scratch(
+        document_path="data/database/databricks/databricks_400.pkl",
+        index_path="data/database/databricks/databricks_400_e5-base-v2",
+        embedding_model_name_or_path="intfloat/e5-base-v2",
+        qa_model_name_or_path=model_name_or_path,
+        qa_model_init_kwargs=kwargs,
+        qa_is_fid=False,
+        verbose=True,
+    )
+    model = rqa.get_model()
+    tokenizer = rqa.get_tokenizer()
+    context_len = 4096  # see max_position_embeddings in model config
+    return rqa, model, tokenizer, context_len
 
 
 def add_model_args(parser):
@@ -106,7 +119,7 @@ class ModelWorker(BaseModelWorker):
         )
 
         logger.info(f"Loading the model {self.model_names} on worker {worker_id} ...")
-        self.model, self.tokenizer, self.context_len = load_model(
+        self.rqa, self.model, self.tokenizer, self.context_len = load_model(
             model_path,
             device=device,
             load_8bit=load_8bit,
@@ -123,13 +136,23 @@ class ModelWorker(BaseModelWorker):
         if not no_register:
             self.init_heart_beat()
 
+    def retrieve(self, params):
+        rephrased_question = self.rqa.rephrase_question_for_retrieval(**params["model_input"])
+        return {
+            "documents": [
+                {'page_content': 'text 1', 'fmt_content': 'DBFS is databricks file system.', 'metadata': {}},
+                {'page_content': 'text 2', 'fmt_content': 'Databricks is a moving company that works on moving bricks.', 'metadata': {}},
+            ],
+            "rephrased_question": rephrased_question,
+        }
+
 
     @torch.inference_mode()
     def generate_stream(self, params):
         tokenizer, model = self.tokenizer, self.model
 
-        prompt = params["prompt"]
-        ori_prompt = prompt
+        prompt = self.rqa.prepare_prompt_for_generation(**params["model_input"])
+        logger.info(f'generate_stream received: {params}\ngenerate_stream fmt prompt: {prompt}')
 
         temperature = float(params.get("temperature", 1.0))
         top_p = float(params.get("top_p", 1.0))
@@ -145,7 +168,7 @@ class ModelWorker(BaseModelWorker):
         max_new_tokens = min(max_new_tokens, max_context_length - input_ids.shape[-1])
 
         if max_new_tokens < 1:
-            yield json.dumps({"text": ori_prompt + "Exceeds max token length. Please start a new conversation, thanks.", "error_code": 0}).encode() + b"\0"
+            yield json.dumps({"text": prompt + "Exceeds max token length. Please start a new conversation, thanks.", "error_code": 0}).encode() + b"\0"
             return
 
         thread = Thread(target=model.generate, kwargs=dict(
@@ -159,7 +182,7 @@ class ModelWorker(BaseModelWorker):
         ))
         thread.start()
 
-        generated_text = ori_prompt
+        generated_text = ''
         for new_text in streamer:
             generated_text += new_text
             if generated_text.endswith(stop_str):
@@ -176,18 +199,6 @@ class ModelWorker(BaseModelWorker):
         try:
             if self.seed is not None:
                 set_seed(self.seed)
-            # for output in self.generate_stream_func(params):
-            #     ret = {
-            #         "text": output["text"],
-            #         "error_code": 0,
-            #     }
-            #     if "usage" in output:
-            #         ret["usage"] = output["usage"]
-            #     if "finish_reason" in output:
-            #         ret["finish_reason"] = output["finish_reason"]
-            #     if "logprobs" in output:
-            #         ret["logprobs"] = output["logprobs"]
-            #     yield json.dumps(ret).encode() + b"\0"
             for x in self.generate_stream(params):
                 yield x
         except torch.cuda.OutOfMemoryError as e:
@@ -224,9 +235,6 @@ def create_model_worker():
         type=lambda s: s.split(","),
         help="Optional display comma separated names",
     )
-    # parser.add_argument(
-    #     "--conv-template", type=str, default=None, help="Conversation prompt template."
-    # )
     parser.add_argument("--embed-in-truncate", action="store_true")
     parser.add_argument(
         "--limit-worker-concurrency",
@@ -254,13 +262,6 @@ def create_model_worker():
     )
     args = parser.parse_args()
     logger.info(f"args: {args}")
-
-    # if args.gpus:
-    #     if len(args.gpus.split(",")) < args.num_gpus:
-    #         raise ValueError(
-    #             f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!"
-    #         )
-    #     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
     worker = ModelWorker(
         args.controller_address,

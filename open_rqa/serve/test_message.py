@@ -3,7 +3,7 @@ import json
 
 import requests
 
-from open_rqa.serve.conversation import default_conversation
+from open_rqa.serve.gradio_dialogue import default_conversation
 
 
 def main():

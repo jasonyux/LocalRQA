@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional
 from open_rqa.base import Component
@@ -63,6 +63,23 @@ class BaseQAModel(Component):
 
         Returns:
             GenerationOutput: _description_
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _prepare_question_w_docs(self, question: str, docs: List[Document], chat_history_str: str) -> List[str]:
+        """format question, source documents, and chat history into a prompt for generation. Required for GRADIO demo
+
+        Args:
+            question (str): _description_
+            docs (List[Document]): _description_
+            chat_history_str (str): _description_
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            List[str]: _description_
         """
         raise NotImplementedError
 

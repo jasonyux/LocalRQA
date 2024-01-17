@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from open_rqa.schema.dialogue import DialogueSession, SeparatorStyle
 
 
@@ -6,6 +6,7 @@ from open_rqa.schema.dialogue import DialogueSession, SeparatorStyle
 class GradioDialogueSession:
     """A class that keeps all conversation history."""
     _session: DialogueSession
+    _tmp_data: dict = field(default_factory=dict)  # placeholder for intermin http results
     skip_next: bool = False
 
     def get_prompt(self):

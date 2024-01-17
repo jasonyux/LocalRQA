@@ -251,6 +251,20 @@ class Controller:
         except requests.exceptions.RequestException as e:
             yield self.handle_worker_timeout(worker_addr)
 
+    def worker_api_retrieval(self, params):
+        worker_addr = self.get_worker_address(params["model"])
+        if not worker_addr:
+            return self.handle_no_worker(params)
+
+        try:
+            ### WorkerModel listens to this, does retrieval, and returns output
+            response = requests.post(
+                worker_addr + "/worker_retrieve", json=params, timeout=5
+            )
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return self.handle_worker_timeout(worker_addr)
+
 
 app = FastAPI()
 
@@ -293,6 +307,13 @@ async def worker_api_generate_stream(request: Request):
     params = await request.json()
     generator = controller.worker_api_generate_stream(params)
     return StreamingResponse(generator)
+
+
+@app.post("/worker_retrieve")
+async def worker_api_retrieval(request: Request):
+    params = await request.json()
+    retrieval_output = controller.worker_api_retrieval(params)
+    return retrieval_output
 
 
 @app.post("/worker_get_status")

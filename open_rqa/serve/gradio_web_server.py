@@ -7,7 +7,8 @@ import time
 import gradio as gr
 import requests
 
-from open_rqa.serve.conversation import default_conversation, conv_templates, SeparatorStyle, GradioDialogueSession
+from open_rqa.schema.document import Document
+from open_rqa.serve.gradio_dialogue import default_conversation, conv_templates, SeparatorStyle, GradioDialogueSession
 from open_rqa.constants import SERVER_LOGDIR, QA_MODERATION_MSG, SERVER_ERROR_MSG
 from open_rqa.utils import init_logger
 import hashlib
@@ -132,7 +133,7 @@ def regenerate(state: GradioDialogueSession, request: gr.Request):
 def clear_history(request: gr.Request):
     logger.info(f"clear_history. ip: {request.client.host}")
     state = default_conversation.clone()
-    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
+    return (state, state.to_gradio_chatbot(), "", []) + (disable_btn,) * 5 + (enable_btn,)
 
 
 def add_text(state: GradioDialogueSession, text, request: gr.Request):
@@ -154,8 +155,72 @@ def add_text(state: GradioDialogueSession, text, request: gr.Request):
     return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
 
 
-def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, request: gr.Request):
-    logger.info(f"http_bot. ip: {request.client.host}")
+def http_retrieve(state: GradioDialogueSession, request: gr.Request):
+    logger.info(f"http_retrieve. ip: {request.client.host}")
+    if state.skip_next:
+        # This generate call is skipped due to invalid inputs (e.g., empty inputs)
+        raw_contents = [doc.fmt_content for doc in state._tmp_data.get('retrieved_docs', [])]
+        return state, raw_contents
+
+    # import random
+    # start_tstamp = time.time()
+    # state._tmp_data['retrieved_docs'] = [
+    #     Document(page_content='text a', fmt_content='- DBFS is databricks file system.', metadata={}),
+    #     Document(page_content='text b', fmt_content='* Databricks is a moving company that works on moving bricks.', metadata={}),
+    # ]
+    # finish_tstamp = time.time()
+    # state._tmp_data['r_start'] = start_tstamp
+    # state._tmp_data['r_finish'] = finish_tstamp
+
+    # ##
+    # raw_contents = [doc.fmt_content for doc in state._tmp_data['retrieved_docs']]
+    # random.shuffle(raw_contents)
+
+    start_tstamp = time.time()
+    model_name = 'vicuna-7b-v1.5'
+
+    # Query worker address
+    controller_url = args.controller_url
+    ret = requests.post(
+        controller_url + "/get_worker_address",
+        json={"model": model_name}
+    )
+    worker_addr = ret.json()["address"]
+    logger.info(f"model_name: {model_name}, worker_addr: {worker_addr}")
+    try:
+        # Make requests
+        _session = state._session.clone()
+        _session.history.pop()  # remove the last user message from the history, as its passed in separately
+        pload = {
+            "model_input": {
+                "question": state._session.history[-1].message,
+                "history": _session.to_list(),
+            },
+            "k": 4,
+        }
+        response = requests.post(
+            worker_addr + "/worker_retrieve",
+            headers=headers, json=pload, stream=False, timeout=10
+        )
+        data = response.json()
+        documents = data["documents"]
+        rephrased_question = data["rephrased_question"]
+        fmt_documents = [Document.from_dict(doc) for doc in documents]
+        raw_contents = [doc.fmt_content for doc in fmt_documents]
+
+        state._tmp_data['retrieved_docs'] = fmt_documents
+        state._tmp_data['rephrased_question'] = rephrased_question
+        finish_tstamp = time.time()
+        state._tmp_data['r_start'] = start_tstamp
+        state._tmp_data['r_finish'] = finish_tstamp
+    except requests.exceptions.RequestException as _:
+        state.skip_next = True
+        raw_contents = [SERVER_ERROR_MSG]
+    return state, raw_contents
+
+
+def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_tokens, request: gr.Request):
+    logger.info(f"http_generate. ip: {request.client.host}")
     start_tstamp = time.time()
     model_name = 'vicuna-7b-v1.5'
 
@@ -190,18 +255,26 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
         return
 
     # Construct prompt
-    history_str = state.get_prompt()  # prompt formatting doine in RQA pipeline
-    prompt = f"""
-    This is a chat between a curious user and an artificial intelligence assistant.
-    The assistant gives helpful, detailed, and polite answers using documents from the following context.
-    ----------------
-    {history_str} ASSISTANT:
-    """.replace(" "*4, "").strip()
+    # history_str = state.get_prompt()  # prompt formatting doine in RQA pipeline
+    # retrieved_docs = state._tmp_data['retrieved_docs']
+    # prompt = f"""
+    # This is a chat between a curious user and an artificial intelligence assistant.
+    # The assistant gives helpful, detailed, and polite answers using documents from the following context.
+    # ----------------
+    # {history_str} ASSISTANT:
+    # """.replace(" "*4, "").strip()
 
     # Make requests
+    retrieved_docs = state._tmp_data['retrieved_docs']
+    _session = state._session.clone()
+    _session.history.pop()  # remove the last user message from the history, as its passed in separately
     pload = {
         "model": model_name,
-        "prompt": prompt,
+        "model_input": {
+            "retrieved_docs": [doc.to_dict() for doc in retrieved_docs],
+            "question": state._session.history[-1].message,
+            "history": _session.to_list(),
+        },
         "temperature": float(temperature),
         "top_p": float(top_p),
         "max_new_tokens": min(int(max_new_tokens), 1536),
@@ -209,8 +282,8 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
     }
     logger.info(f"==== request ====\n{pload}")
 
-    state.add_system_message("▌", [])
-    # state.messages[-1][-1] = "▌"
+    state.add_system_message("▌", retrieved_docs)
+    
     yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 6
 
     try:
@@ -223,7 +296,7 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
             if chunk:
                 data = json.loads(chunk.decode())
                 if data["error_code"] == 0:
-                    output = data["text"][len(prompt):].strip()
+                    output = data["text"].strip()
                     state._session.history[-1].message = output + "▌"
                     # state.messages[-1][-1] = output + "▌"
                     yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 6
@@ -231,12 +304,12 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
                     output = data["text"] + f" (error_code: {data['error_code']})"
                     state._session.history[-1].message = output
                     # state.messages[-1][-1] = output
-                    yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn)
+                    yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn, enable_btn)
                     return
                 time.sleep(0.03)
     except requests.exceptions.RequestException as _:
         state._session.history[-1].message = SERVER_ERROR_MSG
-        yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn)
+        yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn, enable_btn)
         return
 
     state._session.history[-1].message = state._session.history[-1].message[:-1]
@@ -252,6 +325,8 @@ def http_bot(state: GradioDialogueSession, temperature, top_p, max_new_tokens, r
             "model": model_name,
             "start": round(start_tstamp, 4),
             "finish": round(finish_tstamp, 4),
+            "r_start": state._tmp_data['r_start'],
+            "r_finish": state._tmp_data['r_finish'],
             "state": state.to_dict(),
             "ip": request.client.host,
         }
@@ -368,7 +443,11 @@ def build_demo(embed_mode):
             [state, chatbot, textbox] + btn_list,
             queue=False
         ).then(
-            http_bot,
+            http_retrieve,
+            [state],
+            [state, retrieved_doc_df]
+        ).then(
+            http_generate,
             [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
         )
@@ -376,7 +455,7 @@ def build_demo(embed_mode):
         clear_btn.click(
             clear_history,
             None,
-            [state, chatbot, textbox] + btn_list,
+            [state, chatbot, textbox, retrieved_doc_df] + btn_list,
             queue=False
         )
 
@@ -386,7 +465,11 @@ def build_demo(embed_mode):
             [state, chatbot, textbox] + btn_list,
             queue=False
         ).then(
-            http_bot,
+            http_retrieve,
+            [state],
+            [state, retrieved_doc_df]
+        ).then(
+            http_generate,
             [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
         )
@@ -397,7 +480,11 @@ def build_demo(embed_mode):
             [state, chatbot, textbox] + btn_list,
             queue=False
         ).then(
-            http_bot,
+            http_retrieve,
+            [state],
+            [state, retrieved_doc_df]
+        ).then(
+            http_generate,
             [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
         )

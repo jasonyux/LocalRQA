@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain.storage import (
     LocalFileStore,
@@ -8,6 +8,12 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from open_rqa.schema.document import Document
 from open_rqa.retrievers.base import BaseRetriever, RetrievalOutput
 from copy import deepcopy
+import logging
+import pickle
+import os
+
+
+logger = logging.getLogger(__name__)
 
 
 class FaissRetriever(BaseRetriever):
@@ -94,3 +100,28 @@ class FaissRetriever(BaseRetriever):
             batch_source_documents=all_docs
         )
         return output
+
+    @staticmethod
+    def from_disk(
+        database_path: Optional[str] = None,
+        document_path: Optional[str] = None,
+        index_path: str = "./index",
+        embeddings = OpenAIEmbeddings(model='text-embedding-ada-002')
+    ):
+        if database_path is not None:
+            # assume the following filenames
+            document_path = os.path.join(database_path, "documents.pkl")
+            index_path = os.path.join(database_path, "index")
+        elif document_path is None:
+            raise ValueError("both database_path and document_path cannot be None")
+        
+        logger.info(f"Loaded documents from {document_path}")
+        with open(document_path, 'rb') as fread:
+            documents = pickle.load(fread)
+        logger.info(f"Loaded {len(documents)} documents")
+
+        return FaissRetriever(
+            texts=documents,
+            embeddings=embeddings,
+            index_path=index_path
+        )

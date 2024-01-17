@@ -11,11 +11,16 @@ from open_rqa.retrievers.base import BaseRetriever, DummyRetriever
 from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.text_loaders.langchain_text_loader import LangChainTextLoader, DirectoryTextLoader
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
+from open_rqa.utils import init_logger
+import logging
 import os
+import torch
 
 
+logger: logging.Logger
 
-if __name__ == "__main__":
+
+def full():
     ###### Manual usage of RQA ######
     # a quick way to load data into retriever
     # documents = DirectoryTextLoader("/local2/data/shared/rqa/data").load_data()
@@ -67,7 +72,31 @@ if __name__ == "__main__":
         batch_dialogue_session=[DialogueSession()],
     )
     print(response.batch_answers[0])
+    return
 
+
+def quickstart():
+    qa_model_init_args = {
+        'torch_dtype': torch.float16,
+    }
+    rqa = SimpleRQA.from_scratch(
+        document_path="data/database/databricks/databricks_400.pkl",
+        index_path="data/database/databricks/databricks_400_e5-base-v2",
+        embedding_model_name_or_path="intfloat/e5-base-v2",
+        qa_model_name_or_path="lmsys/vicuna-7b-v1.5",
+        qa_model_init_kwargs=qa_model_init_args,
+        qa_is_fid=False,
+        verbose=True,
+    )
+    response = rqa.qa(
+        batch_questions=['What is DBFS?'],
+        batch_dialogue_session=[DialogueSession()],
+    )
+    print(response.batch_answers[0])
+    return
+
+
+def auto():
     # ##### Auto usage of RQA ######
     # documents = SimpleDirectoryReader("data").load_data()
     # rqa = AutoRQA(
@@ -81,3 +110,11 @@ if __name__ == "__main__":
     #     batch_dialogue_session=[DialogueSession()],
     # )
     # print(response)
+    return
+
+if __name__ == "__main__":
+    logger = init_logger()
+
+    # full()
+    quickstart()
+    auto()

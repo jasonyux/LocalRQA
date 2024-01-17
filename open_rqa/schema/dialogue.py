@@ -142,7 +142,7 @@ class DialogueSession:
             dialogue_dict = {
                 'speaker': dialogue_turn.speaker,
                 'message': dialogue_turn.message,
-                'source_documents': dialogue_turn.source_documents
+                'source_documents': [doc.to_dict() for doc in dialogue_turn.source_documents]
             }
             dialogue_list.append(dialogue_dict)
         return dialogue_list
