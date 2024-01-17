@@ -3,7 +3,7 @@ import json
 
 import requests
 
-from open_rqa.conversation import default_conversation
+from open_rqa.serve.conversation import default_conversation
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     if worker_addr == "":
         return
 
-    conv = default_conversation.copy()
+    conv = default_conversation.clone()
     conv.append_message(conv.roles[0], args.message)
     prompt = conv.get_prompt()
 

@@ -91,3 +91,16 @@ class Document:
             page_content=self.page_content,
             metadata=metadata
         )
+
+    def clone(self):
+        """clone the Document object
+
+        Returns:
+            Document: cloned Document object
+        """
+        cloned_document = Document(
+            page_content=self.page_content,
+            fmt_content=self.fmt_content,
+            metadata=deepcopy(self.metadata)
+        )
+        return cloned_document

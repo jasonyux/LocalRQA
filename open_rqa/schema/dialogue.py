@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 from open_rqa.schema.document import Document
+from enum import auto, Enum
 
 
 @dataclass
@@ -51,6 +52,25 @@ class DialogueTurn:
         }
         return dialogue_turn_dict
 
+    def clone(self):
+        """clone the DialogueTurn object
+
+        Returns:
+            DialogueTurn: cloned DialogueTurn object
+        """
+        cloned_dialogue_turn = DialogueTurn(
+            speaker=self.speaker,
+            message=self.message,
+            source_documents=[doc.clone() for doc in self.source_documents]
+        )
+        return cloned_dialogue_turn
+
+
+class SeparatorStyle(Enum):
+    """Different separator style."""
+    SINGLE = auto()
+    TWO = auto()
+
 
 @dataclass
 class DialogueSession:
@@ -62,6 +82,10 @@ class DialogueSession:
     user_prefix: str = "USER"
     assistant_prefix: str = "ASSISTANT"
     history: List[DialogueTurn] = field(default_factory=list)
+    ###
+    sep_style: SeparatorStyle = SeparatorStyle.TWO
+    sep_user: str = " "
+    sep_sys: str = "</s>"
 
     def to_string(self) -> str:
         """format dialogue history into a string
@@ -69,13 +93,20 @@ class DialogueSession:
         Returns:
             str: formatted dialogue history
         """
-        # add </s> to the end of system messages
+        # TODO: assumes the role.lower() of system will be ["system", "assistant"]
         history = ""
-        for turn in self.history:
-            if turn.speaker.lower() in ["system", "assistant"]:
-                history += f"{turn.to_string()}</s>"
-            else:
-                history += f"{turn.to_string()} "
+        if self.sep_style == SeparatorStyle.SINGLE:
+            # always use sep_user
+            for turn in self.history:
+                history += f"{turn.to_string()}" + self.sep_user
+        elif self.sep_style == SeparatorStyle.TWO:
+            for turn in self.history:
+                if turn.speaker.lower() in ["system", "assistant"]:
+                    history += f"{turn.to_string()}" + self.sep_sys
+                else:
+                    history += f"{turn.to_string()}" + self.sep_user
+        else:
+            raise ValueError(f"Invalid style: {self.sep_style}")
         return history
 
     def add_user_message(self, user_message: str):
@@ -136,6 +167,24 @@ class DialogueSession:
         if len(dialogue_session.history) > 1:
             dialogue_session.assistant_prefix = dialogue_session.history[1].speaker
         return dialogue_session
+
+    def clone(self):
+        """clone the DialogueSession object
+
+        Returns:
+            DialogueSession: cloned DialogueSession object
+        """
+        cloned_history = [turn.clone() for turn in self.history]
+        cloned_dialogue_session = DialogueSession(
+            user_prefix=self.user_prefix,
+            assistant_prefix=self.assistant_prefix,
+            history=cloned_history,
+            sep_style=self.sep_style,
+            sep_user=self.sep_user,
+            sep_sys=self.sep_sys
+        )
+        return cloned_dialogue_session
+
 
 
 @dataclass
