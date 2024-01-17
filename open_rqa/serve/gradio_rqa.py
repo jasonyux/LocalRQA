@@ -26,7 +26,7 @@ class GradioRQA(ABC):
         return question  # noop
     
     @abstractmethod
-    def retrieve(self) -> RetrievalOutput:
+    def retrieve(self, question: str) -> RetrievalOutput:
         raise NotImplementedError
     
     @abstractmethod
@@ -60,13 +60,11 @@ class GradioSimpleRQA(GradioRQA):
         )[0]
         return rephrased_question
 
-    def retrieve(self) -> RetrievalOutput:
-        return RetrievalOutput(
-            batch_source_documents = [[
-                Document(page_content='text a', fmt_content='DBFS is databricks file system.', metadata={}),
-                Document(page_content='text b', fmt_content='Databricks is a moving company that works on moving bricks.', metadata={}),
-            ]]
+    def retrieve(self, question: str) -> RetrievalOutput:
+        output = self.rqa.retriever.retrieve(
+            batch_questions=[question]
         )
+        return output
 
     def get_model(self):
         return self.rqa.qa_llm.model

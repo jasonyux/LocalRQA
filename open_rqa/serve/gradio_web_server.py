@@ -27,6 +27,7 @@ priority = {
     "koala-13b": "aaaaaab",
 }
 
+NUM_DOC_TO_RETRIEVE = 4
 
 def violates_moderation(text):
     """
@@ -88,13 +89,13 @@ def load_demo_refresh_model_list(request: gr.Request):
     return state
 
 
-def vote_last_response(state, vote_type, request: gr.Request):
+def vote_last_response(state: GradioDialogueSession, vote_type, request: gr.Request):
     with open(get_conv_log_filename(), "a") as fout:
         data = {
             "tstamp": round(time.time(), 4),
             "type": vote_type,
             "model": 'vicuna-7b-v1.5',
-            "state": state.dict(),
+            "state": state.to_dict(),
             "ip": request.client.host,
         }
         fout.write(json.dumps(data) + "\n")
@@ -133,7 +134,11 @@ def regenerate(state: GradioDialogueSession, request: gr.Request):
 def clear_history(request: gr.Request):
     logger.info(f"clear_history. ip: {request.client.host}")
     state = default_conversation.clone()
-    return (state, state.to_gradio_chatbot(), "", []) + (disable_btn,) * 5 + (enable_btn,)
+    retrieved_docs = []
+    for i in range(NUM_DOC_TO_RETRIEVE):
+        t = gr.Textbox(show_label=False, placeholder="(empty)", info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+        retrieved_docs.append(t)
+    return (state, state.to_gradio_chatbot(), "") + tuple(retrieved_docs) + (disable_btn,) * 5 + (enable_btn,)
 
 
 def add_text(state: GradioDialogueSession, text, request: gr.Request):
@@ -160,21 +165,11 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
     if state.skip_next:
         # This generate call is skipped due to invalid inputs (e.g., empty inputs)
         raw_contents = [doc.fmt_content for doc in state._tmp_data.get('retrieved_docs', [])]
-        return state, raw_contents
-
-    # import random
-    # start_tstamp = time.time()
-    # state._tmp_data['retrieved_docs'] = [
-    #     Document(page_content='text a', fmt_content='- DBFS is databricks file system.', metadata={}),
-    #     Document(page_content='text b', fmt_content='* Databricks is a moving company that works on moving bricks.', metadata={}),
-    # ]
-    # finish_tstamp = time.time()
-    # state._tmp_data['r_start'] = start_tstamp
-    # state._tmp_data['r_finish'] = finish_tstamp
-
-    # ##
-    # raw_contents = [doc.fmt_content for doc in state._tmp_data['retrieved_docs']]
-    # random.shuffle(raw_contents)
+        tboxes = []
+        for i, content in enumerate(raw_contents):
+            t = gr.Textbox(show_label=False, value=content, info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+            tboxes.append(t)
+        return tuple([state] + tboxes)
 
     start_tstamp = time.time()
     model_name = 'vicuna-7b-v1.5'
@@ -216,7 +211,13 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
     except requests.exceptions.RequestException as _:
         state.skip_next = True
         raw_contents = [SERVER_ERROR_MSG]
-    return state, raw_contents
+
+    tboxes = []
+    for i, content in enumerate(raw_contents):
+        # t = gr.Textbox(show_label=False, value=content)
+        t = gr.Textbox(show_label=False, value=content, info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+        tboxes.append(t)
+    return tuple([state] + tboxes)
 
 
 def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_tokens, request: gr.Request):
@@ -334,7 +335,7 @@ def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_toke
 
 title_markdown = ("""
 # LocalRQA
-[[Project Page](https://llava-vl.github.io)] [[Code](https://github.com/haotian-liu/LLaVA)] [[Model](https://github.com/haotian-liu/LLaVA/blob/main/docs/MODEL_ZOO.md)] | 📚 [[LLaVA](https://arxiv.org/abs/2304.08485)] [[LLaVA-v1.5](https://arxiv.org/abs/2310.03744)]
+[[Code](https://github.com/jasonyux/LocalRQA)] | 📚 [[LocalRQA](https://arxiv.org/abs/xxxxx)]
 """)
 
 tos_markdown = ("""
@@ -359,6 +360,7 @@ block_css = """
 
 """
 
+
 def build_demo(embed_mode):
     textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
     with gr.Blocks(title="LocalRQA", theme=gr.themes.Default(), css=block_css) as demo:
@@ -366,18 +368,13 @@ def build_demo(embed_mode):
 
         if not embed_mode:
             gr.Markdown(title_markdown)
-
-        # with gr.Row():
+        
         with gr.Column():
-            retrieved_doc_df = gr.Dataframe(
-                headers=["retrieved documents"],
-                datatype=["str"],
-                row_count=(4, 'dynamic'),
-                col_count=(1, "fixed"),
-                interactive=False,
-                height=1000,
-            )
-            chatbot = gr.Chatbot(elem_id="chatbot", label="LocalRQA Chatbot", height=550)
+            retrieved_docs = []
+            for i in range(NUM_DOC_TO_RETRIEVE):
+                t = gr.Textbox(show_label=False, placeholder="(empty)", info=f'Retrieved document {i+1}:')
+                retrieved_docs.append(t)
+            chatbot = gr.Chatbot(elem_id="chatbot", label="LocalRQA Chatbot", height=650)
 
 
             ## example and gen params
@@ -398,16 +395,13 @@ def build_demo(embed_mode):
                 with gr.Column(scale=8):
                     textbox.render()
                 with gr.Column(scale=1, min_width=50):
-                    old_submit_btn = gr.Button(value="Send", variant="primary")
-                with gr.Column(scale=1, min_width=50):
-                    submit_btn = gr.Button(value="Test", variant="primary")
+                    submit_btn = gr.Button(value="Send", variant="primary")
             
             ## buttons
             with gr.Row(elem_id="buttons") as _:
                 upvote_btn = gr.Button(value="👍  Upvote", interactive=False)
                 downvote_btn = gr.Button(value="👎  Downvote", interactive=False)
                 flag_btn = gr.Button(value="⚠️  Flag", interactive=False)
-                #stop_btn = gr.Button(value="⏹️  Stop Generation", interactive=False)
                 regenerate_btn = gr.Button(value="🔄  Regenerate", interactive=False)
                 clear_btn = gr.Button(value="🗑️  Clear", interactive=False)
 
@@ -417,7 +411,7 @@ def build_demo(embed_mode):
         url_params = gr.JSON(visible=False)
 
         # Register listeners
-        btn_list = [upvote_btn, downvote_btn, flag_btn, regenerate_btn, clear_btn, old_submit_btn]
+        btn_list = [upvote_btn, downvote_btn, flag_btn, regenerate_btn, clear_btn, submit_btn]
         upvote_btn.click(
             upvote_last_response,
             [state],
@@ -445,7 +439,7 @@ def build_demo(embed_mode):
         ).then(
             http_retrieve,
             [state],
-            [state, retrieved_doc_df]
+            [state] + retrieved_docs
         ).then(
             http_generate,
             [state, temperature, top_p, max_output_tokens],
@@ -455,7 +449,7 @@ def build_demo(embed_mode):
         clear_btn.click(
             clear_history,
             None,
-            [state, chatbot, textbox, retrieved_doc_df] + btn_list,
+            [state, chatbot, textbox] + retrieved_docs + btn_list,
             queue=False
         )
 
@@ -467,14 +461,14 @@ def build_demo(embed_mode):
         ).then(
             http_retrieve,
             [state],
-            [state, retrieved_doc_df]
+            [state] + retrieved_docs
         ).then(
             http_generate,
             [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
         )
 
-        old_submit_btn.click(
+        submit_btn.click(
             add_text,
             [state, textbox],
             [state, chatbot, textbox] + btn_list,
@@ -482,23 +476,11 @@ def build_demo(embed_mode):
         ).then(
             http_retrieve,
             [state],
-            [state, retrieved_doc_df]
+            [state] + retrieved_docs
         ).then(
             http_generate,
             [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
-        )
-
-        def fake_update_retrieved_docs():
-            import random
-            random_content = random.choices(["a\nb\nc", "b"*300, "c"*500, "d"*500, "e"*100, "f"*500, "g"*500, "h", "i", "j"], k=3)
-            return random_content
-        
-        submit_btn.click(
-            fake_update_retrieved_docs,
-            [],
-            [retrieved_doc_df],
-            queue=False
         )
         
 

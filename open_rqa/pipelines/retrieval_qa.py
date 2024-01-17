@@ -41,6 +41,7 @@ class SimpleRQA(BaseRQA):
         verbose=False,
     ):
         super().__init__(retriever, qa_llm, answer_guardrail)
+        self.retriever = retriever
         self.qa_llm = qa_llm
         self.verbose = verbose
 

@@ -138,11 +138,15 @@ class ModelWorker(BaseModelWorker):
 
     def retrieve(self, params):
         rephrased_question = self.rqa.rephrase_question_for_retrieval(**params["model_input"])
+        logger.info(f'rephrased_question from {params["model_input"]["question"]} to {rephrased_question}')
+
+        retrieved_docs = self.rqa.retrieve(
+            question=rephrased_question,
+        ).batch_source_documents[0]
+
+        retrieved_docs_dict = [doc.to_dict() for doc in retrieved_docs]
         return {
-            "documents": [
-                {'page_content': 'text 1', 'fmt_content': 'DBFS is databricks file system.', 'metadata': {}},
-                {'page_content': 'text 2', 'fmt_content': 'Databricks is a moving company that works on moving bricks.', 'metadata': {}},
-            ],
+            "documents": retrieved_docs_dict,
             "rephrased_question": rephrased_question,
         }
 
@@ -152,7 +156,6 @@ class ModelWorker(BaseModelWorker):
         tokenizer, model = self.tokenizer, self.model
 
         prompt = self.rqa.prepare_prompt_for_generation(**params["model_input"])
-        logger.info(f'generate_stream received: {params}\ngenerate_stream fmt prompt: {prompt}')
 
         temperature = float(params.get("temperature", 1.0))
         top_p = float(params.get("top_p", 1.0))
