@@ -26,25 +26,34 @@ def main():
         return
 
     conv = default_conversation.clone()
-    conv.append_message(conv.roles[0], args.message)
+    conv.add_user_message(args.message)
     prompt = conv.get_prompt()
 
     headers = {"User-Agent": "LocalRQA Client"}
     pload = {
         "model": args.model_name,
-        "prompt": prompt,
+        # "prompt": prompt,
+        "model_input": {
+            "retrieved_docs": [],
+            "question": prompt,
+            "history": [],
+        },
         "max_new_tokens": args.max_new_tokens,
         "temperature": 0.7,
-        "stop": conv.sep,
+        "stop": conv._session.sep_sys,
     }
-    response = requests.post(worker_addr + "/worker_generate_stream", headers=headers,
-            json=pload, stream=True)
+    response = requests.post(
+        worker_addr + "/worker_generate_stream",
+        headers=headers,
+        json=pload,
+        stream=True
+    )
 
-    print(prompt.replace(conv.sep, "\n"), end="")
+    print(prompt.replace(conv._session.sep_sys, "\n"), end="")
     for chunk in response.iter_lines(chunk_size=8192, decode_unicode=False, delimiter=b"\0"):
         if chunk:
             data = json.loads(chunk.decode("utf-8"))
-            output = data["text"].split(conv.sep)[-1]
+            output = data["text"].split(conv._session.sep_sys)[-1]
             print(output, end="\r")
     print("")
 
@@ -53,10 +62,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--controller-address", type=str, default="http://localhost:21001")
     parser.add_argument("--worker-address", type=str)
-    parser.add_argument("--model-name", type=str, default="facebook/opt-350m")
+    parser.add_argument("--model-name", type=str, default="vicuna-7b-v1.5")
     parser.add_argument("--max-new-tokens", type=int, default=32)
-    parser.add_argument("--message", type=str, default=
-        "Tell me a story with more than 1000 words.")
+    parser.add_argument("--message", type=str, default= "Tell me a joke with more than 20 words.")
     args = parser.parse_args()
 
     main()

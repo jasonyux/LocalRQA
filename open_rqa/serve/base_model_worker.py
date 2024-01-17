@@ -57,23 +57,6 @@ class BaseModelWorker:
         if worker is None:
             worker = self
 
-    # def make_conv_template(
-    #     self,
-    #     conv_template: str = None,
-    #     model_path: str = None,
-    # ) -> Conversation:
-    #     """
-    #     can be overrided to costomize the conversation template for different model workers.
-    #     """
-    #     from fastchat.conversation import get_conv_template
-    #     from fastchat.model.model_adapter import get_conversation_template
-
-    #     if conv_template:
-    #         conv = get_conv_template(conv_template)
-    #     else:
-    #         conv = get_conversation_template(model_path)
-    #     return conv
-
     def init_heart_beat(self):
         self.register_to_controller()
         self.heart_beat_thread = threading.Thread(
@@ -159,9 +142,6 @@ class BaseModelWorker:
             "error_code": 0,
         }
         return ret
-
-    # def get_conv_template(self):
-    #     return {"conv": self.conv}
 
     def generate_stream_gate(self, params):
         raise NotImplementedError

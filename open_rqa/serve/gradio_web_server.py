@@ -11,12 +11,13 @@ from open_rqa.schema.document import Document
 from open_rqa.serve.gradio_dialogue import default_conversation, conv_templates, SeparatorStyle, GradioDialogueSession
 from open_rqa.constants import SERVER_LOGDIR, QA_MODERATION_MSG, SERVER_ERROR_MSG
 from open_rqa.utils import init_logger
-import hashlib
 
 
 logger = init_logger(filename="logs/gradio_web_server.log")
 
+
 headers = {"User-Agent": "LocalRQA Client"}
+
 
 no_change_btn = gr.Button.update()
 enable_btn = gr.Button.update(interactive=True)
@@ -123,10 +124,6 @@ def regenerate(state: GradioDialogueSession, request: gr.Request):
     logger.info(f"regenerate. ip: {request.client.host}")
 
     prev_system_msg = state._session.history.pop()
-    # state.messages[-1][-1] = None
-    # prev_human_msg = state.messages[-2]
-    # if type(prev_human_msg[1]) in (tuple, list):
-    #     prev_human_msg[1] = (*prev_human_msg[1][:2], 'default')
     state.skip_next = False
     return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
 
@@ -136,7 +133,7 @@ def clear_history(request: gr.Request):
     state = default_conversation.clone()
     retrieved_docs = []
     for i in range(NUM_DOC_TO_RETRIEVE):
-        t = gr.Textbox(show_label=False, placeholder="(empty)", info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+        t = gr.Textbox(show_label=False, value="(empty)", info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
         retrieved_docs.append(t)
     return (state, state.to_gradio_chatbot(), "") + tuple(retrieved_docs) + (disable_btn,) * 5 + (enable_btn,)
 
@@ -154,8 +151,6 @@ def add_text(state: GradioDialogueSession, text, request: gr.Request):
 
     text = text[:1536]  # Hard cut-off
     state.add_user_message(text)
-    # state.append_message(state.roles[0], text)
-    # state.append_message(state.roles[1], None)
     state.skip_next = False
     return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 6
 
@@ -235,8 +230,6 @@ def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_toke
         template_name = "vicuna_v1"
         new_state = conv_templates[template_name].clone()
         new_state.add_user_message(state._session.history[-2].message)
-        # new_state.append_message(new_state.roles[0], state.messages[-2][1])
-        # new_state.append_message(new_state.roles[1], None)
         state = new_state
 
     # Query worker address
@@ -251,19 +244,8 @@ def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_toke
     # No available worker
     if worker_addr == "":
         state.add_system_message(SERVER_ERROR_MSG, [])
-        # state.messages[-1][-1] = SERVER_ERROR_MSG
         yield (state, state.to_gradio_chatbot(), disable_btn, disable_btn, disable_btn, enable_btn, enable_btn)
         return
-
-    # Construct prompt
-    # history_str = state.get_prompt()  # prompt formatting doine in RQA pipeline
-    # retrieved_docs = state._tmp_data['retrieved_docs']
-    # prompt = f"""
-    # This is a chat between a curious user and an artificial intelligence assistant.
-    # The assistant gives helpful, detailed, and polite answers using documents from the following context.
-    # ----------------
-    # {history_str} ASSISTANT:
-    # """.replace(" "*4, "").strip()
 
     # Make requests
     retrieved_docs = state._tmp_data['retrieved_docs']
@@ -299,12 +281,10 @@ def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_toke
                 if data["error_code"] == 0:
                     output = data["text"].strip()
                     state._session.history[-1].message = output + "▌"
-                    # state.messages[-1][-1] = output + "▌"
                     yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 6
                 else:
                     output = data["text"] + f" (error_code: {data['error_code']})"
                     state._session.history[-1].message = output
-                    # state.messages[-1][-1] = output
                     yield (state, state.to_gradio_chatbot()) + (disable_btn, disable_btn, disable_btn, enable_btn, enable_btn, enable_btn)
                     return
                 time.sleep(0.03)
