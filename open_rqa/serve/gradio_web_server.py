@@ -32,8 +32,10 @@ def violates_moderation(text):
     Check whether the text violates OpenAI moderation API.
     """
     url = "https://api.openai.com/v1/moderations"
-    headers = {"Content-Type": "application/json",
-               "Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]
+    }
     text = text.replace("\n", "")
     data = "{" + '"input": ' + f'"{text}"' + "}"
     data = data.encode("utf-8")
@@ -61,9 +63,6 @@ def get_model_list():
     models = ret.json()["models"]
     models.sort(key=lambda x: priority.get(x, x))
     logger.info(f"Models: {models}")
-
-    print('CHANGE THIS')
-    models = ['vicuna-7b-v1.5', 'vicuna-7b-v1.6']
     return models
 
 
@@ -79,78 +78,65 @@ function() {
 
 def load_demo(url_params, request: gr.Request):
     logger.info(f"load_demo. ip: {request.client.host}. params: {url_params}")
-
-    dropdown_update = gr.Dropdown.update(visible=True)
-    if "model" in url_params:
-        model = url_params["model"]
-        if model in models:
-            dropdown_update = gr.Dropdown.update(
-                value=model, visible=True)
-
     state = default_conversation.copy()
-    return state, dropdown_update
+    return state
 
 
 def load_demo_refresh_model_list(request: gr.Request):
     logger.info(f"load_demo. ip: {request.client.host}")
-    models = get_model_list()
     state = default_conversation.copy()
-    dropdown_update = gr.Dropdown.update(
-        choices=models,
-        value=models[0] if len(models) > 0 else ""
-    )
-    return state, dropdown_update
+    return state
 
 
-def vote_last_response(state, vote_type, model_selector, request: gr.Request):
+def vote_last_response(state, vote_type, request: gr.Request):
     with open(get_conv_log_filename(), "a") as fout:
         data = {
             "tstamp": round(time.time(), 4),
             "type": vote_type,
-            "model": model_selector,
+            "model": 'vicuna-7b-v1.5',
             "state": state.dict(),
             "ip": request.client.host,
         }
         fout.write(json.dumps(data) + "\n")
 
 
-def upvote_last_response(state, model_selector, request: gr.Request):
+def upvote_last_response(state, request: gr.Request):
     logger.info(f"upvote. ip: {request.client.host}")
-    vote_last_response(state, "upvote", model_selector, request)
+    vote_last_response(state, "upvote", request)
     return ("",) + (disable_btn,) * 3
 
 
-def downvote_last_response(state, model_selector, request: gr.Request):
+def downvote_last_response(state, request: gr.Request):
     logger.info(f"downvote. ip: {request.client.host}")
-    vote_last_response(state, "downvote", model_selector, request)
+    vote_last_response(state, "downvote", request)
     return ("",) + (disable_btn,) * 3
 
 
-def flag_last_response(state, model_selector, request: gr.Request):
+def flag_last_response(state, request: gr.Request):
     logger.info(f"flag. ip: {request.client.host}")
-    vote_last_response(state, "flag", model_selector, request)
+    vote_last_response(state, "flag", request)
     return ("",) + (disable_btn,) * 3
 
 
-def regenerate(state, image_process_mode, request: gr.Request):
+def regenerate(state, request: gr.Request):
     logger.info(f"regenerate. ip: {request.client.host}")
     state.messages[-1][-1] = None
     prev_human_msg = state.messages[-2]
     if type(prev_human_msg[1]) in (tuple, list):
-        prev_human_msg[1] = (*prev_human_msg[1][:2], image_process_mode)
+        prev_human_msg[1] = (*prev_human_msg[1][:2], 'default')
     state.skip_next = False
-    return (state, state.to_gradio_chatbot(), "", None) + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 5
 
 
 def clear_history(request: gr.Request):
     logger.info(f"clear_history. ip: {request.client.host}")
     state = default_conversation.copy()
-    return (state, state.to_gradio_chatbot(), "", None) + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 5
 
 
-def add_text(state, text, image, image_process_mode, request: gr.Request):
+def add_text(state, text, request: gr.Request):
     logger.info(f"add_text. ip: {request.client.host}. len: {len(text)}")
-    if len(text) <= 0 and image is None:
+    if len(text) <= 0:
         state.skip_next = True
         return (state, state.to_gradio_chatbot(), "", None) + (no_change_btn,) * 5
     if args.moderate:
@@ -161,17 +147,16 @@ def add_text(state, text, image, image_process_mode, request: gr.Request):
                 no_change_btn,) * 5
 
     text = text[:1536]  # Hard cut-off
-    image = None
     state.append_message(state.roles[0], text)
     state.append_message(state.roles[1], None)
     state.skip_next = False
-    return (state, state.to_gradio_chatbot(), "", None) + (disable_btn,) * 5
+    return (state, state.to_gradio_chatbot(), "") + (disable_btn,) * 5
 
 
-def http_bot(state, model_selector, temperature, top_p, max_new_tokens, request: gr.Request):
+def http_bot(state, temperature, top_p, max_new_tokens, request: gr.Request):
     logger.info(f"http_bot. ip: {request.client.host}")
     start_tstamp = time.time()
-    model_name = model_selector
+    model_name = 'vicuna-7b-v1.5'
 
     if state.skip_next:
         # This generate call is skipped due to invalid inputs
@@ -180,31 +165,7 @@ def http_bot(state, model_selector, temperature, top_p, max_new_tokens, request:
 
     if len(state.messages) == state.offset + 2:
         # First round of conversation
-        if "llava" in model_name.lower():
-            if 'llama-2' in model_name.lower():
-                template_name = "llava_llama_2"
-            elif "v1" in model_name.lower():
-                if 'mmtag' in model_name.lower():
-                    template_name = "v1_mmtag"
-                elif 'plain' in model_name.lower() and 'finetune' not in model_name.lower():
-                    template_name = "v1_mmtag"
-                else:
-                    template_name = "llava_v1"
-            elif "mpt" in model_name.lower():
-                template_name = "mpt"
-            else:
-                if 'mmtag' in model_name.lower():
-                    template_name = "v0_mmtag"
-                elif 'plain' in model_name.lower() and 'finetune' not in model_name.lower():
-                    template_name = "v0_mmtag"
-                else:
-                    template_name = "llava_v0"
-        elif "mpt" in model_name:
-            template_name = "mpt_text"
-        elif "llama-2" in model_name:
-            template_name = "llama_2"
-        else:
-            template_name = "vicuna_v1"
+        template_name = "vicuna_v1"
         new_state = conv_templates[template_name].copy()
         new_state.append_message(new_state.roles[0], state.messages[-2][1])
         new_state.append_message(new_state.roles[1], None)
@@ -212,8 +173,10 @@ def http_bot(state, model_selector, temperature, top_p, max_new_tokens, request:
 
     # Query worker address
     controller_url = args.controller_url
-    ret = requests.post(controller_url + "/get_worker_address",
-            json={"model": model_name})
+    ret = requests.post(
+        controller_url + "/get_worker_address",
+        json={"model": model_name}
+    )
     worker_addr = ret.json()["address"]
     logger.info(f"model_name: {model_name}, worker_addr: {worker_addr}")
 
@@ -294,7 +257,7 @@ def http_bot(state, model_selector, temperature, top_p, max_new_tokens, request:
         fout.write(json.dumps(data) + "\n")
 
 title_markdown = ("""
-# 🌋 LLaVA: Large Language and Vision Assistant
+# LocalRQA
 [[Project Page](https://llava-vl.github.io)] [[Code](https://github.com/haotian-liu/LLaVA)] [[Model](https://github.com/haotian-liu/LLaVA/blob/main/docs/MODEL_ZOO.md)] | 📚 [[LLaVA](https://arxiv.org/abs/2304.08485)] [[LLaVA-v1.5](https://arxiv.org/abs/2310.03744)]
 """)
 
@@ -318,62 +281,60 @@ block_css = """
     min-width: min(120px,100%);
 }
 
+.gradio-container {margin: 100 !important};
 """
 
 def build_demo(embed_mode):
     textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
-    with gr.Blocks(title="LLaVA", theme=gr.themes.Default(), css=block_css) as demo:
+    with gr.Blocks(title="LocalRQA", theme=gr.themes.Default(), css=block_css) as demo:
         state = gr.State()
 
         if not embed_mode:
             gr.Markdown(title_markdown)
 
-        with gr.Row():
-            with gr.Column(scale=3):
-                with gr.Row(elem_id="model_selector_row"):
-                    model_selector = gr.Dropdown(
-                        choices=models,
-                        value=models[0] if len(models) > 0 else "",
-                        interactive=True,
-                        show_label=False,
-                        container=False
-                    )
+        # with gr.Row():
+        with gr.Column():
+            retrieved_doc_df = gr.Dataframe(
+                headers=["retrieved documents"],
+                datatype=["str"],
+                row_count=(4, 'dynamic'),
+                col_count=(1, "fixed"),
+                interactive=False,
+                height=1000,
+            )
+            chatbot = gr.Chatbot(elem_id="chatbot", label="LocalRQA Chatbot", height=550)
 
-                imagebox = gr.Image(type="pil")
-                image_process_mode = gr.Radio(
-                    ["Crop", "Resize", "Pad", "Default"],
-                    value="Default",
-                    label="Preprocess for non-square image", visible=False)
 
-                gr.Examples(examples=[
-                    ["What does Databricks do?"],
-                    ["What is DBFS?"],
-                ], inputs=[textbox])
-                # cur_dir = os.path.dirname(os.path.abspath(__file__))
-                # gr.Examples(examples=[
-                #     [f"{cur_dir}/examples/extreme_ironing.jpg", "What is unusual about this image?"],
-                #     [f"{cur_dir}/examples/waterview.jpg", "What are the things I should be cautious about when I visit here?"],
-                # ], inputs=[imagebox, textbox])
+            ## example and gen params
+            with gr.Row(equal_height=True):
+                with gr.Column(scale=5):
+                    gr.Examples(examples=[
+                        ["What does Databricks do?"],
+                        ["What is DBFS?"],
+                    ], inputs=[textbox])
+                with gr.Column(scale=5):
+                    with gr.Accordion("Parameters", open=False) as _:
+                        temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.2, step=0.1, interactive=True, label="Temperature",)
+                        top_p = gr.Slider(minimum=0.0, maximum=1.0, value=0.7, step=0.1, interactive=True, label="Top P",)
+                        max_output_tokens = gr.Slider(minimum=0, maximum=512, value=256, step=32, interactive=True, label="Max output tokens",)
 
-                with gr.Accordion("Parameters", open=False) as parameter_row:
-                    temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.2, step=0.1, interactive=True, label="Temperature",)
-                    top_p = gr.Slider(minimum=0.0, maximum=1.0, value=0.7, step=0.1, interactive=True, label="Top P",)
-                    max_output_tokens = gr.Slider(minimum=0, maximum=1024, value=512, step=64, interactive=True, label="Max output tokens",)
-
-            with gr.Column(scale=8):
-                chatbot = gr.Chatbot(elem_id="chatbot", label="LLaVA Chatbot", height=550)
-                with gr.Row():
-                    with gr.Column(scale=8):
-                        textbox.render()
-                    with gr.Column(scale=1, min_width=50):
-                        submit_btn = gr.Button(value="Send", variant="primary")
-                with gr.Row(elem_id="buttons") as button_row:
-                    upvote_btn = gr.Button(value="👍  Upvote", interactive=False)
-                    downvote_btn = gr.Button(value="👎  Downvote", interactive=False)
-                    flag_btn = gr.Button(value="⚠️  Flag", interactive=False)
-                    #stop_btn = gr.Button(value="⏹️  Stop Generation", interactive=False)
-                    regenerate_btn = gr.Button(value="🔄  Regenerate", interactive=False)
-                    clear_btn = gr.Button(value="🗑️  Clear", interactive=False)
+            ## user input
+            with gr.Row():
+                with gr.Column(scale=8):
+                    textbox.render()
+                with gr.Column(scale=1, min_width=50):
+                    old_submit_btn = gr.Button(value="Send", variant="primary")
+                with gr.Column(scale=1, min_width=50):
+                    submit_btn = gr.Button(value="Test", variant="primary")
+            
+            ## buttons
+            with gr.Row(elem_id="buttons") as _:
+                upvote_btn = gr.Button(value="👍  Upvote", interactive=False)
+                downvote_btn = gr.Button(value="👎  Downvote", interactive=False)
+                flag_btn = gr.Button(value="⚠️  Flag", interactive=False)
+                #stop_btn = gr.Button(value="⏹️  Stop Generation", interactive=False)
+                regenerate_btn = gr.Button(value="🔄  Regenerate", interactive=False)
+                clear_btn = gr.Button(value="🗑️  Clear", interactive=False)
 
         if not embed_mode:
             gr.Markdown(tos_markdown)
@@ -384,61 +345,73 @@ def build_demo(embed_mode):
         btn_list = [upvote_btn, downvote_btn, flag_btn, regenerate_btn, clear_btn]
         upvote_btn.click(
             upvote_last_response,
-            [state, model_selector],
+            [state],
             [textbox, upvote_btn, downvote_btn, flag_btn],
             queue=False
         )
         downvote_btn.click(
             downvote_last_response,
-            [state, model_selector],
+            [state],
             [textbox, upvote_btn, downvote_btn, flag_btn],
             queue=False
         )
         flag_btn.click(
             flag_last_response,
-            [state, model_selector],
+            [state],
             [textbox, upvote_btn, downvote_btn, flag_btn],
             queue=False
         )
 
         regenerate_btn.click(
             regenerate,
-            [state, image_process_mode],
-            [state, chatbot, textbox, imagebox] + btn_list,
+            [state],
+            [state, chatbot, textbox] + btn_list,
             queue=False
         ).then(
             http_bot,
-            [state, model_selector, temperature, top_p, max_output_tokens],
+            [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
         )
 
         clear_btn.click(
             clear_history,
             None,
-            [state, chatbot, textbox, imagebox] + btn_list,
+            [state, chatbot, textbox] + btn_list,
             queue=False
         )
 
         textbox.submit(
             add_text,
-            [state, textbox, imagebox, image_process_mode],
-            [state, chatbot, textbox, imagebox] + btn_list,
+            [state, textbox],
+            [state, chatbot, textbox] + btn_list,
             queue=False
         ).then(
             http_bot,
-            [state, model_selector, temperature, top_p, max_output_tokens],
+            [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
         )
 
-        submit_btn.click(
+        old_submit_btn.click(
             add_text,
-            [state, textbox, imagebox, image_process_mode],
-            [state, chatbot, textbox, imagebox] + btn_list,
+            [state, textbox],
+            [state, chatbot, textbox] + btn_list,
             queue=False
         ).then(
             http_bot,
-            [state, model_selector, temperature, top_p, max_output_tokens],
+            [state, temperature, top_p, max_output_tokens],
             [state, chatbot] + btn_list
+        )
+
+        def fake_update_retrieved_docs():
+            import random
+            random_content = random.choices(["a\nb\nc", "b"*300, "c"*500, "d"*500, "e"*100, "f"*500, "g"*500, "h", "i", "j"], k=3)
+            return random_content
+        
+        submit_btn.click(
+            fake_update_retrieved_docs,
+            [],
+            [retrieved_doc_df],
+            queue=False
         )
         
 
@@ -446,7 +419,7 @@ def build_demo(embed_mode):
             demo.load(
                 load_demo,
                 [url_params],
-                [state, model_selector],
+                [state],
                 _js=get_window_url_params,
                 queue=False
             )
@@ -454,7 +427,7 @@ def build_demo(embed_mode):
             demo.load(
                 load_demo_refresh_model_list,
                 None,
-                [state, model_selector],
+                [state],
                 queue=False
             )
         else:
