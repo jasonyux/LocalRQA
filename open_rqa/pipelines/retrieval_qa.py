@@ -9,6 +9,7 @@ from open_rqa.qa_llms.huggingface import HuggingFaceQAModel, HuggingFaceFiDQAMod
 from open_rqa.qa_llms.openai import OpenAIQAModel
 from open_rqa.qa_llms.tgi import TGIQAModel
 from open_rqa.qa_llms.vllm import vLLMQAModel
+from open_rqa.qa_llms.sglang import SGLangQAModel
 from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.pipelines.base import RQAPipeline
 from open_rqa.pipelines.prompts import REPHRASE_QUESTION_PROMPT
@@ -342,6 +343,41 @@ class SimpleRQA(BaseRQA):
         )
         return rqa
 
+    @staticmethod
+    def from_sglang(
+        retriever: BaseRetriever,
+        qa_model_url: str,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
+    ):
+        """initialize simple RQA given an already initialized retriever model + qa model hosted on SGLang
+
+        Args:
+            retriever (BaseRetriever): _description_
+            qa_model_url (str): _description_
+            user_prefix (str, optional): _description_. Defaults to "USER".
+            assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            verbose (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """
+        qa_llm = SGLangQAModel(
+            url=qa_model_url,
+            user_prefix=user_prefix,
+            assistant_prefix=assistant_prefix,
+        )
+        answer_guardrail = NoopAnswerGuardrail()
+
+        rqa = SimpleRQA(
+            retriever=retriever,
+            qa_llm=qa_llm,
+            answer_guardrail=answer_guardrail,
+            verbose=verbose
+        )
+        return rqa
+
     @classmethod
     def from_scratch(
         cls,
@@ -396,6 +432,15 @@ class SimpleRQA(BaseRQA):
         elif AccelerationFramework.TGI in qa_model_name_or_path:
             url = qa_model_name_or_path.replace(AccelerationFramework.TGI, "")
             return cls.from_tgi(
+                retriever=retriever,
+                qa_model_url=url,
+                user_prefix=user_prefix,
+                assistant_prefix=assistant_prefix,
+                verbose=verbose,
+            )
+        elif AccelerationFramework.SGLANG in qa_model_name_or_path:
+            url = qa_model_name_or_path.replace(AccelerationFramework.SGLANG, "")
+            return cls.from_sglang(
                 retriever=retriever,
                 qa_model_url=url,
                 user_prefix=user_prefix,
