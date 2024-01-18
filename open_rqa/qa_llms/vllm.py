@@ -1,52 +1,102 @@
-from typing import List, Optional
-from copy import deepcopy
+import json
+import requests
+import logging
 from retry import retry
 from open_rqa.qa_llms.base import BaseQAModel, GenerationOutput
 from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.schema.document import Document
 from open_rqa.qa_llms.prompts import RQA_PROMPT
 from open_rqa.constants import QA_ERROR_MSG
-from text_generation import Client
-import logging
+from typing import Iterable, List, Optional
+from copy import deepcopy
 
 
 logger = logging.getLogger(__name__)
 
 
-class TGIQAModel(BaseQAModel):
-    """under the hood its using your generative model hosted on Text-Generation-Inference
+class VLLMClient:
+    def __init__(self, url, timeout=60) -> None:
+        self.url = url
+        self.timeout = timeout
+        return
 
-    Args:
-        BaseQAModel (_type_): _description_
-    """
+    def _post_http_request(
+        self,
+        prompt: str,
+        **gen_args
+    ) -> requests.Response:
+        headers = {"User-Agent": "Test Client"}
+        pload = {
+            "prompt": prompt,
+            **gen_args
+        }
+        response = requests.post(
+            self.url,
+            headers=headers, json=pload,
+            stream=gen_args.get("stream", False),
+            timeout=self.timeout
+        )
+        return response
+
+    def _get_streaming_response(self, response: requests.Response) -> Iterable[List[str]]:
+        for chunk in response.iter_lines(chunk_size=8192,
+                                        decode_unicode=False,
+                                        delimiter=b"\0"):
+            if chunk:
+                data = json.loads(chunk.decode("utf-8"))
+                output = data["text"][0]
+                yield output
+
+    def _get_response(self, response: requests.Response) -> List[str]:
+        data = json.loads(response.content)
+        output = data["text"]
+        return output
+
+    def generate(self, input_text: str, **generate_kwargs):
+        response = self._post_http_request(input_text, **generate_kwargs)
+        generated_text = self._get_response(response)[0]
+        return generated_text
+
+    def generate_stream(self, input_text: str, **generate_kwargs):
+        generate_kwargs['stream'] = True
+        response = self._post_http_request(input_text, **generate_kwargs)
+        for token in self._get_streaming_response(response):
+            yield token
+
+
+class vLLMQAModel(BaseQAModel):
     def __init__(self, url, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
-        self.client = Client(url, timeout=60)
+        self.client = VLLMClient(url, timeout=60)
         self.url = url
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
 
         self._default_generate_kwargs = {
-            "max_new_tokens": 512,
-            "do_sample": True,
+            "use_beam_search": False,
+            "n": 1,
             "temperature": 0.7,
-            "eos_token_id": None,
+            "max_tokens": 256,
+            "stream": False,
         }
+        self.stop_sequences = ["</s>"]
         return
-    
+
     def prepare_gen_kwargs(self, input_kwargs):
         new_input_kwargs = deepcopy(input_kwargs)
         if 'num_beams' in new_input_kwargs:
             new_input_kwargs.pop('num_beams')
-            logger.warning("num_beams is not supported in text_generation_inference")
+            logger.warning("num_beams is not used in this vllm client")
+        if 'use_beam_search' in new_input_kwargs:
+            new_input_kwargs['use_beam_search'] = False  # difficult to handle as it returns a list
         
         if 'eos_token_id' in new_input_kwargs:
             new_input_kwargs.pop('eos_token_id')
-            new_input_kwargs['stop_sequences'] = ['</s>']
-            logger.warning("eos_token_id is not supported in text_generation_inference. Using stop_sequences='</s>' instead.")
+            self.stop_sequences = ["</s>"]
+            logger.warning("eos_token_id is not supported in vllm. Using stop_sequences='</s>' instead.")
         
         if 'early_stopping' in new_input_kwargs:
             new_input_kwargs.pop('early_stopping')
-            logger.warning("early_stopping is not supported in text_generation_inference")
+            logger.warning("early_stopping is not used in this vllm client")
         
         return new_input_kwargs
 
@@ -98,18 +148,18 @@ class TGIQAModel(BaseQAModel):
             generation_kwargs=generation_kwargs
         )
         return answers
-
+    
     @retry(Exception, tries=3, delay=0.5)
     def _generate(self, input_text, **generate_kwargs):
         generate_kwargs = self.prepare_gen_kwargs(generate_kwargs)
-        response = self.client.generate(input_text, **generate_kwargs)
-        return response.generated_text
+        generated_text = self.client.generate(input_text, **generate_kwargs)
+        return generated_text
     
     def _generate_stream(self, input_text, **generate_kwargs):
         generate_kwargs = self.prepare_gen_kwargs(generate_kwargs)
-        for response in self.client.generate_stream(input_text, **generate_kwargs):
-            if not response.token.special:
-                yield response.token.text
+        for token in self.client.generate_stream(input_text, **generate_kwargs):
+            if token not in self.stop_sequences:
+                yield token
 
     def generate(self, batched_prompts: List[str], tokenization_kwargs: dict, generation_kwargs: dict) -> GenerationOutput:
         responses = []
@@ -128,3 +178,23 @@ class TGIQAModel(BaseQAModel):
         return GenerationOutput(
             batch_answers=responses,
         )
+
+
+if __name__ == "__main__":
+    # example usage
+    # assume you already have a running vllm server
+    # e.g.: python -m vllm.entrypoints.api_server will host at http://localhost:8000/generate
+    rqa_model = vLLMQAModel(url="http://localhost:8000/generate")
+    question = "What is the capital of France?"
+    output = rqa_model.generate(
+        batched_prompts=[question],
+        tokenization_kwargs={},
+        generation_kwargs={'max_tokens': 16}
+    )
+    print('[[not streaming]]')
+    print(output.batch_answers[0])
+
+    ## stream
+    print('[[streaming]]')
+    for token in rqa_model._generate_stream(question, max_tokens=8):
+        print(token, flush=True)

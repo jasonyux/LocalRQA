@@ -59,7 +59,7 @@ class Document:
         document = Document(
             page_content=document_dict['page_content'],
             fmt_content=document_dict.get('fmt_content', ''),
-            metadata=document_dict['metadata']
+            metadata=document_dict.get('metadata', {})
         )
         return document
 

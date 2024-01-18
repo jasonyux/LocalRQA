@@ -44,6 +44,10 @@ class EvaluatorConfig:
         default=True,
         metadata={"help": "Whether to compute ROUGE for generation"},
     )
+    gen_bleu: bool = field(
+        default=False,
+        metadata={"help": "Whether to compute BLEU for generation"},
+    )
     gen_latency: bool = field(
         default=True,
         metadata={"help": "Whether to compute latency for generation"},

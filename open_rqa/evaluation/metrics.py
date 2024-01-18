@@ -365,6 +365,62 @@ class ROUGE(RunningMetic):
         return
 
 
+class BLEU(RunningMetic):
+    def __init__(self, name="bleu"):
+        self.name = name
+        self.bleu_metric = evaluate.load("bleu")
+        self.state = {
+            "bleu_ans": [],
+            "bleu_retr_doc": [],
+            "brevity_pen_ans": [],
+        }
+        self.reset()
+        return
+    
+    def update(
+        self,
+        batch_questions: List[str],
+        batch_gen_answers: List[str],
+        batch_gold_answers: List[str],
+        batch_retrieved_docs: List[List[Document]],
+        batch_gold_docs: List[List[Document]],
+    ):
+        bsz = len(batch_retrieved_docs)
+        for i in range(bsz):
+            gen_ans = batch_gen_answers[i]
+            gold_ans = batch_gold_answers[i]
+            retr_docs = batch_retrieved_docs[i]
+            
+            # measure w.r.t gold answer
+            bleu_ans = self.bleu_metric.compute(predictions=[gen_ans], references=[gold_ans])
+
+            # check how faithful generated answer are to the retrieved docs
+            bleu_retr_docs = {"bleu": []}
+            for rdoc in retr_docs:
+                retr_d = rdoc.page_content
+                score = self.bleu_metric.compute(predictions=[gen_ans], references=[retr_d])
+                bleu_retr_docs["bleu"].append(score["bleu"])
+            bleu_retr_doc = {k: max(v) for k, v in bleu_retr_docs.items()}
+
+            self.state["bleu_ans"].append(bleu_ans["bleu"])
+            self.state["bleu_retr_doc"].append(bleu_retr_doc["bleu"])
+            self.state["brevity_pen_ans"].append(bleu_ans["brevity_penalty"])
+        return
+    
+    def compute(self):
+        return {
+            f'avg_{k}': mean(v) for k, v in self.state.items()
+        }
+    
+    def reset(self):
+        self.state = {
+            "bleu_ans": [],
+            "bleu_retr_doc": [],
+            "brevity_pen_ans": [],
+        }
+        return
+
+
 class AnswerStats(RunningMetic):
     def __init__(self, name="answer_stats") -> None:
         self.name = name
@@ -483,7 +539,7 @@ class GPT4Eval(RunningMetic):
         extracted_correctness = re.findall(r"Correctness: \[\[(.*)\]\]", extracted_message)
         logger.info(f"GPT4Eval Response:\n {extracted_message}")
         logger.info(f"GPT4Eval Correctness: {extracted_correctness}")
-        
+
         if len(extracted_correctness) == 0:
             return None
         else:
@@ -579,6 +635,7 @@ METRICS = {
     'f1': F1,
     'precision': Precision,
     'rouge': ROUGE,
+    'bleu': BLEU,
     'gpt4eval': GPT4Eval,
     'answer_stats': AnswerStats,
     "latency": Latency,

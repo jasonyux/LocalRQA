@@ -91,6 +91,24 @@ def quickstart():
     return
 
 
+def quickstart_vllm():
+    rqa = SimpleRQA.from_scratch(
+        document_path="data/database/databricks/databricks_400.pkl",
+        index_path="data/database/databricks/databricks_400_e5-base-v2",
+        embedding_model_name_or_path="intfloat/e5-base-v2",
+        qa_model_name_or_path="vllm::http://localhost:8000/generate",  # where 'http://localhost:8000/generate' is the address of the vllm server
+        qa_model_init_kwargs={},
+        qa_is_fid=False,
+        verbose=True,
+    )
+    response = rqa.qa(
+        batch_questions=['What is DBFS?'],
+        batch_dialogue_session=[DialogueSession()],
+    )
+    print(response.batch_answers[0])
+    return
+
+
 def auto():
     # ##### Auto usage of RQA ######
     # documents = SimpleDirectoryReader("data").load_data()

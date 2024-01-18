@@ -7,10 +7,12 @@ from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.qa_llms.base import BaseQAModel
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel, HuggingFaceFiDQAModel
 from open_rqa.qa_llms.openai import OpenAIQAModel
+from open_rqa.qa_llms.tgi import TGIQAModel
+from open_rqa.qa_llms.vllm import vLLMQAModel
 from open_rqa.guardrails.base import NoopAnswerGuardrail
 from open_rqa.pipelines.base import RQAPipeline
 from open_rqa.pipelines.prompts import REPHRASE_QUESTION_PROMPT
-from open_rqa.constants import OPENAI_MODEL_NAMES
+from open_rqa.constants import OPENAI_MODEL_NAMES, AccelerationFramework
 from langchain.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 import logging
 import os
@@ -273,6 +275,73 @@ class SimpleRQA(BaseRQA):
         )
         return rqa
 
+    @staticmethod
+    def from_vllm(
+        retriever: BaseRetriever,
+        qa_model_url: str,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
+    ):
+        """intialized simple RQA given an already initialized retriever model + vllm-based qa model (e.g. llama-2)
+
+        Args:
+            retriever (BaseRetriever): _description_
+            qa_model_url (str): _description_
+            user_prefix (str, optional): _description_. Defaults to "USER".
+            assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            verbose (bool, optional): _description_. Defaults to False.
+        """
+        qa_llm = vLLMQAModel(
+            url=qa_model_url,
+            user_prefix=user_prefix,
+            assistant_prefix=assistant_prefix,
+        )
+        answer_guardrail = NoopAnswerGuardrail()
+
+        rqa = SimpleRQA(
+            retriever=retriever,
+            qa_llm=qa_llm,
+            answer_guardrail=answer_guardrail,
+            verbose=verbose
+        )
+        return rqa
+
+    @staticmethod
+    def from_tgi(
+        retriever: BaseRetriever,
+        qa_model_url: str,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        verbose: bool = False,
+    ):
+        """initialize simple RQA given an already initialized retriever model + qa model hosted on Text-Generation-Inference
+
+        Args:
+            retriever (BaseRetriever): _description_
+            qa_model_url (str): _description_
+            user_prefix (str, optional): _description_. Defaults to "USER".
+            assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            verbose (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """
+        qa_llm = TGIQAModel(
+            url=qa_model_url,
+            user_prefix=user_prefix,
+            assistant_prefix=assistant_prefix,
+        )
+        answer_guardrail = NoopAnswerGuardrail()
+
+        rqa = SimpleRQA(
+            retriever=retriever,
+            qa_llm=qa_llm,
+            answer_guardrail=answer_guardrail,
+            verbose=verbose
+        )
+        return rqa
+
     @classmethod
     def from_scratch(
         cls,
@@ -311,6 +380,24 @@ class SimpleRQA(BaseRQA):
             return cls.from_openai(
                 retriever=retriever,
                 qa_model_name=qa_model_name_or_path,
+                user_prefix=user_prefix,
+                assistant_prefix=assistant_prefix,
+                verbose=verbose,
+            )
+        elif AccelerationFramework.VLLM in qa_model_name_or_path:
+            url = qa_model_name_or_path.replace(AccelerationFramework.VLLM, "")
+            return cls.from_vllm(
+                retriever=retriever,
+                qa_model_url=url,
+                user_prefix=user_prefix,
+                assistant_prefix=assistant_prefix,
+                verbose=verbose,
+            )
+        elif AccelerationFramework.TGI in qa_model_name_or_path:
+            url = qa_model_name_or_path.replace(AccelerationFramework.TGI, "")
+            return cls.from_tgi(
+                retriever=retriever,
+                qa_model_url=url,
                 user_prefix=user_prefix,
                 assistant_prefix=assistant_prefix,
                 verbose=verbose,

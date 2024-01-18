@@ -1,10 +1,14 @@
 # all kinds of constants
-from enum import IntEnum
+from enum import IntEnum, Enum
 import os
 
 
 ##### For main modules
 OPENAI_MODEL_NAMES = ['gpt-4-1106-preview', 'gpt-4', 'gpt-3.5-turbo', 'text-embedding-ada-002']
+
+class AccelerationFramework(Enum):
+    VLLM = 'vllm::'
+    TGI = 'tgi::'
 
 
 ##### For the controller and workers (could be overwritten through ENV variables.)
