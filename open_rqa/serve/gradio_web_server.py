@@ -17,18 +17,16 @@ logger = init_logger(filename="logs/gradio_web_server.log")
 
 
 headers = {"User-Agent": "LocalRQA Client"}
+args: argparse.Namespace
 
 
 no_change_btn = gr.Button.update()
 enable_btn = gr.Button.update(interactive=True)
 disable_btn = gr.Button.update(interactive=False)
 
-priority = {
-    "vicuna-13b": "aaaaaaa",
-    "koala-13b": "aaaaaab",
-}
 
 NUM_DOC_TO_RETRIEVE = 4
+
 
 def violates_moderation(text):
     """
@@ -63,7 +61,6 @@ def get_model_list():
     assert ret.status_code == 200
     ret = requests.post(args.controller_url + "/list_models")
     models = ret.json()["models"]
-    models.sort(key=lambda x: priority.get(x, x))
     logger.info(f"Models: {models}")
     return models
 
@@ -95,7 +92,7 @@ def vote_last_response(state: GradioDialogueSession, vote_type, request: gr.Requ
         data = {
             "tstamp": round(time.time(), 4),
             "type": vote_type,
-            "model": 'vicuna-7b-v1.5',
+            "model": args.model_id,
             "state": state.to_dict(),
             "ip": request.client.host,
         }
@@ -167,7 +164,7 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
         return tuple([state] + tboxes)
 
     start_tstamp = time.time()
-    model_name = 'vicuna-7b-v1.5'
+    model_name = args.model_id
 
     # Query worker address
     controller_url = args.controller_url
@@ -218,7 +215,7 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
 def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_tokens, request: gr.Request):
     logger.info(f"http_generate. ip: {request.client.host}")
     start_tstamp = time.time()
-    model_name = 'vicuna-7b-v1.5'
+    model_name = args.model_id
 
     if state.skip_next:
         # This generate call is skipped due to invalid inputs
@@ -227,7 +224,7 @@ def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_toke
 
     if len(state._session.history) == 0:
         # First round of conversation
-        template_name = "vicuna_v1"
+        template_name = args.conv_template
         new_state = conv_templates[template_name].clone()
         new_state.add_user_message(state._session.history[-2].message)
         state = new_state
@@ -360,10 +357,10 @@ def build_demo(embed_mode):
             ## example and gen params
             with gr.Row(equal_height=True):
                 with gr.Column(scale=5):
-                    gr.Examples(examples=[
-                        ["What does Databricks do?"],
-                        ["What is DBFS?"],
-                    ], inputs=[textbox])
+                    gr.Examples(
+                        examples=[[ex] for ex in args.example] or [['(use --example to specify example questions here)']], 
+                        inputs=[textbox]
+                    )
                 with gr.Column(scale=5):
                     with gr.Accordion("Parameters", open=False) as _:
                         temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.2, step=0.1, interactive=True, label="Temperature",)
@@ -496,10 +493,14 @@ if __name__ == "__main__":
     parser.add_argument("--share", action="store_true")
     parser.add_argument("--moderate", action="store_true")
     parser.add_argument("--embed", action="store_true")
+    parser.add_argument("--model_id", type=str, default="simple_rqa")
+    parser.add_argument('--example', action='append', help='Example question displayed on demo page')
+    parser.add_argument("--conv_template", type=str, default="default")  # see conv_templates in gradio_dialogue.py
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
     models = get_model_list()
+    assert args.model_id in models, f"Model {args.model_id} not found in {models}. Are you sure you have started the worker with {args.model_id}?"
 
     logger.info(args)
     demo = build_demo(args.embed)

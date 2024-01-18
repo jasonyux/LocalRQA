@@ -235,6 +235,29 @@ python scripts/train/qa_llm/train_w_gt.py \
 ```
 
 
+# Serving
+
+by default, all server logs will go under `logs` folder. Make sure this folder exists before running the commands below.
+1. `python open_rqa/serve/controller.py`
+2. This is where you launch your customized RQA Pipeline(s):
+      ```bash
+      export CUDA_VISIBLE_DEVICES=7
+      python open_rqa/serve/model_worker.py \
+      --document_path data/database/databricks/databricks_400.pkl \
+      --index_path data/database/databricks/databricks_400_e5-base-v2 \
+      --embedding_model_name_or_path intfloat/e5-base-v2 \
+      --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
+      --model_id simple_rqa
+      ```
+3. Launch your demo page!
+      ```bash
+      python open_rqa/serve/gradio_web_server.py \
+      --model_id simple_rqa \
+      --example "What is Databricks?" \
+      --example "What is DBFS? What can it do?"
+      ```
+      where the `--model_id simple_rqa` is to let the controller know which model this demo page is for, and the `--example` are the example questions that will be shown on the demo page.
+
 # References
 
 G. Izacard, E. Grave [Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering](https://arxiv.org/abs/2007.01282)
@@ -248,10 +271,3 @@ G. Izacard, E. Grave [Leveraging Passage Retrieval with Generative Models for Op
       publisher = {arXiv},
 }
 ```
-
-## Serving
-
-by default, all server logs will go under `logs` folder. Make sure this folder exists before running the commands below.
-1. `python open_rqa/serve/controller.py`
-2. `export CUDA_VISIBLE_DEVICES=7 && python open_rqa/serve/model_worker.py --model-path lmsys/vicuna-7b-v1.5`
-3. `python open_rqa/serve/gradio_web_server.py`

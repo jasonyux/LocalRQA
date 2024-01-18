@@ -21,12 +21,20 @@ logger = init_logger(filename=f"logs/model_worker_{worker_id}.log")
 
 
 def load_model(
-    model_name_or_path,
+    database_path: Optional[str] = None,
+    document_path: Optional[str] = None,
+    index_path: str = "./index",
+    embedding_model_name_or_path = 'text-embedding-ada-002',
+    qa_model_name_or_path: str = "lmsys/vicuna-7b-v1.5",
+    qa_is_fid: bool = False,
+    user_prefix: str = "USER",
+    assistant_prefix: str = "ASSISTANT",
+    ## model_init stuff for faster inference
     load_8bit=False,
     load_4bit=False,
     device_map="auto",
     device="cuda",
-    debug=False,
+    verbose=False,
     **kwargs
 ):
     kwargs = {"device_map": device_map, **kwargs}
@@ -46,31 +54,90 @@ def load_model(
     else:
         kwargs['torch_dtype'] = torch.float16
 
-    # tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=False)
-    # model = AutoModelForCausalLM.from_pretrained(model_name_or_path, low_cpu_mem_usage=True, **kwargs)
-    # context_len = 2048
-
     kwargs['low_cpu_mem_usage'] = True
     rqa = GradioSimpleRQA.from_scratch(
-        document_path="data/database/databricks/databricks_400.pkl",
-        index_path="data/database/databricks/databricks_400_e5-base-v2",
-        embedding_model_name_or_path="intfloat/e5-base-v2",
-        qa_model_name_or_path=model_name_or_path,
+        database_path=database_path,
+        document_path=document_path,
+        index_path=index_path,
+        embedding_model_name_or_path=embedding_model_name_or_path,
+        qa_model_name_or_path=qa_model_name_or_path,
         qa_model_init_kwargs=kwargs,
-        qa_is_fid=False,
-        verbose=True,
+        qa_is_fid=qa_is_fid,
+        user_prefix=user_prefix,
+        assistant_prefix=assistant_prefix,
+        verbose=verbose,
     )
     model = rqa.get_model()
     tokenizer = rqa.get_tokenizer()
-    context_len = 4096  # see max_position_embeddings in model config
+    try:
+        context_len = model.config.max_position_embeddings
+    except Exception as _:
+        context_len = 4096  # default to this if cannot find it in config
     return rqa, model, tokenizer, context_len
 
 
 def add_model_args(parser):
     parser.add_argument(
-        "--model-path",
+        "--model_id",
         type=str,
+        default='simple_rqa',
+        help="Name for this RQA pipeline. Used by controller.py if you are hosting multiple RQA pipelines.",
     )
+    ### SimpleRQA from_scratch args
+    parser.add_argument(
+        "--database_path",
+        type=str,
+        default=None,
+        help="Path to the database folder.",
+    )
+    parser.add_argument(
+        "--document_path",
+        type=str,
+        default=None,
+        help="Path to the chunked document pickle file.",
+    )
+    parser.add_argument(
+        "--index_path",
+        type=str,
+        default='./index',
+        help="Path to the index folder.",
+    )
+    parser.add_argument(
+        "--embedding_model_name_or_path",
+        type=str,
+        default='intfloat/e5-base-v2',
+        help="Path to the embedding model.",
+    )
+    parser.add_argument(
+        "--qa_model_name_or_path",
+        type=str,
+        default='lmsys/vicuna-7b-v1.5',
+        help="Path to the QA model.",
+    )
+    parser.add_argument(
+        "--qa_is_fid",
+        action="store_true",
+        help="Whether the QA model is a FID model.",
+    )
+    parser.add_argument(
+        "--user_prefix",
+        type=str,
+        default="USER",
+        help="Prefix to add to the user input.",
+    )
+    parser.add_argument(
+        "--assistant_prefix",
+        type=str,
+        default="ASSISTANT",
+        help="Prefix to add to the assistant output.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Whether to print out the logs.",
+    )
+
+    ### model_init stuff for faster inference
     parser.add_argument(
         "--device",
         type=str,
@@ -96,11 +163,22 @@ class ModelWorker(BaseModelWorker):
         controller_addr: str,
         worker_addr: str,
         worker_id: str,
-        model_path: str,
+        model_name: str,
         limit_worker_concurrency: int,
         no_register: bool,
-        device: str,
+        ## SimpleRQA from_scratch args
+        database_path: Optional[str] = None,
+        document_path: Optional[str] = None,
+        index_path: str = "./index",
+        embedding_model_name_or_path = 'text-embedding-ada-002',
+        qa_model_name_or_path: str = "lmsys/vicuna-7b-v1.5",
+        qa_is_fid: bool = False,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        ## load_model_args
+        device: str = 'cuda',
         load_8bit: bool = False,
+        load_4bit: bool = False,
         stream_interval: int = 2,
         conv_template: Optional[str] = None,
         embed_in_truncate: bool = False,
@@ -112,7 +190,7 @@ class ModelWorker(BaseModelWorker):
             controller_addr,
             worker_addr,
             worker_id,
-            model_path,
+            model_name,
             [],
             limit_worker_concurrency,
             conv_template=conv_template,
@@ -120,10 +198,18 @@ class ModelWorker(BaseModelWorker):
 
         logger.info(f"Loading the model {self.model_names} on worker {worker_id} ...")
         self.rqa, self.model, self.tokenizer, self.context_len = load_model(
-            model_path,
+            database_path=database_path,
+            document_path=document_path,
+            index_path=index_path,
+            embedding_model_name_or_path=embedding_model_name_or_path,
+            qa_model_name_or_path=qa_model_name_or_path,
+            qa_is_fid=qa_is_fid,
+            user_prefix=user_prefix,
+            assistant_prefix=assistant_prefix,
             device=device,
             load_8bit=load_8bit,
-            debug=debug,
+            load_4bit=load_4bit,
+            verbose=debug,
         )
         self.device = device
         if self.tokenizer.pad_token is None:
@@ -135,6 +221,7 @@ class ModelWorker(BaseModelWorker):
 
         if not no_register:
             self.init_heart_beat()
+        return
 
     def retrieve(self, params):
         rephrased_question = self.rqa.rephrase_question_for_retrieval(**params["model_input"])
@@ -233,11 +320,11 @@ def create_model_worker():
         "--controller-address", type=str, default="http://localhost:21001"
     )
     add_model_args(parser)
-    parser.add_argument(
-        "--model-names",
-        type=lambda s: s.split(","),
-        help="Optional display comma separated names",
-    )
+    # parser.add_argument(
+    #     "--model-names",
+    #     type=lambda s: s.split(","),
+    #     help="Optional display comma separated names",
+    # )
     parser.add_argument("--embed-in-truncate", action="store_true")
     parser.add_argument(
         "--limit-worker-concurrency",
@@ -267,14 +354,25 @@ def create_model_worker():
     logger.info(f"args: {args}")
 
     worker = ModelWorker(
-        args.controller_address,
-        args.worker_address,
-        worker_id,
-        args.model_path,
-        args.limit_worker_concurrency,
+        controller_addr=args.controller_address,
+        worker_addr=args.worker_address,
+        worker_id=worker_id,
+        model_name=args.model_id,
+        limit_worker_concurrency=args.limit_worker_concurrency,
         no_register=args.no_register,
+        ### SimpleRQA from_scratch args
+        database_path=args.database_path,
+        document_path=args.document_path,
+        index_path=args.index_path,
+        embedding_model_name_or_path=args.embedding_model_name_or_path,
+        qa_model_name_or_path=args.qa_model_name_or_path,
+        qa_is_fid=args.qa_is_fid,
+        user_prefix=args.user_prefix,
+        assistant_prefix=args.assistant_prefix,
+        ### load_model args
         device=args.device,
         load_8bit=args.load_8bit,
+        load_4bit=args.load_4bit,
         stream_interval=args.stream_interval,
         conv_template=None,
         embed_in_truncate=args.embed_in_truncate,

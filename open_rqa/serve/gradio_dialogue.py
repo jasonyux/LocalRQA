@@ -59,7 +59,7 @@ conv_vicuna_v1 = GradioDialogueSession(
 default_conversation = conv_vicuna_v1
 conv_templates = {
     "default": conv_vicuna_v1,
-    "vicuna_v1": conv_vicuna_v1,
+    # add your own conversation templates here
 }
 
 
