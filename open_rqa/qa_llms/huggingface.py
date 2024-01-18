@@ -165,7 +165,7 @@ class HuggingFaceFiDQAModel(BaseQAModel):
 
         ## configs
         self._default_generate_kwargs = {
-            "max_length": 256,
+            "max_new_tokens": 256,
             "do_sample": False,  # FiD does not support sampling
         }
         self.user_prefix = user_prefix

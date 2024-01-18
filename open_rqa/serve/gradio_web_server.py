@@ -202,7 +202,11 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
         state._tmp_data['r_finish'] = finish_tstamp
     except requests.exceptions.RequestException as _:
         state.skip_next = True
-        raw_contents = [SERVER_ERROR_MSG]
+        tboxes = []
+        for i in range(NUM_DOC_TO_RETRIEVE):
+            t = gr.Textbox(show_label=False, value=SERVER_ERROR_MSG, info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+            tboxes.append(t)
+        return tuple([state] + tboxes)
 
     tboxes = []
     for i, content in enumerate(raw_contents):

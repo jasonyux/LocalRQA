@@ -80,7 +80,7 @@ python scripts/test/test_e2e.py \
 Databricks T5-FiD + Contriever:
 ```bash
 python scripts/test/test_e2e.py \
---qa_model_name_or_path model_checkpoints/databricks_flant5-xl_contriever-ft/checkpoint-800 \
+--qa_model_name_or_path model_checkpoints/databricks_flant5-xl_contriever-ft/checkpoint-700 \
 --qa_is_fid true \
 --embedding_model_name_or_path model_checkpoints/retriever_model/contriever-ms_databricks_inbatch256_chunk400_fulldoc_hard0.05_train/checkpoint-65 \
 --document_path data/database/databricks/databricks_400.pkl \

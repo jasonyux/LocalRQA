@@ -211,6 +211,7 @@ class ModelWorker(BaseModelWorker):
             load_4bit=load_4bit,
             verbose=debug,
         )
+        self.qa_is_fid = qa_is_fid  # this changes how input is prepared for QA
         self.device = device
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -224,8 +225,12 @@ class ModelWorker(BaseModelWorker):
         return
 
     def retrieve(self, params):
-        rephrased_question = self.rqa.rephrase_question_for_retrieval(**params["model_input"])
-        logger.info(f'rephrased_question from {params["model_input"]["question"]} to {rephrased_question}')
+        if self.qa_is_fid:
+            ## FiD cannot do rephrase very well as it was NOT trained to do so
+            rephrased_question = params["model_input"]["question"]
+        else:
+            rephrased_question = self.rqa.rephrase_question_for_retrieval(**params["model_input"])
+            logger.info(f'rephrased_question from {params["model_input"]["question"]} to {rephrased_question}')
 
         retrieved_docs = self.rqa.retrieve(
             question=rephrased_question,
@@ -242,35 +247,62 @@ class ModelWorker(BaseModelWorker):
     def generate_stream(self, params):
         tokenizer, model = self.tokenizer, self.model
 
-        prompt = self.rqa.prepare_prompt_for_generation(**params["model_input"])
+        if self.qa_is_fid:
+            ## a bit more complicated for FID model
+            q_w_retrieved_docs = [self.rqa.prepare_prompt_for_generation(**params["model_input"])]
 
-        temperature = float(params.get("temperature", 1.0))
-        top_p = float(params.get("top_p", 1.0))
-        max_context_length = getattr(model.config, 'max_position_embeddings', 2048)
-        max_new_tokens = min(int(params.get("max_new_tokens", 256)), 512)
-        do_sample = True if temperature > 0.001 else False
-        stop_str = params.get("stop", "</s>")
+            max_new_tokens = min(int(params.get("max_new_tokens", 256)), 512)
+            do_sample = False  # FID model does not support sampling
+            stop_str = params.get("stop", "</s>")
 
-        # input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).to(self.device)
-        input_ids = tokenizer(prompt, return_tensors='pt').input_ids.to(self.device)
-        streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=15)
+            input_ids, attention_mask = self.rqa.rqa.qa_llm.encode_fid_inputs(
+                q_w_retrieved_docs,
+                max_length=512,  # required by FID model
+            )
+            input_ids = input_ids.to(self.device)
+            attention_mask = attention_mask.to(self.device)
+            
+            streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=15)
 
-        max_new_tokens = min(max_new_tokens, max_context_length - input_ids.shape[-1])
+            thread = Thread(target=model.generate, kwargs=dict(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                do_sample=do_sample,
+                max_new_tokens=max_new_tokens,
+                streamer=streamer,
+                use_cache=True,
+            ))
+            thread.start()
+        else:
+            ## things are easier for decoder only model
+            prompt = self.rqa.prepare_prompt_for_generation(**params["model_input"])
 
-        if max_new_tokens < 1:
-            yield json.dumps({"text": prompt + "Exceeds max token length. Please start a new conversation, thanks.", "error_code": 0}).encode() + b"\0"
-            return
+            temperature = float(params.get("temperature", 1.0))
+            top_p = float(params.get("top_p", 1.0))
+            max_context_length = getattr(model.config, 'max_position_embeddings', 2048)
+            max_new_tokens = min(int(params.get("max_new_tokens", 256)), 512)
+            do_sample = True if temperature > 0.001 else False
+            stop_str = params.get("stop", "</s>")
 
-        thread = Thread(target=model.generate, kwargs=dict(
-            inputs=input_ids,
-            do_sample=do_sample,
-            temperature=temperature,
-            top_p=top_p,
-            max_new_tokens=max_new_tokens,
-            streamer=streamer,
-            use_cache=True,
-        ))
-        thread.start()
+            input_ids = tokenizer(prompt, return_tensors='pt').input_ids.to(self.device)
+            streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=15)
+
+            max_new_tokens = min(max_new_tokens, max_context_length - input_ids.shape[-1])
+
+            if max_new_tokens < 1:
+                yield json.dumps({"text": prompt[0] + "Exceeds max token length. Please start a new conversation, thanks.", "error_code": 0}).encode() + b"\0"
+                return
+
+            thread = Thread(target=model.generate, kwargs=dict(
+                inputs=input_ids,
+                do_sample=do_sample,
+                temperature=temperature,
+                top_p=top_p,
+                max_new_tokens=max_new_tokens,
+                streamer=streamer,
+                use_cache=True,
+            ))
+            thread.start()
 
         generated_text = ''
         for new_text in streamer:
@@ -315,7 +347,6 @@ def create_model_worker():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="localhost")
     parser.add_argument("--port", type=int, default=21002)
-    parser.add_argument("--worker-address", type=str, default="http://localhost:21002")
     parser.add_argument(
         "--controller-address", type=str, default="http://localhost:21001"
     )
@@ -353,9 +384,10 @@ def create_model_worker():
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
+    worker_address = f"http://{args.host}:{args.port}"
     worker = ModelWorker(
         controller_addr=args.controller_address,
-        worker_addr=args.worker_address,
+        worker_addr=worker_address,
         worker_id=worker_id,
         model_name=args.model_id,
         limit_worker_concurrency=args.limit_worker_concurrency,

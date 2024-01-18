@@ -56,6 +56,7 @@ class BaseModelWorker:
             logger = init_logger(f"model_worker_{self.worker_id}.log")
         if worker is None:
             worker = self
+        return
 
     def init_heart_beat(self):
         self.register_to_controller()
@@ -106,6 +107,7 @@ class BaseModelWorker:
 
         if not exist:
             self.register_to_controller()
+        return
 
     def get_queue_length(self):
         if (
