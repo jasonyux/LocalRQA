@@ -261,6 +261,17 @@ by default, all server logs will go under `logs` folder. Make sure this folder e
       ```
       where the `--model_id simple_rqa` is to let the controller know which model this demo page is for, and the `--example` are the example questions that will be shown on the demo page.
 
+## Serving with Acceleration Framework
+
+Here we provide an example using `vLLM`. The procedure is very similar with using `TGI`:
+
+1. prepare and launch your `vLLM` server, hosting your generative model. For example:
+      ```bash
+      python -m vllm.entrypoints.api_server --model lmsys/vicuna-7b-v1.5
+      ```
+      this will by default host the model at `http://localhost:8000`.
+2. Then all you have to do is to use `--qa_model_name_or_path vllm::http://localhost:8000` instead of `--qa_model_name_or_path lmsys/vicuna-7b-v1.5` in the above section!
+
 # References
 
 G. Izacard, E. Grave [Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering](https://arxiv.org/abs/2007.01282)

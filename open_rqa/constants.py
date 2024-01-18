@@ -9,7 +9,7 @@ OPENAI_MODEL_NAMES = ['gpt-4-1106-preview', 'gpt-4', 'gpt-3.5-turbo', 'text-embe
 class AccelerationFramework(Enum):
     VLLM = 'vllm::'
     TGI = 'tgi::'
-
+    SGLANG = 'sglang::'
 
 ##### For the controller and workers (could be overwritten through ENV variables.)
 SERVER_LOGDIR = "logs"
