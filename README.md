@@ -55,6 +55,8 @@ python scripts/data/doc_q_to_a.py \
 
 # Testing
 
+(for E2E test, you can enable GPT4Eval by passing the flag `--gen_gpt4eval true`.)
+
 E2E test GPT-3.5 + Text ada:
 ```bash
 python scripts/test/test_e2e.py \
@@ -249,7 +251,8 @@ by default, all server logs will go under `logs` folder. Make sure this folder e
       --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
       --model_id simple_rqa
       ```
-3. Launch your demo page!
+3. To do a quick test to see if the above is working, try `python open_rqa/serve/test_message.py --model_id simple_rqa`
+4. Launch your demo page!
       ```bash
       python open_rqa/serve/gradio_web_server.py \
       --model_id simple_rqa \

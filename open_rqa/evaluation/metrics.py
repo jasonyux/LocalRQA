@@ -1,11 +1,19 @@
 import time
 import evaluate
+import os
+import re
+import logging
 from abc import ABC, abstractmethod
 from collections import Counter
 from functools import partial
 from typing import Dict, List
 from open_rqa.evaluation.scores import f1, precision
 from open_rqa.evaluation.utils import normalize_answer
+from open_rqa.schema.document import Document
+from openai import OpenAI
+
+
+logger = logging.getLogger(__name__)
 
 
 def mean(l):
@@ -194,7 +202,14 @@ class F1(RunningMetic):
         self.reset()
         return
     
-    def update(self, batch_gen_answers, batch_gold_answers, batch_retrieved_docs, batch_gold_docs):
+    def update(
+        self,
+        batch_questions: List[str],
+        batch_gen_answers: List[str],
+        batch_gold_answers: List[str],
+        batch_retrieved_docs: List[List[Document]],
+        batch_gold_docs: List[List[Document]],
+    ):
         bsz = len(batch_retrieved_docs)
         for i in range(bsz):
             gen_ans = batch_gen_answers[i]
@@ -241,7 +256,14 @@ class Precision(RunningMetic):
         self.reset()
         return
     
-    def update(self, batch_gen_answers, batch_gold_answers, batch_retrieved_docs, batch_gold_docs):
+    def update(
+        self,
+        batch_questions: List[str],
+        batch_gen_answers: List[str],
+        batch_gold_answers: List[str],
+        batch_retrieved_docs: List[List[Document]],
+        batch_gold_docs: List[List[Document]],
+    ):
         bsz = len(batch_retrieved_docs)
         for i in range(bsz):
             gen_ans = batch_gen_answers[i]
@@ -291,7 +313,14 @@ class ROUGE(RunningMetic):
         self.reset()
         return
     
-    def update(self, batch_gen_answers, batch_gold_answers, batch_retrieved_docs, batch_gold_docs):
+    def update(
+        self,
+        batch_questions: List[str],
+        batch_gen_answers: List[str],
+        batch_gold_answers: List[str],
+        batch_retrieved_docs: List[List[Document]],
+        batch_gold_docs: List[List[Document]],
+    ):
         bsz = len(batch_retrieved_docs)
         for i in range(bsz):
             gen_ans = batch_gen_answers[i]
@@ -345,7 +374,14 @@ class AnswerStats(RunningMetic):
         self.reset()
         return
     
-    def update(self, batch_gen_answers, batch_gold_answers, batch_retrieved_docs, batch_gold_docs):
+    def update(
+        self,
+        batch_questions: List[str],
+        batch_gen_answers: List[str],
+        batch_gold_answers: List[str],
+        batch_retrieved_docs: List[List[Document]],
+        batch_gold_docs: List[List[Document]],
+    ):
         bsz = len(batch_gen_answers)
         for i in range(bsz):
             gen_ans = batch_gen_answers[i]
@@ -362,6 +398,137 @@ class AnswerStats(RunningMetic):
     def reset(self):
         self.state = {
             "num_words": []
+        }
+        return
+
+
+GPT_EVAL_ACC_PROMPT = """
+Please act as an impartial judge and evaluate the correctness of the response provided by an AI assistant to the user question displayed below.
+Your evaluation should only consider whether the response answered the user's question and contained the correct information.
+Begin your evaluation by providing a SHORT explanation, no more than 5 sentences. Be as objective as possible.
+After providing your explanation, you must access whether the response is correct or incorrect by strictly following this format: "[[correctness]]", for example: "Correctness: [[correct]]" or "Correctness: [[incorrect]]".
+
+[Question]
+{question}
+[Reference Answer]
+{reference}
+[Reference Passages]
+{reference_passages}
+
+[The Start of Assistant's Answer]
+{answer}
+[The End of Assistant's Answer]
+
+Explanation:
+""".strip()
+
+
+class GPT4Eval(RunningMetic):
+    def __init__(self, name="gpt4eval"):
+        self.name = name
+        self.prompt = GPT_EVAL_ACC_PROMPT
+
+        self.model_name = 'gpt-4-1106-preview'
+        self.client = OpenAI(
+            api_key = os.environ.get("OPENAI_API_KEY"),
+            organization = os.environ.get("OPENAI_ORGANIZATION")
+        )
+        self.state = {
+            "gpt4eval_acc": [],
+        }
+        self._default_generate_kwargs = {
+            "temperature": 0.7,
+            "timeout": 30.0,
+        }
+        self.reset()
+        return
+
+    def _generate(self, prompt):
+        _gen_kwargs = {
+            **self._default_generate_kwargs,
+        }
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt},
+                ],
+                **_gen_kwargs
+            )
+            extracted_message = response.choices[0].message.content
+        except Exception as _:
+            extracted_message = ''
+        return extracted_message
+
+    def judge(self, question, reference, answer, gold_docs, retrieved_docs):
+        ### format prompt
+        gold_doc = gold_docs[0]
+        first_retrieved_doc = retrieved_docs[0]
+        if is_almost_same_document(gold_doc, first_retrieved_doc):
+            passages = [gold_doc]
+        else:
+            passages = [gold_doc, first_retrieved_doc]
+        fmt_passages = "\n".join([p.fmt_content for p in passages])
+        prompt = self.prompt.format(
+            question=question,
+            reference=reference,
+            answer=answer,
+            reference_passages=fmt_passages
+        )
+
+        ### generate
+        logger.info(f"GPT4Eval Prompt:\n {prompt}")
+        extracted_message = self._generate(prompt)
+        extracted_correctness = re.findall(r"Correctness: \[\[(.*)\]\]", extracted_message)
+        logger.info(f"GPT4Eval Response:\n {extracted_message}")
+        logger.info(f"GPT4Eval Correctness: {extracted_correctness}")
+        
+        if len(extracted_correctness) == 0:
+            return None
+        else:
+            if extracted_correctness[0].strip().lower() == "correct":
+                return True
+            else:
+                return False
+        return
+    
+    def update(
+        self,
+        batch_questions: List[str],
+        batch_gen_answers: List[str],
+        batch_gold_answers: List[str],
+        batch_retrieved_docs: List[List[Document]],
+        batch_gold_docs: List[List[Document]],
+    ):
+        bsz = len(batch_retrieved_docs)
+        for i in range(bsz):
+            question = batch_questions[i]
+            gen_ans = batch_gen_answers[i]
+            gold_ans = batch_gold_answers[i]
+            gold_docs = batch_gold_docs[i]
+            retr_docs = batch_retrieved_docs[i]
+            
+            # measure w.r.t gold answer
+            correctness = self.judge(
+                question=question,
+                reference=gold_ans,
+                answer=gen_ans,
+                gold_docs=gold_docs,
+                retrieved_docs=retr_docs,
+            )
+            self.state["gpt4eval_acc"].append(correctness)
+        return
+    
+    def compute(self):
+        no_none = [x for x in self.state["gpt4eval_acc"] if x is not None]
+        return {
+            'gpt4eval_acc': mean(no_none)
+        }
+    
+    def reset(self):
+        self.state = {
+            "gpt4eval_acc": [],
         }
         return
 
@@ -412,6 +579,7 @@ METRICS = {
     'f1': F1,
     'precision': Precision,
     'rouge': ROUGE,
+    'gpt4eval': GPT4Eval,
     'answer_stats': AnswerStats,
     "latency": Latency,
 }

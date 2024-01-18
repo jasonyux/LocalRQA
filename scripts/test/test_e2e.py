@@ -56,6 +56,11 @@ class TestArguments:
         default="model_checkpoints/debug_test",
         metadata={"help": "Path to the output directory for saving test predictions and results"},
     )
+    ### eval config
+    gen_gpt4eval: bool = field(
+        default=False,
+        metadata={"help": "Whether to use GPT4 for evaluation"},
+    )
 
 
 def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_path: str):
@@ -131,6 +136,7 @@ def test(model_args: ModelArguments, test_args: TestArguments):
         gen_precision = True,
         gen_rouge = True,
         gen_latency = True,
+        gen_gpt4eval = test_args.gen_gpt4eval,
         e2e_latency = True,
     )
     loaded_eval_data = load_eval_data(test_args.eval_data_path)

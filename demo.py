@@ -1,19 +1,14 @@
 from langchain.document_loaders import *
 from langchain.text_splitter import *
-from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings import *
-from transformers import AutoTokenizer
-
 from open_rqa.pipelines.retrieval_qa import SimpleRQA, AutoRQA
 from open_rqa.schema.dialogue import DialogueSession
 from open_rqa.guardrails.base import NoopAnswerGuardrail
-from open_rqa.retrievers.base import BaseRetriever, DummyRetriever
 from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.text_loaders.langchain_text_loader import LangChainTextLoader, DirectoryTextLoader
 from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
 from open_rqa.utils import init_logger
 import logging
-import os
 import torch
 
 

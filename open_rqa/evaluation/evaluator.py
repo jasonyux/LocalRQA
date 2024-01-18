@@ -52,6 +52,10 @@ class EvaluatorConfig:
         default=True,
         metadata={"help": "Whether to compute answer stats for generation"},
     )
+    gen_gpt4eval: bool = field(
+        default=False,
+        metadata={"help": "Whether to prompt GPT-4 as judge for evaluation"},
+    )
     e2e_latency: bool = field(
         default=True,
         metadata={"help": "Whether to compute latency for end-to-end"},
@@ -60,9 +64,9 @@ class EvaluatorConfig:
 
 class Evaluator(ABC):
     def __init__(
-        self, 
+        self,
         config: EvaluatorConfig,
-        test_data: List[Dict], 
+        test_data: List[Dict],
         documents = None
     ):
         self.config = config
@@ -195,7 +199,7 @@ class E2EEvaluator(Evaluator):
         config: EvaluatorConfig,
         test_data: List[Dict],
     ):
-        super().__init__(config, test_data, None, None)
+        super().__init__(config, test_data, None)
         self.retr_metrics = self.init_metrics(metric_type="retr")
         self.gen_metrics = self.init_metrics(metric_type="gen")
         self.e2e_metrics = self.init_metrics(metric_type="e2e")
@@ -248,6 +252,7 @@ class E2EEvaluator(Evaluator):
         num_batches = math.ceil(len(self.test_data) / self.config.batch_size)
         for batch in tqdm(test_data_iterator, desc="Evaluating Performance", total=num_batches):
             num_samples_seen += batch['__len__']
+            questions: List[str] = batch["question"]
             gold_docs: List[List[Document]] = batch["gold_docs"]
             gold_answers: List[str] = batch["gold_answer"]
             # e2e qa and score
@@ -256,7 +261,7 @@ class E2EEvaluator(Evaluator):
                     metric.start()
             
             gen_outputs: RQAOutput = wrapped_model.qa(
-                batch_questions=batch["question"],
+                batch_questions=questions,
                 batch_dialogue_session=batch["dialogue_session"],
             )
             retrieved_docs: List[List[Document]] = gen_outputs.batch_source_documents
@@ -270,11 +275,11 @@ class E2EEvaluator(Evaluator):
                 if isinstance(metric, MonitoringMetric):
                     metric.stop(batch['__len__'])
                 else:
-                    metric.update(generated_answers, gold_answers, retrieved_docs, gold_docs)
+                    metric.update(questions, generated_answers, gold_answers, retrieved_docs, gold_docs)
             
             # flatten and make it savable with jsonlines
             for idx in range(batch['__len__']):
-                question = batch["question"][idx]
+                question = questions[idx]
                 gold_doc = gold_docs[idx]
                 retrieved_doc = retrieved_docs[idx]
                 gold_answer = gold_answers[idx]
