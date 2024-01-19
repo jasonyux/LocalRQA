@@ -8,7 +8,6 @@ from open_rqa.schema.document import Document
 from open_rqa.qa_llms.prompts import RQA_PROMPT
 from open_rqa.constants import QA_ERROR_MSG
 from typing import Iterable, List, Optional
-from copy import deepcopy
 
 
 logger = logging.getLogger(__name__)
@@ -38,8 +37,8 @@ class VLLMClient:
         )
         return response
 
-    def _get_streaming_response(self, response: requests.Response) -> Iterable[List[str]]:
-        prev = 0
+    def _get_streaming_response(self, response: requests.Response, offset: int) -> Iterable[List[str]]:
+        prev = offset
         for chunk in response.iter_lines(chunk_size=8192,
                                         decode_unicode=False,
                                         delimiter=b"\0"):
@@ -62,7 +61,7 @@ class VLLMClient:
     def generate_stream(self, input_text: str, **generate_kwargs):
         generate_kwargs['stream'] = True
         response = self._post_http_request(input_text, **generate_kwargs)
-        for token in self._get_streaming_response(response):
+        for token in self._get_streaming_response(response, offset=len(input_text)):
             yield token
 
 
@@ -79,28 +78,31 @@ class vLLMQAModel(BaseQAModel):
             "use_beam_search": False,
             "n": 1,
             "temperature": 0.7,
-            "max_tokens": 256,
+            "max_tokens": 2048,  # prompt + answer
             "stream": False,
         }
-        self.stop_sequences = ["</s>"]
+        self._allowed_params = [
+            'presence_penalty', 'frequency_penalty', 'repetition_penalty', 'temperature', 'top_p', 'top_k', 'min_p',
+            'use_beam_search', 'length_penalty', 'early_stopping', 'stop', 'stop_token_ids', 'max_tokens'
+        ]
         return
 
     def prepare_gen_kwargs(self, input_kwargs):
-        new_input_kwargs = deepcopy(input_kwargs)
-        if 'num_beams' in new_input_kwargs:
-            new_input_kwargs.pop('num_beams')
-            logger.warning("num_beams is not used in this vllm client")
-        if 'use_beam_search' in new_input_kwargs:
-            new_input_kwargs['use_beam_search'] = False  # difficult to handle as it returns a list
-        
-        if 'eos_token_id' in new_input_kwargs:
-            new_input_kwargs.pop('eos_token_id')
-            self.stop_sequences = ["</s>"]
-            logger.warning("eos_token_id is not supported in vllm. Using stop_sequences='</s>' instead.")
-        
-        if 'early_stopping' in new_input_kwargs:
-            new_input_kwargs.pop('early_stopping')
-            logger.warning("early_stopping is not used in this vllm client")
+        if 'num_beams' in input_kwargs:
+            input_kwargs.pop('num_beams')
+        if 'use_beam_search' in input_kwargs:
+            input_kwargs['use_beam_search'] = False  # difficult to handle as it returns a list
+        if 'eos_token_id' in input_kwargs:
+            input_kwargs['stop_token_ids'] = input_kwargs.pop('eos_token_id')
+        if 'max_new_tokens' in input_kwargs:
+            # assume prompt is 1.2k
+            max_tokens = input_kwargs.pop('max_new_tokens') + 1200
+            input_kwargs['max_tokens'] = max_tokens
+
+        new_input_kwargs = {}
+        for k in self._allowed_params:
+            if k in input_kwargs:
+                new_input_kwargs[k] = input_kwargs[k]
         
         return new_input_kwargs
 
@@ -157,13 +159,12 @@ class vLLMQAModel(BaseQAModel):
     def _generate(self, input_text, **generate_kwargs):
         generate_kwargs = self.prepare_gen_kwargs(generate_kwargs)
         generated_text = self.client.generate(input_text, **generate_kwargs)
-        return generated_text
+        return generated_text[len(input_text):]
     
     def _generate_stream(self, input_text, **generate_kwargs):
         generate_kwargs = self.prepare_gen_kwargs(generate_kwargs)
         for token in self.client.generate_stream(input_text, **generate_kwargs):
-            if token not in self.stop_sequences:
-                yield token
+            yield token
 
     def generate(self, batched_prompts: List[str], tokenization_kwargs: dict, generation_kwargs: dict) -> GenerationOutput:
         responses = []
@@ -193,12 +194,12 @@ if __name__ == "__main__":
     output = rqa_model.generate(
         batched_prompts=[question],
         tokenization_kwargs={},
-        generation_kwargs={'max_tokens': 16}
+        generation_kwargs={'max_tokens': 32}
     )
     print('[[not streaming]]')
     print(output.batch_answers[0])
 
     ## stream
     print('[[streaming]]')
-    for token in rqa_model._generate_stream(question, max_tokens=8):
-        print(token, flush=True)
+    for token in rqa_model._generate_stream(question, max_tokens=32):
+        print(token, end="", flush=True)

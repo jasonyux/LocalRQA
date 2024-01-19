@@ -8,7 +8,6 @@ from open_rqa.schema.document import Document
 from open_rqa.qa_llms.prompts import RQA_PROMPT
 from open_rqa.constants import QA_ERROR_MSG
 from typing import Iterable, List, Optional
-from copy import deepcopy
 
 
 logger = logging.getLogger(__name__)
