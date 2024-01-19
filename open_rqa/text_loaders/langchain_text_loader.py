@@ -7,9 +7,8 @@ from open_rqa.text_loaders.base import BaseTextLoader
 import pickle
 import os
 import tiktoken
+import json
 
-
-# TODO: change langchain.schema Document to our Document
 
 class LangChainTextLoader(BaseTextLoader):
     def __init__(self, save_folder="data", save_filename="parsed_docs", loader_func=DirectoryLoader, splitter_func=CharacterTextSplitter):
@@ -68,66 +67,53 @@ class LangChainTextLoader(BaseTextLoader):
         return
     
 
-class DirectoryTextLoader(LangChainTextLoader):
-    def __init__(self, datapath, save_folder="data", save_filename="parsed_docs"):
-        """default text loader through DirectoryLoader
-
-        Args:
-            datapath (_type_): local data file path
-            save_folder (str, optional): _description_. Defaults to "data".
-            save_filename (str, optional): _description_. Defaults to "parsed_docs".
-        """
-        super().__init__(save_folder, save_filename)
-        self.datapath = datapath
-        return
-
-    def load_data(self, *args: Any, **kwargs: Any) -> List[Document]:
-        """default load data through DirectoryLoader with default parameter setting
-
-        Returns:
-            List[Document]: _description_
-        """
-        # TODO: distinguish between 
-        # tokenizer = AutoTokenizer.from_pretrained("facebook/contriever-msmarco")
-        # loader_parameters = kwargs.get('loader_params') if kwargs.get('loader_params') else {'path': self.datapath}
-        # splitter_parameters = kwargs.get('splitter_params') if kwargs.get('splitter_params') else {'tokenizer': tokenizer, 'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
-        # docs = self.loader_func(**loader_parameters).load()
-        # text_splitter = self.splitter_func.from_huggingface_tokenizer(**splitter_parameters)
-        
-        loader_parameters = kwargs.get('loader_params') if kwargs.get('loader_params') else {
-            'path': self.datapath
-        }
-        splitter_parameters = kwargs.get('splitter_params') if kwargs.get('splitter_params') else {
-            'encoding_name': tiktoken.encoding_name_for_model("text-embedding-ada-002"),
-            'chunk_size': 500,
-            'chunk_overlap': 200,
-            'separator': "\n\n"
-        }
-        docs = self.loader_func(**loader_parameters).load()
-        text_splitter = self.splitter_func.from_tiktoken_encoder(**splitter_parameters)
-        texts = text_splitter.split_documents(docs)
-        texts = self._convert_doc(texts)
-        
-        self.save_texts(texts)
-
-        return texts
-    
-
-
 if __name__ == "__main__":
-    # loader_func, split_func = GoogleDriveLoader, CharacterTextSplitter
-    # loader_parameters = {'folder_id': "1KARQJvcjAbsofjyFpke-z7Udk3m_NnIF", 'recursive': True}
+    ## Example of load document by using GoogleDriveLoader, split the docs by using CharacterTextSplitter
+    loader_func, split_func = GoogleDriveLoader, CharacterTextSplitter
+    loader_parameters = {'folder_id': "1KARQJvcjAbsofjyFpke-z7Udk3m_NnIF", 'recursive': True}
+    splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+    kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    docs = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
 
-    # loader_func, split_func = SeleniumURLLoader, CharacterTextSplitter
-    # loader_parameters = {'urls': ["https://python.langchain.com/docs/modules/data_connection/document_loaders/file_directory"]}
+    ## Examples of load document from website url by using SeleniumURLLoader
+    loader_func, split_func = SeleniumURLLoader, CharacterTextSplitter
+    loader_parameters = {'urls': ["https://python.langchain.com/docs/modules/data_connection/document_loaders/file_directory"]}
+    splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+    kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    docs = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
 
-    # loader_func, split_func = DirectoryLoader, CharacterTextSplitter
-    # loader_parameters = {'path': "data", 'glob': "**/*.txt"}
-    # splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
-    # kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    ## Example of local document from all .txt file under directory by using DirectoryLoader
+    loader_func, split_func = DirectoryLoader, CharacterTextSplitter
+    loader_parameters = {'path': "data", 'glob': "**/*.txt"}
+    splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
+    kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    docs = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
     
-    # docs = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
-    # print(len(docs))
+    ## Example of local document from json/jsonl file by using JSONLoader
+    def metadata_func(record: dict, metadata: dict) -> dict:
 
-    docs = DirectoryTextLoader("./open_rqa/text_loaders/data").load_data()
-    print(len(docs))
+        metadata["subtitle"] = record.get("question")
+        metadata['source'] = record.get("source")
+        metadata['title'] = record.get("title")
+
+        return metadata
+
+    json_list_docs = json.load(open("/local2/data/shared/rqa/training/faire_raw/faire_texts.json", "r"))
+    jsonl_filepath = '/local2/data/shared/rqa/training/faire_raw/faire_texts.jsonl'
+    with open(jsonl_filepath, 'w') as file:
+        for json_obj in json_list_docs:
+            json_str = json.dumps(json_obj)
+            file.write(json_str + '\n')
+    loader_func, splitter_func = JSONLoader, RecursiveCharacterTextSplitter.from_huggingface_tokenizer
+    loader_parameters = {
+        'file_path': jsonl_filepath,
+        'jq_schema': '.',
+        'content_key': 'full_text',
+        'json_lines': True,
+        'metadata_func': metadata_func
+    }
+    tokenizer = AutoTokenizer.from_pretrained("facebook/contriever-msmarco")
+    splitter_parameters = {'tokenizer': tokenizer, 'chunk_size': 400, 'chunk_overlap': 50}
+    kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
+    documents = LangChainTextLoader(save_folder="/local2/data/shared/rqa/training", save_filename="faire_400", 
+                                    loader_func=loader_func, splitter_func=splitter_func).load_data(**kwargs)
