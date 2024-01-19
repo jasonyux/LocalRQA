@@ -40,13 +40,14 @@ class SGLangClient:
 
     def _get_streaming_response(self, response: requests.Response) -> Iterable[List[str]]:
         prev = 0
-        for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
+        for chunk in response.iter_lines(chunk_size=8192,
+                                        decode_unicode=False,
+                                        delimiter=b"\0"):
             if chunk:
                 data = json.loads(chunk.decode("utf-8"))
-                output = data["text"].strip()
-                # output = output[prev:]
-                prev = len(output)
+                output = data["text"][prev:]
                 yield output
+                prev += len(output)
 
     def _get_response(self, response: requests.Response) -> List[str]:
         data = response.json()
@@ -59,12 +60,14 @@ class SGLangClient:
         return generated_text
 
     def generate_stream(self, input_text: str, **generate_kwargs):
-        response = self._post_http_request(input_text, **generate_kwargs)
+        response = self._post_http_request(input_text, stream=True, **generate_kwargs)
         for token in self._get_streaming_response(response):
             yield token
 
 
 class SGLangQAModel(BaseQAModel):
+    is_api_model = True
+    
     def __init__(self, url, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
         self.client = SGLangClient(url, timeout=60)
         self.url = url
@@ -76,26 +79,31 @@ class SGLangQAModel(BaseQAModel):
             "max_new_tokens": 256,
             "stop": ["</s>"]
         }
-        self.stop_sequences = ["</s>"]
+        self._allowed_params = [
+            'max_new_tokens', 'stop', 'temperature', 'top_p', 'top_k', 'frequency_penalty', 'presence_penalty'
+        ]
         return
 
     def prepare_gen_kwargs(self, input_kwargs):
-        new_input_kwargs = deepcopy(input_kwargs)
-        if 'num_beams' in new_input_kwargs:
-            new_input_kwargs.pop('num_beams')
+        # print some warning to let user know what is not supported
+        if 'num_beams' in input_kwargs:
+            input_kwargs.pop('num_beams')
             logger.warning("num_beams is not supported in sglang")
-        
-        if 'eos_token_id' in new_input_kwargs:
-            new_input_kwargs.pop('eos_token_id')
+        if 'eos_token_id' in input_kwargs:
+            input_kwargs.pop('eos_token_id')
             logger.warning("eos_token_id is not supported in sglang. Using stop instead.")
-        
-        if 'early_stopping' in new_input_kwargs:
-            new_input_kwargs.pop('early_stopping')
+        if 'early_stopping' in input_kwargs:
+            input_kwargs.pop('early_stopping')
             logger.warning("early_stopping is not supported in sglang")
-
-        if 'stream' in new_input_kwargs:
-            new_input_kwargs.pop('stream')
-        
+        if 'do_sample' in input_kwargs:
+            input_kwargs.pop('do_sample')
+            logger.warning("do_sample is not supported in sglang, use temperature instead")
+        if 'stream' in input_kwargs:
+            input_kwargs.pop('stream')
+        new_input_kwargs = {}
+        for k in self._allowed_params:
+            if k in input_kwargs:
+                new_input_kwargs[k] = input_kwargs[k]
         return new_input_kwargs
 
     def _prepare_question_w_docs(self, question: str, docs: List[Document], chat_history_str: str):
@@ -182,7 +190,7 @@ if __name__ == "__main__":
     # assume you already have a running vllm server
     # e.g.: python -m vllm.entrypoints.api_server will host at http://localhost:8000/generate
     rqa_model = SGLangQAModel(url="http://localhost:30000/generate")
-    question = "What is the capital of France?"
+    question = "Tell me a very long story."
     output = rqa_model.generate(
         batched_prompts=[question],
         tokenization_kwargs={},
@@ -193,5 +201,5 @@ if __name__ == "__main__":
 
     ## stream
     print('[[streaming]]')
-    for token in rqa_model._generate_stream(question, temperature=0.0, max_new_tokens=32):
-        print(token, flush=True)
+    for token in rqa_model._generate_stream(question, max_new_tokens=32):
+        print(token, end="", flush=True)

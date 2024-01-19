@@ -114,11 +114,17 @@ class SimpleRQA(BaseRQA):
         self, questions: List[str], chat_history_strs: List[str]
     ) -> List[str]:
         input_prompts = []
+
+        try:
+            eos_token = self.qa_llm.tokenizer.eos_token
+        except AttributeError:
+            eos_token = "</s>"
+        
         for question, chat_history_str in zip(questions, chat_history_strs):
             prompt_i = REPHRASE_QUESTION_PROMPT.format(
                 question=question,
                 chat_history_str=chat_history_str,
-                eos_token=self.qa_llm.tokenizer.eos_token,
+                eos_token=eos_token,
             )
             input_prompts.append(prompt_i)
             if self.verbose:
@@ -420,8 +426,8 @@ class SimpleRQA(BaseRQA):
                 assistant_prefix=assistant_prefix,
                 verbose=verbose,
             )
-        elif AccelerationFramework.VLLM in qa_model_name_or_path:
-            url = qa_model_name_or_path.replace(AccelerationFramework.VLLM, "")
+        elif AccelerationFramework.VLLM.value in qa_model_name_or_path:
+            url = qa_model_name_or_path.replace(AccelerationFramework.VLLM.value, "")
             return cls.from_vllm(
                 retriever=retriever,
                 qa_model_url=url,
@@ -429,8 +435,8 @@ class SimpleRQA(BaseRQA):
                 assistant_prefix=assistant_prefix,
                 verbose=verbose,
             )
-        elif AccelerationFramework.TGI in qa_model_name_or_path:
-            url = qa_model_name_or_path.replace(AccelerationFramework.TGI, "")
+        elif AccelerationFramework.TGI.value in qa_model_name_or_path:
+            url = qa_model_name_or_path.replace(AccelerationFramework.TGI.value, "")
             return cls.from_tgi(
                 retriever=retriever,
                 qa_model_url=url,
@@ -438,8 +444,8 @@ class SimpleRQA(BaseRQA):
                 assistant_prefix=assistant_prefix,
                 verbose=verbose,
             )
-        elif AccelerationFramework.SGLANG in qa_model_name_or_path:
-            url = qa_model_name_or_path.replace(AccelerationFramework.SGLANG, "")
+        elif AccelerationFramework.SGLANG.value in qa_model_name_or_path:
+            url = qa_model_name_or_path.replace(AccelerationFramework.SGLANG.value, "")
             return cls.from_sglang(
                 retriever=retriever,
                 qa_model_url=url,

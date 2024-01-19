@@ -38,6 +38,17 @@ class GradioRQA(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def generate_stream_from_api(self):
+        """either this method is used for generate_stream, or model.generate will be used
+        so, if you are NOT using acceleration frameworks and is loading models locally, just implement get_model and get_tokenizer
+        otherwise, implement this method and return a generator
+
+        Raises:
+            NotImplementedError: _description_
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def prepare_prompt_for_generation(self, question: str, retrieved_docs: List[dict], history: List):
         raise NotImplementedError
 
@@ -50,6 +61,11 @@ class GradioSimpleRQA(GradioRQA):
     """
     def __init__(self, rqa: SimpleRQA):
         self.rqa = rqa
+
+        if not self.rqa.qa_llm.is_api_model:
+            tokenizer = self.rqa.qa_llm.tokenizer
+            if tokenizer.pad_token is None:
+                tokenizer.pad_token = tokenizer.eos_token
         return
 
     def rephrase_question_for_retrieval(self, question: str, history: list) -> str:
@@ -66,12 +82,6 @@ class GradioSimpleRQA(GradioRQA):
         )
         return output
 
-    def get_model(self):
-        return self.rqa.qa_llm.model
-
-    def get_tokenizer(self):
-        return self.rqa.qa_llm.tokenizer
-
     def prepare_prompt_for_generation(self, question: str, retrieved_docs: List[dict], history: List):
         dialogue_session = DialogueSession.from_list(history)
         docs = [Document.from_dict(doc) for doc in retrieved_docs]
@@ -81,6 +91,19 @@ class GradioSimpleRQA(GradioRQA):
             chat_history_str=dialogue_session.to_string(),
         )
         return prompt
+
+    def get_model(self):
+        if self.rqa.qa_llm.is_api_model:
+            return None
+        return self.rqa.qa_llm.model
+
+    def get_tokenizer(self):
+        if self.rqa.qa_llm.is_api_model:
+            return None
+        return self.rqa.qa_llm.tokenizer
+
+    def generate_stream_from_api(self, input_text: str, **kwargs):
+        return self.rqa.qa_llm._generate_stream(input_text, **kwargs)
 
     @classmethod
     def from_scratch(cls, *args, **kwargs):

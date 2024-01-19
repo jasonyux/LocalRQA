@@ -19,6 +19,8 @@ class TGIQAModel(BaseQAModel):
     Args:
         BaseQAModel (_type_): _description_
     """
+    is_api_model = True
+    
     def __init__(self, url, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
         self.client = Client(url, timeout=60)
         self.url = url

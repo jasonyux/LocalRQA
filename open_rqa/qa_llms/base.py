@@ -19,6 +19,7 @@ class BaseQAModel(Component):
         "batch_source_documents",
         "batch_dialogue_session",
     ]
+    is_api_model = False
 
     @abstractmethod
     def r_generate(

@@ -69,6 +69,7 @@ def load_model(
     )
     model = rqa.get_model()
     tokenizer = rqa.get_tokenizer()
+    
     try:
         context_len = model.config.max_position_embeddings
     except Exception as _:
@@ -213,8 +214,6 @@ class ModelWorker(BaseModelWorker):
         )
         self.qa_is_fid = qa_is_fid  # this changes how input is prepared for QA
         self.device = device
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
         # self.generate_stream_func = get_generate_stream_function(self.model, model_path)
         self.stream_interval = stream_interval
         self.embed_in_truncate = embed_in_truncate
@@ -248,12 +247,13 @@ class ModelWorker(BaseModelWorker):
         tokenizer, model = self.tokenizer, self.model
 
         if self.qa_is_fid:
+            if self.rqa.rqa.qa_llm.is_api_model:
+                raise NotImplementedError("FID model cannot be used as an API model.")
             ## a bit more complicated for FID model
             q_w_retrieved_docs = [self.rqa.prepare_prompt_for_generation(**params["model_input"])]
 
             max_new_tokens = min(int(params.get("max_new_tokens", 256)), 512)
             do_sample = False  # FID model does not support sampling
-            stop_str = params.get("stop", "</s>")
 
             input_ids, attention_mask = self.rqa.rqa.qa_llm.encode_fid_inputs(
                 q_w_retrieved_docs,
@@ -279,31 +279,40 @@ class ModelWorker(BaseModelWorker):
 
             temperature = float(params.get("temperature", 1.0))
             top_p = float(params.get("top_p", 1.0))
-            max_context_length = getattr(model.config, 'max_position_embeddings', 2048)
+            max_context_length = self.context_len
             max_new_tokens = min(int(params.get("max_new_tokens", 256)), 512)
             do_sample = True if temperature > 0.001 else False
-            stop_str = params.get("stop", "</s>")
 
-            input_ids = tokenizer(prompt, return_tensors='pt').input_ids.to(self.device)
-            streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=15)
+            if self.rqa.rqa.qa_llm.is_api_model:
+                streamer = self.rqa.generate_stream_from_api(
+                    input_text=prompt,
+                    do_sample=do_sample,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_new_tokens=max_new_tokens,
+                )
+            else:
+                input_ids = tokenizer(prompt, return_tensors='pt').input_ids.to(self.device)
+                streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=15)
 
-            max_new_tokens = min(max_new_tokens, max_context_length - input_ids.shape[-1])
+                max_new_tokens = min(max_new_tokens, max_context_length - input_ids.shape[-1])
 
-            if max_new_tokens < 1:
-                yield json.dumps({"text": prompt[0] + "Exceeds max token length. Please start a new conversation, thanks.", "error_code": 0}).encode() + b"\0"
-                return
+                if max_new_tokens < 1:
+                    yield json.dumps({"text": prompt[0] + "Exceeds max token length. Please start a new conversation, thanks.", "error_code": 0}).encode() + b"\0"
+                    return
 
-            thread = Thread(target=model.generate, kwargs=dict(
-                inputs=input_ids,
-                do_sample=do_sample,
-                temperature=temperature,
-                top_p=top_p,
-                max_new_tokens=max_new_tokens,
-                streamer=streamer,
-                use_cache=True,
-            ))
-            thread.start()
+                thread = Thread(target=model.generate, kwargs=dict(
+                    inputs=input_ids,
+                    do_sample=do_sample,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_new_tokens=max_new_tokens,
+                    streamer=streamer,
+                    use_cache=True,
+                ))
+                thread.start()
 
+        stop_str = params.get("stop", "</s>")
         generated_text = ''
         for new_text in streamer:
             generated_text += new_text

@@ -39,13 +39,15 @@ class VLLMClient:
         return response
 
     def _get_streaming_response(self, response: requests.Response) -> Iterable[List[str]]:
+        prev = 0
         for chunk in response.iter_lines(chunk_size=8192,
                                         decode_unicode=False,
                                         delimiter=b"\0"):
             if chunk:
                 data = json.loads(chunk.decode("utf-8"))
-                output = data["text"][0]
+                output = data["text"][0][prev:]
                 yield output
+                prev += len(output)
 
     def _get_response(self, response: requests.Response) -> List[str]:
         data = json.loads(response.content)
@@ -65,6 +67,8 @@ class VLLMClient:
 
 
 class vLLMQAModel(BaseQAModel):
+    is_api_model = True
+    
     def __init__(self, url, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
         self.client = VLLMClient(url, timeout=60)
         self.url = url

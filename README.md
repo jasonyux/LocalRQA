@@ -270,7 +270,9 @@ Here we provide an example using `vLLM`. The procedure is very similar with usin
       python -m vllm.entrypoints.api_server --model lmsys/vicuna-7b-v1.5
       ```
       this will by default host the model at `http://localhost:8000`.
-2. Then all you have to do is to use `--qa_model_name_or_path vllm::http://localhost:8000` instead of `--qa_model_name_or_path lmsys/vicuna-7b-v1.5` in the above section!
+2. Then all you have to do is to use `--qa_model_name_or_path vllm::http://localhost:8000/generate` instead of `--qa_model_name_or_path lmsys/vicuna-7b-v1.5` in the above section!
+
+Currently our list of supported acceleration frameworks include `vLLM`, `SGLang`, and `TGI`.
 
 # References
 
