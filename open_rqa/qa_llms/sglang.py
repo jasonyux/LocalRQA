@@ -187,7 +187,7 @@ class SGLangQAModel(BaseQAModel):
 if __name__ == "__main__":
     # example usage
     # assume you already have a running vllm server
-    # e.g.: python -m vllm.entrypoints.api_server will host at http://localhost:8000/generate
+    # e.g.: python -m sglang.launch_server --model-path lmsys/vicuna-7b-v1.5 --port 30000 will host at http://localhost:30000/generate
     rqa_model = SGLangQAModel(url="http://localhost:30000/generate")
     question = "Tell me a very long story."
     output = rqa_model.generate(

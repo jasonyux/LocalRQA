@@ -256,8 +256,8 @@ by default, all server logs will go under `logs` folder. Make sure this folder e
       ```bash
       python open_rqa/serve/gradio_web_server.py \
       --model_id simple_rqa \
-      --example "What is Databricks?" \
-      --example "What is DBFS? What can it do?"
+      --example "What is DBFS? What can it do?" \
+      --example "What is INVALID_ARRAY_INDEX?"
       ```
       where the `--model_id simple_rqa` is to let the controller know which model this demo page is for, and the `--example` are the example questions that will be shown on the demo page.
 
