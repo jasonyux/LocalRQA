@@ -67,11 +67,20 @@ class SGLangClient:
 class SGLangQAModel(BaseQAModel):
     is_api_model = True
     
-    def __init__(self, url, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
+    def __init__(
+        self,
+        url,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys: str = "</s>"
+    ) -> None:
         self.client = SGLangClient(url, timeout=60)
         self.url = url
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
+        self.sep_user = sep_user
+        self.sep_sys = sep_sys
 
         self._default_generate_kwargs = {
             "temperature": 0.7,
@@ -112,7 +121,7 @@ class SGLangQAModel(BaseQAModel):
             formatted_documents += f"{doc.fmt_content}\n"
         formatted_documents = formatted_documents.strip()
 
-        formatted_chat = f"{chat_history_str} {self.user_prefix}: {question}".strip()
+        formatted_chat = f"{chat_history_str}{self.user_prefix}: {question}{self.sep_user}".strip()
         # format source augmented question
         prompt = RQA_PROMPT.format(
             formatted_documents = formatted_documents,

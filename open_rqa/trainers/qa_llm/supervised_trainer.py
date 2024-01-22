@@ -97,8 +97,10 @@ class SupervisedTrainer(Trainer):
             retriever=retriever,
             qa_model=qa_model,
             qa_tokenizer=tokenizer,
-            user_prefix="USER",  # doesn't really matter as evaluation during training is single turn
-            assistant_prefix="ASSISTANT",
+            user_prefix=self.evaluator_config.user_prefix,
+            assistant_prefix=self.evaluator_config.assistant_prefix,
+            sep_user=self.evaluator_config.sep_user,
+            sep_sys=self.evaluator_config.sep_sys,
         )
         return wrapped_model
     

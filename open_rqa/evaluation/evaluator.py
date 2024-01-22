@@ -14,7 +14,7 @@ import math
 
 @dataclass
 class EvaluatorConfig:
-    """controls what metrics to compute during evaluation
+    """controls what metrics to compute during evaluation, as well as other eval related model configs
     """
     batch_size: int = field(
         default=4,
@@ -63,6 +63,23 @@ class EvaluatorConfig:
     e2e_latency: bool = field(
         default=True,
         metadata={"help": "Whether to compute latency for end-to-end"},
+    )
+    ## eval related model configs
+    assistant_prefix: str = field(
+        default="ASSISTANT",
+        metadata={"help": "Prefix for assistant in a conversation"},
+    )
+    user_prefix: str = field(
+        default="USER",
+        metadata={"help": "Prefix for user in a conversation"},
+    )
+    sep_user: str = field(
+        default=" ",
+        metadata={"help": "Token right after user finished his/her turn"},
+    )
+    sep_sys: str = field(
+        default="</s>",
+        metadata={"help": "Token right after assistant finished his/her turn"},
     )
 
 

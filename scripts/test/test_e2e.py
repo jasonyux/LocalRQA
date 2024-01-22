@@ -34,6 +34,23 @@ class ModelArguments:
         default="intfloat/e5-base",
         metadata={"help": "Embedding model name or path. Huggingface model or OpenAI model"},
     )
+    assistant_prefix: str = field(
+        default="ASSISTANT",
+        metadata={"help": "Prefix for assistant in a conversation"},
+    )
+    user_prefix: str = field(
+        default="USER",
+        metadata={"help": "Prefix for user in a conversation"},
+    )
+    sep_user: str = field(
+        default=" ",
+        metadata={"help": "Token right after user finished his/her turn"},
+    )
+    sep_sys: str = field(
+        default="</s>",
+        metadata={"help": "Token right after assistant finished his/her turn"},
+    )
+
 
 @dataclass
 class TestArguments:
@@ -91,21 +108,29 @@ def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_
         rqa_model = SimpleRQA.from_openai(
             retriever=retriever,
             qa_model_name=model_args.qa_model_name_or_path,
+            user_prefix=model_args.user_prefix,
+            assistant_prefix=model_args.assistant_prefix,
+            sep_user=model_args.sep_user,
+            sep_sys=model_args.sep_sys,
         )
     else:
         if model_args.qa_is_fid:
             rqa_model = SimpleRQA.from_huggingface_fid(
                 retriever=retriever,
                 qa_model_name_or_path=model_args.qa_model_name_or_path,
-                user_prefix="USER",  # doesn't really matter as evaluation during training is single turn
-                assistant_prefix="ASSISTANT",
+                user_prefix=model_args.user_prefix,
+                assistant_prefix=model_args.assistant_prefix,
+                sep_user=model_args.sep_user,
+                sep_sys=model_args.sep_sys,
             )
         else:
             rqa_model = SimpleRQA.from_huggingface(
                 retriever=retriever,
                 qa_model_name_or_path=model_args.qa_model_name_or_path,
-                user_prefix="USER",
-                assistant_prefix="ASSISTANT",
+                user_prefix=model_args.user_prefix,
+                assistant_prefix=model_args.assistant_prefix,
+                sep_user=model_args.sep_user,
+                sep_sys=model_args.sep_sys,
             )
     return rqa_model
 
@@ -143,6 +168,11 @@ def test(model_args: ModelArguments, test_args: TestArguments):
         gen_latency = True,
         gen_gpt4eval = test_args.gen_gpt4eval,
         e2e_latency = True,
+        ## eval model related configs
+        assistant_prefix = model_args.assistant_prefix,
+        user_prefix = model_args.user_prefix,
+        sep_user = model_args.sep_user,
+        sep_sys = model_args.sep_sys,
     )
     loaded_eval_data = load_eval_data(test_args.eval_data_path)
     evaluator = E2EEvaluator(

@@ -168,6 +168,8 @@ class SimpleRQA(BaseRQA):
         qa_model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = "</s>",
         verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + huggingface-based qa model
@@ -180,6 +182,8 @@ class SimpleRQA(BaseRQA):
             qa_model_init_kwargs (dict, optional): _description_. Defaults to {}.
             user_prefix (str, optional): _description_. Defaults to "USER".
             assistant_prefix (str, optional): _description_. Defaults to "ASSISTANT".
+            sep_user (str, optional): _description_. Defaults to " ".
+            sep_sys (str, optional): _description_. Defaults to "</s>".
             verbose (bool, optional): _description_. Defaults to False.
 
         Returns:
@@ -192,6 +196,8 @@ class SimpleRQA(BaseRQA):
             model_init_kwargs=qa_model_init_kwargs,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
+            sep_user=sep_user,
+            sep_sys=sep_sys,
         )
         answer_guardrail = NoopAnswerGuardrail()
 
@@ -212,6 +218,8 @@ class SimpleRQA(BaseRQA):
         qa_model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = "</s>",
         verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + huggingface-based qa model
@@ -235,6 +243,8 @@ class SimpleRQA(BaseRQA):
             model_init_kwargs=qa_model_init_kwargs,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
+            sep_user=sep_user,
+            sep_sys=sep_sys,
         )
         answer_guardrail = NoopAnswerGuardrail()
 
@@ -253,6 +263,8 @@ class SimpleRQA(BaseRQA):
         qa_model_name: str,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = " ",
         verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + openai-based qa model (e.g. gpt-3.5-turbo)
@@ -271,6 +283,8 @@ class SimpleRQA(BaseRQA):
             model_name=qa_model_name,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
+            sep_user=sep_user,
+            sep_sys=sep_sys,
         )
         answer_guardrail = NoopAnswerGuardrail()
 
@@ -288,6 +302,8 @@ class SimpleRQA(BaseRQA):
         qa_model_url: str,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = "</s>",
         verbose: bool = False,
     ):
         """intialized simple RQA given an already initialized retriever model + vllm-based qa model (e.g. llama-2)
@@ -303,6 +319,8 @@ class SimpleRQA(BaseRQA):
             url=qa_model_url,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
+            sep_user=sep_user,
+            sep_sys=sep_sys,
         )
         answer_guardrail = NoopAnswerGuardrail()
 
@@ -320,6 +338,8 @@ class SimpleRQA(BaseRQA):
         qa_model_url: str,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = "</s>",
         verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + qa model hosted on Text-Generation-Inference
@@ -338,6 +358,8 @@ class SimpleRQA(BaseRQA):
             url=qa_model_url,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
+            sep_user=sep_user,
+            sep_sys=sep_sys,
         )
         answer_guardrail = NoopAnswerGuardrail()
 
@@ -355,6 +377,8 @@ class SimpleRQA(BaseRQA):
         qa_model_url: str,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = "</s>",
         verbose: bool = False,
     ):
         """initialize simple RQA given an already initialized retriever model + qa model hosted on SGLang
@@ -373,6 +397,8 @@ class SimpleRQA(BaseRQA):
             url=qa_model_url,
             user_prefix=user_prefix,
             assistant_prefix=assistant_prefix,
+            sep_user=sep_user,
+            sep_sys=sep_sys,
         )
         answer_guardrail = NoopAnswerGuardrail()
 
@@ -396,6 +422,8 @@ class SimpleRQA(BaseRQA):
         qa_model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys = "</s>",
         verbose: bool = False,
     ):
         ## init embedding model
@@ -424,6 +452,8 @@ class SimpleRQA(BaseRQA):
                 qa_model_name=qa_model_name_or_path,
                 user_prefix=user_prefix,
                 assistant_prefix=assistant_prefix,
+                sep_user=sep_user,
+                sep_sys=sep_sys,
                 verbose=verbose,
             )
         elif AccelerationFramework.VLLM.value in qa_model_name_or_path:
@@ -433,6 +463,8 @@ class SimpleRQA(BaseRQA):
                 qa_model_url=url,
                 user_prefix=user_prefix,
                 assistant_prefix=assistant_prefix,
+                sep_user=sep_user,
+                sep_sys=sep_sys,
                 verbose=verbose,
             )
         elif AccelerationFramework.TGI.value in qa_model_name_or_path:
@@ -442,6 +474,8 @@ class SimpleRQA(BaseRQA):
                 qa_model_url=url,
                 user_prefix=user_prefix,
                 assistant_prefix=assistant_prefix,
+                sep_user=sep_user,
+                sep_sys=sep_sys,
                 verbose=verbose,
             )
         elif AccelerationFramework.SGLANG.value in qa_model_name_or_path:
@@ -451,6 +485,8 @@ class SimpleRQA(BaseRQA):
                 qa_model_url=url,
                 user_prefix=user_prefix,
                 assistant_prefix=assistant_prefix,
+                sep_user=sep_user,
+                sep_sys=sep_sys,
                 verbose=verbose,
             )
         else:
@@ -461,6 +497,8 @@ class SimpleRQA(BaseRQA):
                     qa_model_init_kwargs=qa_model_init_kwargs,
                     user_prefix=user_prefix,
                     assistant_prefix=assistant_prefix,
+                    sep_user=sep_user,
+                    sep_sys=sep_sys,
                     verbose=verbose,
                 )
             else:
@@ -470,6 +508,8 @@ class SimpleRQA(BaseRQA):
                     qa_model_init_kwargs=qa_model_init_kwargs,
                     user_prefix=user_prefix,
                     assistant_prefix=assistant_prefix,
+                    sep_user=sep_user,
+                    sep_sys=sep_sys,
                     verbose=verbose,
                 )
         return

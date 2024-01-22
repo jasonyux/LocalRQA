@@ -263,9 +263,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("--port", type=int, default=7861)
-    parser.add_argument("--file_path", type=str, required=True, help="e.g., model_checkpoints/databricks_e2e_tests/vicuna13b-ft_e5-ft/test-predictions.jsonl")
+    parser.add_argument("--file_path", type=str, required=True, help="JSONL file containing your model's predictions from scripts/test/test_e2e.py")
     parser.add_argument("--include_idx", type=str, default="")
-    parser.add_argument("--concurrency-count", type=int, default=1)
+    parser.add_argument("--concurrency-count", type=int, default=10)
     parser.add_argument("--share", action="store_true")
     parser.add_argument("--embed", action="store_true")
     parser.add_argument("--conv_template", type=str, default="default")  # see conv_templates in gradio_dialogue.py

@@ -136,6 +136,8 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
         tokenizer: AutoTokenizer,
         assistant_prefix: str = "ASSISTANT",
         user_prefix: str = "USER",
+        sep_user = " ",
+        sep_sys = "</s>",
         max_num_to_retrieve: int = 3,
         max_length=2048,  # should be enough for 4 * 400 token passgae + answer
         start_data_idx=0,
@@ -151,6 +153,8 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
         self.end_data_idx = end_data_idx
         self.assistant_prefix = assistant_prefix
         self.user_prefix = user_prefix
+        self.sep_user = sep_user
+        self.sep_sys = sep_sys
 
         flattened_formatted_data = self.prepare_data(qa_w_doc_data)
         self.data = self.encode_data(flattened_formatted_data)
@@ -205,6 +209,8 @@ class SupervisedRQAwRetrieverDataset(torch.utils.data.Dataset):
             retrieved_docs = all_retrieved_docs[i]
             # format dialogue
             dialogue_session = DialogueSession.from_list(chat_history)
+            dialogue_session.sep_sys = self.sep_sys
+            dialogue_session.sep_user = self.sep_user
             dialogue_session.assistant_prefix = self.assistant_prefix
             dialogue_session.user_prefix = self.user_prefix
             dialogue_session.add_user_message(question)

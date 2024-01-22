@@ -22,6 +22,8 @@ class HuggingFaceQAModel(BaseQAModel):
         model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user = " ",
+        sep_sys = "</s>",
     ):
         super().__init__()
         self.model_name_or_path = model_name_or_path
@@ -38,6 +40,8 @@ class HuggingFaceQAModel(BaseQAModel):
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
+        self.sep_user = sep_user
+        self.sep_sys = sep_sys
         return
 
     def _init(self, model, tokenizer, model_name_or_path: str, model_init_kwargs: dict):
@@ -104,7 +108,7 @@ class HuggingFaceQAModel(BaseQAModel):
             formatted_documents += f"{doc.fmt_content}\n"
         formatted_documents = formatted_documents.strip()
 
-        formatted_chat = f"{chat_history_str} {self.user_prefix}: {question}".strip()
+        formatted_chat = f"{chat_history_str}{self.user_prefix}: {question}{self.sep_user}".strip()
         # format source augmented question
         prompt = RQA_PROMPT.format(
             formatted_documents = formatted_documents,
@@ -157,6 +161,8 @@ class HuggingFaceFiDQAModel(BaseQAModel):
         model_init_kwargs: Optional[dict] = None,
         user_prefix: str = "USER",
         assistant_prefix: str = "ASSISTANT",
+        sep_user = " ",
+        sep_sys = "</s>",
     ):
         super().__init__()
         self.model_name_or_path = model_name_or_path
@@ -170,6 +176,8 @@ class HuggingFaceFiDQAModel(BaseQAModel):
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
+        self.sep_user = sep_user
+        self.sep_sys = sep_sys
         self.fid_token = "<fid>"
         return
     
@@ -276,7 +284,7 @@ class HuggingFaceFiDQAModel(BaseQAModel):
         # format documents
         # FiD = append question to each document
         fid_input = []
-        formatted_chat = f"{chat_history_str} {self.user_prefix}: {question}".strip()
+        formatted_chat = f"{chat_history_str}{self.user_prefix}: {question}{self.sep_user}".strip()
         for doc in docs:
             prompt = RQA_PROMPT.format(
                 formatted_documents = doc.fmt_content,

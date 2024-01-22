@@ -188,6 +188,37 @@ python scripts/train/qa_llm/train_w_gt.py \
 --full_dataset_index_path data/database/databricks/databricks_400_e51e4_inbatch256_chunk400hard0.05_checkpoint120
 ```
 
+Databricks Starling-LM-7B-alpha + E5
+
+```bash
+torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_gt.py \
+--use_flash_attention true \
+--per_device_train_batch_size 2 \
+--per_device_eval_batch_size 2 \
+--deepspeed scripts/train/ds_config.json \
+--learning_rate 1e-5 \
+--num_train_epochs 2 \
+--gradient_accumulation_steps 4 \
+--bf16 true \
+--model_name_or_path berkeley-nest/Starling-LM-7B-alpha \
+--assistant_prefix "GPT4 Correct Assistant" \
+--user_prefix "GPT4 Correct User" \
+--sep_user "<|end_of_turn|>" \
+--sep_sys "<|end_of_turn|>" \
+--embedding_model model_checkpoints/retriever_model/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05_retriever_train/checkpoint-120 \
+--embedding_max_num_to_retrieve 3 \
+--logging_steps 10 \
+--eval_steps 100 \
+--save_steps 100 \
+--output_dir model_checkpoints/databricks_Starling7b-5e6-train7_e5-ft \
+--run_group databricks_vicuna \
+--train_file data/training/databricks_new/train_w_qa.jsonl \
+--eval_file data/training/databricks_new/eval_w_qa.jsonl \
+--test_file data/training/databricks_new/test_w_qa.jsonl \
+--full_dataset_file_path data/database/databricks/databricks_400.pkl \
+--full_dataset_index_path data/database/databricks/databricks_400_e51e4_inbatch256_chunk400hard0.05_checkpoint120
+```
+
 
 Faire FID + contriever:
 ```bash

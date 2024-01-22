@@ -6,7 +6,7 @@ Do not mention 'this context' in the assistant's response, since the following c
 Context:
 {formatted_documents}
 ----------------
-{formatted_chat} {assistant_prefix}:
+{formatted_chat}{assistant_prefix}:
 """.strip()
 
 

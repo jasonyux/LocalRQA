@@ -9,7 +9,14 @@ import os
 
 
 class OpenAIQAModel(BaseQAModel):
-    def __init__(self, model_name: str, user_prefix: str = "USER", assistant_prefix: str = "ASSISTANT") -> None:
+    def __init__(
+        self,
+        model_name: str,
+        user_prefix: str = "USER",
+        assistant_prefix: str = "ASSISTANT",
+        sep_user: str = " ",
+        sep_sys: str = " "
+    ) -> None:
         super().__init__()
         self.client = OpenAI(
             api_key = os.environ.get("OPENAI_API_KEY"),
@@ -22,6 +29,8 @@ class OpenAIQAModel(BaseQAModel):
         }
         self.user_prefix = user_prefix
         self.assistant_prefix = assistant_prefix
+        self.sep_user = sep_user
+        self.sep_sys = sep_sys
         return
 
     def _prepare_question_w_docs(self, question: str, docs: List[Document], chat_history_str: str):
@@ -31,7 +40,7 @@ class OpenAIQAModel(BaseQAModel):
             formatted_documents += f"{doc.fmt_content}\n"
         formatted_documents = formatted_documents.strip()
 
-        formatted_chat = f"{chat_history_str} {self.user_prefix}: {question}".strip()
+        formatted_chat = f"{chat_history_str}{self.user_prefix}: {question}{self.sep_user}".strip()
         # format source augmented question
         prompt = RQA_PROMPT.format(
             formatted_documents = formatted_documents,

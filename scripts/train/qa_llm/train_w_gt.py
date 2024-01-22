@@ -85,6 +85,22 @@ class DataArguments:
         default='data/database/databricks/databricks_400_tmp',
         metadata={"help": "Path for cached full dataset index"},
     )
+    assistant_prefix: str = field(
+        default="ASSISTANT",
+        metadata={"help": "Prefix for assistant in a conversation"},
+    )
+    user_prefix: str = field(
+        default="USER",
+        metadata={"help": "Prefix for user in a conversation"},
+    )
+    sep_user: str = field(
+        default=" ",
+        metadata={"help": "Token right after user finished his/her turn"},
+    )
+    sep_sys: str = field(
+        default="</s>",
+        metadata={"help": "Token right after assistant finished his/her turn"},
+    )
     max_seq_length: int = field(
         default=2048,
         metadata={"help": "The maximum total input sequence length, INCLUDING source documents"},
@@ -97,7 +113,6 @@ class DataArguments:
         default=3,
         metadata={"help": "Max number of documents to retrieve (excluding the gold doc), if embedding_model is none empty"},
     )
-
 
 
 def init_embedding_model(model_name):
@@ -136,6 +151,10 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         retriever_init_fn=partial(retriever_init_fn, index_path=train_index_save_path),
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
+        assistant_prefix=data_args.assistant_prefix,
+        user_prefix=data_args.user_prefix,
+        sep_user=data_args.sep_user,
+        sep_sys=data_args.sep_sys,
         max_length=data_args.max_seq_length,
         end_data_idx=None,
         shuffle=True
@@ -147,6 +166,10 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         retriever_init_fn=partial(retriever_init_fn, index_path=eval_index_save_path),
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
+        assistant_prefix=data_args.assistant_prefix,
+        user_prefix=data_args.user_prefix,
+        sep_user=data_args.sep_user,
+        sep_sys=data_args.sep_sys,
         max_length=data_args.max_seq_length,
         end_data_idx=None,
         shuffle=True
@@ -158,6 +181,10 @@ def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embe
         retriever_init_fn=partial(retriever_init_fn, index_path=test_index_save_path),
         max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
         tokenizer=tokenizer,
+        assistant_prefix=data_args.assistant_prefix,
+        user_prefix=data_args.user_prefix,
+        sep_user=data_args.sep_user,
+        sep_sys=data_args.sep_sys,
         max_length=data_args.max_seq_length,
         end_data_idx=None,
         shuffle=True
@@ -224,6 +251,11 @@ def main(model_args: ModelArguments, data_args: DataArguments, logger_args: Logg
         gen_rouge = True,
         gen_latency = True,
         e2e_latency = True,
+        ## eval model related configs
+        assistant_prefix = data_args.assistant_prefix,
+        user_prefix = data_args.user_prefix,
+        sep_user = data_args.sep_user,
+        sep_sys = data_args.sep_sys,
     )
 
     if training_args.deepspeed is not None:
