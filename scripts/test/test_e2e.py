@@ -61,6 +61,10 @@ class TestArguments:
         default=False,
         metadata={"help": "Whether to use GPT4 for evaluation"},
     )
+    batch_size: int = field(
+        default=4,
+        metadata={"help": "Batch size for evaluation"},
+    )
 
 
 def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_path: str):
@@ -131,6 +135,7 @@ def test(model_args: ModelArguments, test_args: TestArguments):
 
     ### evaluation
     eval_config = EvaluatorConfig(  # type: ignore
+        batch_size = test_args.batch_size,
         retr_latency = False,
         gen_f1 = True,
         gen_precision = True,
