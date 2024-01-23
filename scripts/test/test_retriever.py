@@ -1,5 +1,6 @@
 from transformers import HfArgumentParser
 from open_rqa.retrievers.faiss_retriever import FaissRetriever
+from open_rqa.retrievers.bm25_retriever import BM25Retriever
 from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
 from open_rqa.trainers.utils import init_logger, create_dir_if_not_exists
 from open_rqa.schema.document import Document
@@ -44,6 +45,10 @@ class TestArguments:
                     "and 'gold_docs' and 'gold_answers' for E2E QA.")
         },
     )
+    retirever_type: str = field(
+        default="faiss",
+        metadata={"help": "faiss or BM25"},
+    )
     test_bszv: int = field(
 		default=8,
 		metadata={"help": "Batch size per GPU/TPU core/CPU for evaluation."}
@@ -54,22 +59,27 @@ class TestArguments:
     )
 
 
-def init_retriever_model(model_args: ModelArguments, documents: List[Document], index_path: str):
-    if model_args.embedding_model_name_or_path in OPENAI_MODEL_NAMES:
-        embedding_model = OpenAIEmbeddings(
-            model=model_args.embedding_model_name_or_path,
-            organization=os.environ['OPENAI_ORGANIZATION']
+def init_retriever_model(model_args: ModelArguments, test_args: TestArguments, documents: List[Document]):
+    if test_args.retirever_type == "faiss":
+        if model_args.embedding_model_name_or_path in OPENAI_MODEL_NAMES:
+            embedding_model = OpenAIEmbeddings(
+                model=model_args.embedding_model_name_or_path,
+                organization=os.environ['OPENAI_ORGANIZATION']
+            )
+        else:
+            embedding_model = HuggingFaceEmbeddings(
+                model_name=model_args.embedding_model_name_or_path
+            )
+        logger.info(f"Initializing retriever with {model_args.embedding_model_name_or_path} and {test_args.index_path}")
+        retriever = FaissRetriever(
+            documents,
+            embeddings=embedding_model,
+            index_path=test_args.index_path
         )
+    elif test_args.retirever_type == "BM25":
+        retriever = BM25Retriever(documents)
     else:
-        embedding_model = HuggingFaceEmbeddings(
-            model_name=model_args.embedding_model_name_or_path
-        )
-    logger.info(f"Initializing retriever with {model_args.embedding_model_name_or_path} and {index_path}")
-    retriever = FaissRetriever(
-        documents,
-        embeddings=embedding_model,
-        index_path=index_path
-    )
+        raise NotImplementedError("Please choose retriever type from [faiss, BM25]")
     return retriever
 
 
@@ -92,7 +102,7 @@ def test(model_args: ModelArguments, test_args: TestArguments):
     logger.info(f"Loaded {len(documents)} documents from {test_args.document_path}")
 
     ### init retriever model
-    retriever_model = init_retriever_model(model_args, documents, test_args.index_path)
+    retriever_model = init_retriever_model(model_args, test_args, documents)
 
     ### evaluation
     eval_config = EvaluatorConfig(
