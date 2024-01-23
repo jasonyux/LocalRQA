@@ -65,14 +65,16 @@ def get_model_list():
     return models
 
 
-get_window_url_params = """
-function() {
-    const params = new URLSearchParams(window.location.search);
-    url_params = Object.fromEntries(params);
-    console.log(url_params);
-    return url_params;
-    }
-"""
+def document_view(idx: int, document: Document):
+    view = gr.Markdown(
+        value=document.fmt_content,
+        autoscroll=False,
+        visible=True,
+        header_links=True,
+        max_height=50,
+        elem_classes=["retr_document"],
+    )
+    return view
 
 
 def load_demo(url_params, request: gr.Request):
@@ -128,11 +130,16 @@ def regenerate(state: GradioDialogueSession, request: gr.Request):
 def clear_history(request: gr.Request):
     logger.info(f"clear_history. ip: {request.client.host}")
     state = default_conversation.clone()
-    retrieved_docs = []
+    tboxes = []
     for i in range(NUM_DOC_TO_RETRIEVE):
-        t = gr.Textbox(show_label=False, value="(empty)", info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
-        retrieved_docs.append(t)
-    return (state, state.to_gradio_chatbot(), "") + tuple(retrieved_docs) + (disable_btn,) * 5 + (enable_btn,)
+        doc = Document(
+            page_content="(empty)",
+            fmt_content="(empty)",
+            metadata={}
+        )
+        t = document_view(i, doc)
+        tboxes.append(t)
+    return (state, state.to_gradio_chatbot(), "") + tuple(tboxes) + (disable_btn,) * 5 + (enable_btn,)
 
 
 def add_text(state: GradioDialogueSession, text, request: gr.Request):
@@ -156,10 +163,9 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
     logger.info(f"http_retrieve. ip: {request.client.host}")
     if state.skip_next:
         # This generate call is skipped due to invalid inputs (e.g., empty inputs)
-        raw_contents = [doc.fmt_content for doc in state._tmp_data.get('retrieved_docs', [])]
         tboxes = []
-        for i, content in enumerate(raw_contents):
-            t = gr.Textbox(show_label=False, value=content, info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+        for i, doc in enumerate(state._tmp_data.get('retrieved_docs', [])):
+            t = document_view(i, doc)
             tboxes.append(t)
         return tuple([state] + tboxes)
 
@@ -193,7 +199,6 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
         documents = data["documents"]
         rephrased_question = data["rephrased_question"]
         fmt_documents = [Document.from_dict(doc) for doc in documents]
-        raw_contents = [doc.fmt_content for doc in fmt_documents]
 
         state._tmp_data['retrieved_docs'] = fmt_documents
         state._tmp_data['rephrased_question'] = rephrased_question
@@ -204,14 +209,18 @@ def http_retrieve(state: GradioDialogueSession, request: gr.Request):
         state.skip_next = True
         tboxes = []
         for i in range(NUM_DOC_TO_RETRIEVE):
-            t = gr.Textbox(show_label=False, value=SERVER_ERROR_MSG, info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+            doc = Document(
+                page_content=SERVER_ERROR_MSG,
+                fmt_content=SERVER_ERROR_MSG,
+                metadata={}
+            )
+            t = document_view(i, doc)
             tboxes.append(t)
         return tuple([state] + tboxes)
 
     tboxes = []
-    for i, content in enumerate(raw_contents):
-        # t = gr.Textbox(show_label=False, value=content)
-        t = gr.Textbox(show_label=False, value=content, info=f'Retrieved document {i+1}:', max_lines=5, autoscroll=False)
+    for i, doc in enumerate(fmt_documents):
+        t = document_view(i, doc)
         tboxes.append(t)
     return tuple([state] + tboxes)
 
@@ -249,7 +258,7 @@ def http_generate(state: GradioDialogueSession, temperature, top_p, max_new_toke
         return
 
     # Make requests
-    retrieved_docs = state._tmp_data['retrieved_docs']
+    retrieved_docs = state._tmp_data.get('retrieved_docs', [])
     _session = state._session.clone()
     _session.history.pop()  # remove the last user message from the history, as its passed in separately
     pload = {
@@ -339,7 +348,16 @@ block_css = """
     min-width: min(120px,100%);
 }
 
-"""
+.retr_document {
+    max-height: 175px;
+    min-height: 175px;
+}
+
+""".strip()
+
+
+block_js = """
+""".strip()
 
 
 def build_demo(embed_mode):
@@ -351,12 +369,20 @@ def build_demo(embed_mode):
             gr.Markdown(title_markdown)
         
         with gr.Column():
+            ### retrieval part
             retrieved_docs = []
-            for i in range(NUM_DOC_TO_RETRIEVE):
-                t = gr.Textbox(show_label=False, placeholder="(empty)", info=f'Retrieved document {i+1}:')
-                retrieved_docs.append(t)
-            chatbot = gr.Chatbot(elem_id="chatbot", label="LocalRQA Chatbot", height=650)
-
+            with gr.Row(elem_id="retrieval"):
+                for i in range(NUM_DOC_TO_RETRIEVE):
+                    with gr.Tab(f"Retrieved document {i+1}"):
+                        doc = Document(
+                            page_content="(empty)",
+                            fmt_content="(empty)",
+                            metadata={}
+                        )
+                        t = document_view(i, doc)
+                        retrieved_docs.append(t)
+            
+            chatbot = gr.Chatbot(elem_id="chatbot", label="LocalRQA Chatbot", height=550)
 
             ## example and gen params
             with gr.Row(equal_height=True):
@@ -366,10 +392,10 @@ def build_demo(embed_mode):
                         inputs=[textbox]
                     )
                 with gr.Column(scale=5):
-                    with gr.Accordion("Parameters", open=False) as _:
-                        temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.2, step=0.1, interactive=True, label="Temperature",)
-                        top_p = gr.Slider(minimum=0.0, maximum=1.0, value=0.7, step=0.1, interactive=True, label="Top P",)
-                        max_output_tokens = gr.Slider(minimum=0, maximum=512, value=256, step=32, interactive=True, label="Max output tokens",)
+                    with gr.Accordion("Parameters", open=False):
+                        temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.1, step=0.1, interactive=True, label="Temperature",)
+                        top_p = gr.Slider(minimum=0.0, maximum=1.0, value=0.95, step=0.1, interactive=True, label="Top P",)
+                        max_output_tokens = gr.Slider(minimum=0, maximum=512, value=350, step=16, interactive=True, label="Max output tokens",)
 
             ## user input
             with gr.Row():
@@ -470,7 +496,7 @@ def build_demo(embed_mode):
                 load_demo,
                 [url_params],
                 [state],
-                _js=get_window_url_params,
+                _js=block_js,
                 queue=False
             )
         elif args.model_list_mode == "reload":

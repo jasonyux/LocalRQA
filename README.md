@@ -94,7 +94,8 @@ python scripts/test/test_e2e.py \
 Databricks Vicuna+e5:
 ```bash
 python scripts/test/test_e2e.py \
---qa_model_name_or_path model_checkpoints/databricks_vincuna-7b-5e6-train7_e5-ft/checkpoint-400 \
+--qa_model_name_or_path model_checkpoints/databricks_vincuna-13b-5e6-train7_e5-ft/checkpoint-300 \
+# --qa_model_name_or_path model_checkpoints/databricks_vincuna-7b-5e6-train7_e5-ft/checkpoint-400 \
 --embedding_model_name_or_path model_checkpoints/retriever_model/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05_retriever_train/checkpoint-120 \
 --document_path data/database/databricks/databricks_400.pkl \
 --index_path data/database/databricks/databricks_400_e51e4_inbatch256_chunk400hard0.05_checkpoint120 \
@@ -116,7 +117,9 @@ python scripts/test/test_e2e.py \
 
 Faire Vicuna+e5:
 ```bash
-python scripts/test/test_e2e.py --qa_model_name_or_path model_checkpoints/faire_vincuna-7b-5e6-train7_e5-ft/checkpoint-400 \
+python scripts/test/test_e2e.py \
+--qa_model_name_or_path model_checkpoints/faire_vincuna-13b-5e6-train7_e5-ft/checkpoint-350 \
+# --qa_model_name_or_path model_checkpoints/faire_vincuna-7b-5e6-train7_e5-ft/checkpoint-400 \
 --embedding_model_name_or_path model_checkpoints/retriever_model/e5_faire_1e5_inbatch256_chunk400_fulldoc_temp1.2_hard0.05_retriever_train/checkpoint-54 \
 --document_path data/database/faire/faire_400.pkl \
 --index_path data/database/faire/faire_400_e51e5_inbatch256_temp1.2_hard0.05_ckpt54 \
@@ -256,8 +259,8 @@ by default, all server logs will go under `logs` folder. Make sure this folder e
       ```bash
       python open_rqa/serve/gradio_web_server.py \
       --model_id simple_rqa \
-      --example "What is Databricks?" \
-      --example "What is DBFS? What can it do?"
+      --example "What is DBFS? What can it do?" \
+      --example "What is INVALID_ARRAY_INDEX?"
       ```
       where the `--model_id simple_rqa` is to let the controller know which model this demo page is for, and the `--example` are the example questions that will be shown on the demo page.
 
@@ -273,6 +276,18 @@ Here we provide an example using `vLLM`. The procedure is very similar with usin
 2. Then all you have to do is to use `--qa_model_name_or_path vllm::http://localhost:8000/generate` instead of `--qa_model_name_or_path lmsys/vicuna-7b-v1.5` in the above section!
 
 Currently our list of supported acceleration frameworks include `vLLM`, `SGLang`, and `TGI`.
+
+## Serving Static Results for Evaluation
+
+
+```bash
+python open_rqa/serve/gradio_static_server.py \
+--file_path model_checkpoints/databricks_e2e_tests/vicuna13b-ft_e5-ft/test-predictions.jsonl \  # prediction file output from scripts/test/test_e2e.py
+--include_idx 1,2,5-12,14,25-63  # e.g., ask human to label data with idx [1,2] + [5,6,...,12] + [14] + [25,26,...,63]
+```
+
+and annotated data will be saved under `logs/YY-MM-DD-HH-mm-annotations.jsonl`.
+
 
 # References
 
