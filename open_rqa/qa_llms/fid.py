@@ -207,31 +207,33 @@ def cross_attention_forward(
         self,
         input,
         mask=None,
-        kv=None,
+        key_value_states=None,
         position_bias=None,
-        past_key_value_state=None,
-        head_mask=None,
-        query_length=None,
+        layer_head_mask=None,
+        past_key_value=None,
         use_cache=False,
+        query_length=None,
         output_attentions=False,
     ):
     """
     This only works for computing cross attention over the input
     """
-    assert(kv != None)
-    assert(head_mask == None)
+    self.has_relative_attention_bias = True
+    self.relative_attention_bias = nn.Embedding(self.relative_attention_num_buckets, self.n_heads)
+    assert(key_value_states != None)
+    assert(layer_head_mask == None)
     assert(position_bias != None or self.has_relative_attention_bias)
 
     bsz, qlen, dim = input.size()
-    n_heads, d_heads = self.n_heads, self.d_kv
-    klen = kv.size(1)
+    n_heads, d_heads = self.n_heads, self.key_value_proj_dim
+    klen = key_value_states.size(1)
 
     q = self.q(input).view(bsz, -1, n_heads, d_heads).transpose(1, 2)
-    if past_key_value_state == None:
-        k = self.k(kv).view(bsz, -1, n_heads, d_heads).transpose(1, 2)
-        v = self.v(kv).view(bsz, -1, n_heads, d_heads).transpose(1, 2)
+    if past_key_value == None:
+        k = self.k(key_value_states).view(bsz, -1, n_heads, d_heads).transpose(1, 2)
+        v = self.v(key_value_states).view(bsz, -1, n_heads, d_heads).transpose(1, 2)
     else:
-        k, v = past_key_value_state
+        k, v = past_key_value
 
     scores = torch.einsum("bnqd,bnkd->bnqk", q, k)
 
@@ -240,6 +242,8 @@ def cross_attention_forward(
 
     if position_bias is None:
         position_bias = self.compute_bias(qlen, klen)
+    scores = scores.cuda()
+    position_bias = position_bias.cuda()
     scores += position_bias
 
     if self.score_storage is None:
