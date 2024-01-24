@@ -184,3 +184,7 @@ class RetrievalQATrainingArguments(TrainingArguments):
 		default=True,
 		metadata={"help": "Whether to save the predictions to a file"},
 	)
+	pooling_type: str = field(
+		default="mean",
+		metadata={"help": "pooling method for embedding, choose from [mean, cls]"}
+	)

@@ -30,11 +30,16 @@ def mean_pooling(token_embeddings, mask):
 	sentence_embeddings = token_embeddings.sum(dim=1) / mask.sum(dim=1)[..., None]
 	return sentence_embeddings
 
-def compute_embedding(encoded_inputs, outputs):
-	embedding = mean_pooling(outputs.last_hidden_state, encoded_inputs['attention_mask'])
+def compute_embedding(encoded_inputs, outputs, pooling_type):
+	if pooling_type == "mean":
+		embedding = mean_pooling(outputs.last_hidden_state, encoded_inputs['attention_mask'])
+	elif pooling_type == "cls":
+		embedding = outputs.hidden_states[-1][:, 0, :]
+	else:
+		raise NotImplementedError("Other pooling types haven't been implemented yet!")
 	return embedding
 
-def embed_document_batch(tokenizer, model, batch, batch_size=8, to_list=False):
+def embed_document_batch(tokenizer, model, pooling_type, batch, batch_size=8, to_list=False):
 	b = batch_iterator(batch, batch_size=batch_size, shuffle=False)
 	embeddings = []
 	for bb in b:
@@ -47,7 +52,7 @@ def embed_document_batch(tokenizer, model, batch, batch_size=8, to_list=False):
 			encoded_inputs[k] = v.to(model.device)
 		outputs = model(**encoded_inputs, output_hidden_states=True)
 		# [len(texts), 768)]
-		embedding = compute_embedding(encoded_inputs, outputs)
+		embedding = compute_embedding(encoded_inputs, outputs, pooling_type)
 		if to_list:
 			embeddings.extend(embedding.tolist())
 		else:
@@ -58,16 +63,17 @@ def embed_document_batch(tokenizer, model, batch, batch_size=8, to_list=False):
 
 
 class LocalEmbeddings(Embeddings):
-	def __init__(self, model, tokenizer, device = "cuda:0"):
+	def __init__(self, model, tokenizer, pooling_type = "mean", device = "cuda:0"):
 		model.eval()
 		model.to(device)
 		self.device = device
 		self.model = model
 		self.tokenizer = tokenizer
+		self.pooling_type = pooling_type
 		return
 
 	def embed_documents(self, texts: List[str]) -> List[List[float]]:
-		embeddings = embed_document_batch(self.tokenizer, self.model, texts, to_list=True)
+		embeddings = embed_document_batch(self.tokenizer, self.model, self.pooling_type, texts, to_list=True)
 		return embeddings
 
 	def embed_query(self, text) -> List[float]:

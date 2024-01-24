@@ -5,6 +5,8 @@ from transformers.data.data_collator import DataCollator
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.trainer_utils import EvalPrediction, EvalLoopOutput
 from transformers.trainer_callback import TrainerCallback
+from sentence_transformers import models
+from sentence_transformers import SentenceTransformer
 from torch.utils.data import Dataset
 from typing import Optional, List, Union, Dict, Any, Tuple, Type, Callable
 from open_rqa.schema.document import Document
@@ -92,9 +94,9 @@ class RetrieverTrainer(Trainer):
 		all_docs = gathered_gold_doc + included_hard_negs
 		labels = torch.arange(0, bsz, dtype=torch.long, device=model.device)
 
-		query_embeddings = embed_document_batch(self.tokenizer, model, gathered_query, batch_size=bsz)
-		key_embeddings = embed_document_batch(self.tokenizer, model, all_docs, batch_size=bsz)
-        
+		query_embeddings = embed_document_batch(self.tokenizer, model, self.args.pooling_type, gathered_query, batch_size=bsz)
+		key_embeddings = embed_document_batch(self.tokenizer, model, self.args.pooling_type, all_docs, batch_size=bsz)
+		
 		score = torch.einsum('id, jd->ij', query_embeddings / temperature, key_embeddings)
 		loss = torch.nn.functional.cross_entropy(score, labels)
 		return loss
@@ -113,13 +115,13 @@ class RetrieverTrainer(Trainer):
 	def wrap_model_for_eval(
 		self,
 		documents,
-        embeddings,
-        index_path,
+		embeddings,
+		index_path,
 	) -> FaissRetriever:
 		wrapped_model = FaissRetriever(
 			documents,
-        	embeddings=embeddings,
-        	index_path=index_path
+			embeddings=embeddings,
+			index_path=index_path
 		)
 		return wrapped_model
 	
@@ -184,3 +186,25 @@ class RetrieverTrainer(Trainer):
 			with jsonlines.open(save_path, 'w') as fwrite:
 				fwrite.write_all(predictions)
 		return output
+	
+	def _save(self, output_dir: Optional[str] = None, state_dict=None):
+		TRAINING_ARGS_NAME = "training_args.bin"
+		# If we are executing this function, we are the process zero, so we don't check for that.
+		output_dir = output_dir if output_dir is not None else self.args.output_dir
+		os.makedirs(output_dir, exist_ok=True)
+		
+		self.model.save_pretrained(
+			output_dir, state_dict=state_dict, safe_serialization=self.args.save_safetensors
+		)
+
+		if self.tokenizer is not None:
+			self.tokenizer.save_pretrained(output_dir)
+
+		# Good practice: save your training arguments together with the trained model
+		torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
+
+		# save to sentence transformers
+		word_embedding_model = models.Transformer(output_dir)
+		pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension(), pooling_mode=self.args.pooling_type)
+		model = SentenceTransformer(modules=[word_embedding_model, pooling_model], device='cpu')
+		model.save(output_dir)
