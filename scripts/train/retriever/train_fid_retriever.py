@@ -5,6 +5,7 @@ import argparse
 import os
 import json
 import jsonlines
+import numpy as np
 
 from transformers import (
 	AutoTokenizer, AutoModel,
@@ -78,6 +79,18 @@ def get_crossattention_score(model_args, data_file, fid_args, training_args):
 
 	return eval_dataset.data
 
+def modify_score(examples):
+	for sample in examples:
+		all_scores = []
+		for doc in sample['ctxs']:
+			if doc.get('crossattention_score', None):
+				all_scores.append(doc['crossattention_score'])
+		
+		mean = np.mean(all_scores)
+		std = np.std(all_scores)
+		max = np.max(all_scores)
+		sample['ctxs'][0]['crossattention_score'] = max + std
+
 
 if __name__ == "__main__":
 	parser = HfArgumentParser(
@@ -87,15 +100,33 @@ if __name__ == "__main__":
 	if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
 		# If we pass only one argument to the script and it's the path to a json file,
 		# let's parse it to get our arguments.
-		model_args, data_args, logger_args, training_args = parser.parse_json_file(
+		model_args, data_args, fid_args, training_args = parser.parse_json_file(
 			json_file=os.path.abspath(sys.argv[1])
 		)
 	else:
 		model_args, data_args, fid_args, training_args = parser.parse_args_into_dataclasses()
 	
 	# Get cross attention score based on the reader
-	train_examples = get_crossattention_score(model_args, data_args.train_file, fid_args, training_args)
-	eval_examples = get_crossattention_score(model_args, data_args.eval_file, fid_args, training_args)
+	if not fid_args.with_score:
+		train_examples = get_crossattention_score(model_args, data_args.train_file, fid_args, training_args)
+		eval_examples = get_crossattention_score(model_args, data_args.eval_file, fid_args, training_args)
+
+		# Save the data
+		train_filepath_wscore = data_args.train_file.split(".json")[0] + "_wscore.json"
+		with open(train_filepath_wscore, 'w') as fout:
+			json.dump(train_examples, fout, indent=4)
+
+		eval_filepath_wscore = data_args.eval_file.split(".json")[0] + "_wscore.json"
+		with open(eval_filepath_wscore, 'w') as fout:
+			json.dump(eval_examples, fout, indent=4)
+	else:
+		# load the train and eval data with score
+		train_examples = json.load(open(data_args.train_file, "r"))
+		eval_examples = json.load(open(data_args.eval_file, "r"))
+
+		# manually modify the cross attention score for the gold document
+		modify_score(train_examples)
+		modify_score(eval_examples)
 
 		
 	#Load data

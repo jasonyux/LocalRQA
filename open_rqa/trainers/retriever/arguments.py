@@ -17,6 +17,10 @@ class FidTrainingArgs:
 		default="google/flan-t5-xl",
 		metadata={"help": "Reader model path to get the cross attention score"},
 	)
+	with_score: bool = field(
+		default=False,
+		metadata={"help": "Whether the train_file and eval_file dataset have already got crossattention score"}
+	)
 	text_maxlength: int = field(
 		default=512,
 		metadata={"help": "maximum number of tokens in text segments (question+passage)"},
