@@ -10,6 +10,17 @@ docker run -it --gpus all --shm-size=256m \
 jasonyux/nvcr_torch:23.08 bash
 ```
 
+# Prepare Document
+```bash
+python scripts/data/process_docs.py \
+--document_path data/training/faire_tmp/faire_texts.jsonl \
+--model_name_or_path facebook/contriever-msmarco \
+--chunk_size 400 \
+--chunk_overlap_size 50 \
+--save_dir data/training/faire_tmp \
+--save_name faire_paresed_docs
+```
+
 # Data Generation
 Let's use GPT-3.5 to generate questions, and GPT-4-turbo to generate answers.
 
