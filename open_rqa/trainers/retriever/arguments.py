@@ -12,6 +12,46 @@ class ModelArguments:
 
 
 @dataclass
+class FidTrainingArgs:
+	reader_model_path: str = field(
+		default="google/flan-t5-xl",
+		metadata={"help": "Reader model path to get the cross attention score"},
+	)
+	with_score: bool = field(
+		default=False,
+		metadata={"help": "Whether the train_file and eval_file dataset have already got crossattention score"}
+	)
+	text_maxlength: int = field(
+		default=512,
+		metadata={"help": "maximum number of tokens in text segments (question+passage)"},
+	)
+	n_context: int = field(
+		default=100,
+		metadata={"help": "num of candidates passages for each question"},
+	)
+	apply_question_mask: bool = field(
+		default=True
+	)
+	apply_passage_mask: bool = field(
+		default=True
+	)
+	extract_cls: bool = field(
+		default=False
+	)
+	projection: bool = field(
+		default=False
+	)
+	indexing_dimension: int = field(
+		default=768,
+		metadata={"help": "token embedding dimension"},
+	)
+	search_algo: str = field(
+		default='inner_product',
+		metadata={"help": "choose from 'cosine', 'inner_product', 'cosine_w_bm25', 'inner_product_w_bm25'"}
+	)
+
+
+@dataclass
 class DataArguments:
 	"""
 	Arguments pertaining to what data we are going to input our model for training and eval.
@@ -125,10 +165,6 @@ class RetrievalQATrainingArguments(TrainingArguments):
 		default="wandb",
 		metadata={"help": "Report to wandb or not"}
 	)
-	write_predictions: bool = field(
-		default=True,
-		metadata={"help": "Whether to save the predictions to a file"},
-	)
 	evaluation_strategy: str = field(
 		default="steps",
 		metadata={"help": "Evaluation strategy to adopt during training."}
@@ -147,4 +183,12 @@ class RetrievalQATrainingArguments(TrainingArguments):
 	)
 	seed: int = field(
 		default=42,
+	)
+	write_predictions: bool = field(
+		default=True,
+		metadata={"help": "Whether to save the predictions to a file"},
+	)
+	pooling_type: str = field(
+		default="mean",
+		metadata={"help": "pooling method for embedding, choose from [mean, cls]"}
 	)

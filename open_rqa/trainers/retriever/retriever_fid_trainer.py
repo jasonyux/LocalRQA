@@ -12,7 +12,7 @@ from typing import Optional, List, Union, Dict, Any, Tuple, Type, Callable
 from open_rqa.schema.document import Document
 from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
-from open_rqa.trainers.retriever.arguments import DataArguments, ContrasitiveTrainingArgs, RetrievalQATrainingArguments
+from open_rqa.trainers.retriever.arguments import DataArguments, FidTrainingArgs, RetrievalQATrainingArguments
 from open_rqa.trainers.retriever.embeddings import embed_document_batch, LocalEmbeddings
 import torch
 import torch.nn as nn
@@ -20,15 +20,16 @@ import random
 import os
 import pickle
 import jsonlines
+import numpy as np
+import json
 
-
-class RetrieverTrainer(Trainer):
+class FidRetrieverTrainer(Trainer):
 	def __init__(
 		self,
 		model: Union[PreTrainedModel, nn.Module],
 		training_args: RetrievalQATrainingArguments,
 		data_args: DataArguments,
-		contrastive_args: ContrasitiveTrainingArgs,
+		fid_args: FidTrainingArgs,
 		eval_config: EvaluatorConfig,
 		eval_search_kwargs: Dict[str, Any],
 		data_collator: Optional[DataCollator] = None,
@@ -55,50 +56,79 @@ class RetrieverTrainer(Trainer):
 			preprocess_logits_for_metrics=preprocess_logits_for_metrics
 		)
 		self.data_args = data_args
-		self.contrastive_args = contrastive_args
+		self.fid_args = fid_args
 		self.evaluator_config = eval_config
 		self.eval_search_kwargs = eval_search_kwargs
+		self.loss_fct = torch.nn.KLDivLoss()
+		if self.fid_args.projection:
+			self.proj = nn.Linear(
+				self.model.config.hidden_size,
+				self.fid_args.indexing_dimension
+			).to("cuda:0")
+			self.norm = nn.LayerNorm(self.fid_args.indexing_dimension).to("cuda:0")
 		_supported_encoders = (BertModel, BertForMaskedLM)
 		if not isinstance(self.model, _supported_encoders):
 			raise NotImplementedError(f"Model architecture is not supported.")
 		return
+	
+	def embed_text(self, text_ids, text_mask, apply_mask=False, extract_cls=False):
+		text_output = self.model(
+			input_ids=text_ids,
+			attention_mask=text_mask if apply_mask else None
+		)
+		if type(text_output) is not tuple:
+			text_output.to_tuple()
+		text_output = text_output[0]
+		if self.fid_args.projection:
+			text_output = self.proj(text_output)
+			text_output = self.norm(text_output)
+
+		if extract_cls:
+			text_output = text_output[:, 0]
+		else:
+			if apply_mask:
+				text_output = text_output.masked_fill(~text_mask[:, :, None], 0.)
+				text_output = torch.sum(text_output, dim=1) / torch.sum(text_mask, dim=1)[:, None]
+			else:
+				text_output = torch.mean(text_output, dim=1)
+		return text_output
+
+	def kldivloss(self, score, gold_score):
+		gold_score = torch.softmax(gold_score, dim=-1)
+		score = torch.nn.functional.log_softmax(score, dim=-1)
+		return self.loss_fct(score, gold_score)
 
 	def compute_loss(self, model, inputs, return_outputs=False):
-		if self.contrastive_args.contrastive_loss == 'inbatch_contrastive':
-			loss = self._inbatch_contrastive_w_hardneg(model, inputs, return_outputs)
+
+		(idx, question_ids, question_mask, passage_ids, passage_mask, gold_score) = inputs
+
+		question_output = self.embed_text(
+			text_ids=question_ids,
+			text_mask=question_mask,
+			apply_mask=self.fid_args.apply_question_mask,
+			extract_cls=self.fid_args.extract_cls,
+		)
+		bsz, n_passages, plen = passage_ids.size()
+		passage_ids = passage_ids.view(bsz * n_passages, plen)
+		passage_mask = passage_mask.view(bsz * n_passages, plen)
+		passage_output = self.embed_text(
+			text_ids=passage_ids,
+			text_mask=passage_mask,
+			apply_mask=self.fid_args.apply_passage_mask,
+			extract_cls=self.fid_args.extract_cls,
+		)
+
+		score = torch.einsum(
+			'bd,bid->bi',
+			question_output,
+			passage_output.view(bsz, n_passages, -1)
+		)
+		score = score / np.sqrt(question_output.size(-1))
+		if gold_score is not None:
+			loss = self.kldivloss(score, gold_score)
 		else:
-			raise NotImplementedError
-		return loss
-	
-	def _inbatch_contrastive_w_hardneg(self, model, inputs, return_outputs=False):
-		hard_neg_ratio = self.contrastive_args.hard_neg_ratio
-		temperature = self.contrastive_args.temperature
-
-		bsz = len(inputs)
-		num_hard_negs = int(hard_neg_ratio * bsz)
-
-		# collect data
-		gathered_query = []
-		gathered_gold_doc = []
-		gathered_hard_neg_doc = []
-		for d in inputs:
-			query = d['question']
-			gold_doc = d['gold_docs'][0]  # there is only one gold_doc in the list
-			hard_neg_doc = d['hard_neg_docs']
-			gathered_query.append(query)
-			gathered_gold_doc.append(gold_doc)
-			gathered_hard_neg_doc.extend(hard_neg_doc)
-
-		gathered_hard_neg_doc = [hard_neg for hard_neg in gathered_hard_neg_doc if hard_neg not in gathered_gold_doc]
-		included_hard_negs = random.sample(gathered_hard_neg_doc, num_hard_negs)
-		all_docs = gathered_gold_doc + included_hard_negs
-		labels = torch.arange(0, bsz, dtype=torch.long, device=model.device)
-
-		query_embeddings = embed_document_batch(self.tokenizer, model, self.args.pooling_type, gathered_query, batch_size=bsz)
-		key_embeddings = embed_document_batch(self.tokenizer, model, self.args.pooling_type, all_docs, batch_size=bsz)
+			loss = None
 		
-		score = torch.einsum('id, jd->ij', query_embeddings / temperature, key_embeddings)
-		loss = torch.nn.functional.cross_entropy(score, labels)
 		return loss
 	
 	def prediction_step(
@@ -131,15 +161,8 @@ class RetrieverTrainer(Trainer):
 		return documents
 	
 	def _load_eval_data(self, eval_data_path) -> List[Dict]:
-		with jsonlines.open(eval_data_path) as fread:
-			eval_data = list(fread)
-		flattened_eval_data = []
-		for d in eval_data:
-			for q in d['questions']:
-				new_data = deepcopy(d)
-				new_data['question'] = q
-				flattened_eval_data.append(new_data)
-		return flattened_eval_data
+		eval_data = json.load(open(eval_data_path, "r"))
+		return eval_data
 	
 	def evaluation_loop(
 		self,
@@ -186,7 +209,7 @@ class RetrieverTrainer(Trainer):
 			with jsonlines.open(save_path, 'w') as fwrite:
 				fwrite.write_all(predictions)
 		return output
-	
+
 	def _save(self, output_dir: Optional[str] = None, state_dict=None):
 		TRAINING_ARGS_NAME = "training_args.bin"
 		# If we are executing this function, we are the process zero, so we don't check for that.
