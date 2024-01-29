@@ -103,6 +103,21 @@ python scripts/test/test_e2e.py \
 --output_dir model_checkpoints/databricks_e2e_tests/vicuna7b-ft_e5-ft
 ```
 
+Databricks Starling LM-7B+e5:
+```bash
+python scripts/test/test_e2e.py \
+--qa_model_name_or_path model_checkpoints/databricks_Starling7b-1e5-train2_e5-ft/checkpoint-50 \
+--assistant_prefix "GPT4 Correct Assistant" \
+--user_prefix "GPT4 Correct User" \
+--sep_user "<|end_of_turn|>" \
+--sep_sys "<|end_of_turn|>" \
+--embedding_model_name_or_path model_checkpoints/retriever_model/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05_retriever_train/checkpoint-120 \
+--document_path data/database/databricks/databricks_400.pkl \
+--index_path data/database/databricks/databricks_400_e51e4_inbatch256_chunk400hard0.05_checkpoint120 \
+--eval_data_path data/training/databricks_new/test_w_qa.jsonl \
+--output_dir model_checkpoints/databricks_e2e_tests/databricks_Starling7b-1e5-train2_e5-ft
+```
+
 Faire T5-FiD + Contriever:
 ```bash
 python scripts/test/test_e2e.py \
@@ -208,8 +223,8 @@ torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_gt.
 --embedding_model model_checkpoints/retriever_model/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05_retriever_train/checkpoint-120 \
 --embedding_max_num_to_retrieve 3 \
 --logging_steps 10 \
---eval_steps 100 \
---save_steps 100 \
+--eval_steps 50 \
+--save_steps 50 \
 --output_dir model_checkpoints/databricks_Starling7b-5e6-train7_e5-ft \
 --run_group databricks_vicuna \
 --train_file data/training/databricks_new/train_w_qa.jsonl \
@@ -217,6 +232,36 @@ torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_gt.
 --test_file data/training/databricks_new/test_w_qa.jsonl \
 --full_dataset_file_path data/database/databricks/databricks_400.pkl \
 --full_dataset_index_path data/database/databricks/databricks_400_e51e4_inbatch256_chunk400hard0.05_checkpoint120
+```
+
+Databricks OpenChat + BGE:
+```bash
+python scripts/train/qa_llm/train_w_gt.py \
+--use_flash_attention true \
+--per_device_train_batch_size 2 \
+--per_device_eval_batch_size 2 \
+--deepspeed scripts/train/ds_config.json \
+--learning_rate 5e-6 \
+--num_train_epochs 2 \
+--gradient_accumulation_steps 4 \
+--bf16 true \
+--model_name_or_path openchat/openchat_3.5 \
+--assistant_prefix "GPT4 Correct Assistant" \
+--user_prefix "GPT4 Correct User" \
+--sep_user "<|end_of_turn|>" \
+--sep_sys "<|end_of_turn|>" \
+--embedding_model model_checkpoints/retriever_model/bge_1e5_mean_databricks_inbatch256_chunk400_fulldoc_temp1_hard0.05_train/checkpoint-60 \
+--embedding_max_num_to_retrieve 3 \
+--logging_steps 10 \
+--eval_steps 50 \
+--save_steps 50 \
+--output_dir model_checkpoints/databricks_OpenChat7b-5e6-train2_bge-ft \
+--run_group databricks_openchat \
+--train_file data/training/databricks_new/train_w_qa.jsonl \
+--eval_file data/training/databricks_new/eval_w_qa.jsonl \
+--test_file data/training/databricks_new/test_w_qa.jsonl \
+--full_dataset_file_path data/database/databricks/databricks_400.pkl \
+--full_dataset_index_path data/database/databricks/databricks_400_bge1e5_mean_databricks_inbatch256_chunk400_ckpt60
 ```
 
 
