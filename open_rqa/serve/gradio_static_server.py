@@ -3,6 +3,8 @@ import datetime
 import jsonlines
 import os
 import gradio as gr
+import re
+import markdown
 
 from open_rqa.evaluation.metrics import is_almost_same_document
 from open_rqa.schema.document import Document
@@ -23,7 +25,7 @@ enable_btn = gr.Button.update(interactive=True)
 disable_btn = gr.Button.update(interactive=False)
 
 
-NUM_DOC_TO_RETRIEVE = 2 + 1  # +1 for the gold document
+NUM_DOC_TO_RETRIEVE = 4 + 1  # +1 for the gold document
 ANN_CORRECT = "👍 correct"
 ANN_INCORRECT = "👎 incorrect"
 
@@ -35,11 +37,25 @@ def get_conv_log_filename():
 
 
 def document_view(idx: int, document: Document):
-    view = gr.Markdown(
-        value=document.fmt_content,
+    #$ gradio MD has some issues where some MD docs throws runtime errors that cannot be caught in the code = app hangs
+    # view = gr.Markdown(
+    #     value=document.fmt_content,
+    #     visible=True,
+    #     elem_classes=["retr_document"],
+    #     line_breaks=True,
+    # )
+    preprocessed = document.fmt_content.replace("\nContent:", "\n\nContent:")\
+                                            .replace("#.", "- ")\
+                                            .replace(".. gcp::", "For GCP")\
+                                            .replace(".. aws::", "For AWS")\
+                                            .replace(".. azure::", "For Azure")
+    preprocessed = re.sub(r'^---', '\n---\n', preprocessed)
+    preprocessed = re.sub("\n\n+", "\n\n", preprocessed)
+    md_html = markdown.markdown(preprocessed, extensions=['extra', 'toc', 'nl2br'])
+    view = gr.HTML(
+        value=md_html,
         visible=True,
         elem_classes=["retr_document"],
-        line_breaks=True,
     )
     return view
 
@@ -170,6 +186,8 @@ block_css = """
 .retr_document {
     max-height: 300px;
     min-height: 300px;
+    overflow-y: scroll;
+    overflow-clip-margin: content-box;
 }
 
 """.strip()

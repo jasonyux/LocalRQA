@@ -479,10 +479,29 @@ Explanation:
 """.strip()
 
 
+GPT_EVAL_NOANS_ACC_PROMPT = """
+Please act as an impartial judge and evaluate the correctness of the response provided by an AI assistant to the user question displayed below.
+Your evaluation should only consider whether the response answered the user's question and contained the correct information.
+Begin your evaluation by providing a SHORT explanation, no more than 5 sentences. Be as objective as possible.
+After providing your explanation, you must access whether the response is correct or incorrect by strictly following this format: "[[correctness]]", for example: "Correctness: [[correct]]" or "Correctness: [[incorrect]]".
+
+[Question]
+{question}
+[Reference Passages]
+{reference_passages}
+
+[The Start of Assistant's Answer]
+{answer}
+[The End of Assistant's Answer]
+
+Explanation:
+""".strip()
+
+
 class GPT4Eval(RunningMetic):
-    def __init__(self, name="gpt4eval"):
+    def __init__(self, name="gpt4eval", use_gold_answer=False):
         self.name = name
-        self.prompt = GPT_EVAL_ACC_PROMPT
+        self.use_gold_answer = use_gold_answer
 
         self.model_name = 'gpt-4-1106-preview'
         self.client = OpenAI(
@@ -520,18 +539,30 @@ class GPT4Eval(RunningMetic):
     def judge(self, question, reference, answer, gold_docs, retrieved_docs):
         ### format prompt
         gold_doc = gold_docs[0]
-        first_retrieved_doc = retrieved_docs[0]
-        if is_almost_same_document(gold_doc, first_retrieved_doc):
-            passages = [gold_doc]
+        retr_doc_to_include = None
+        for retr_doc in retrieved_docs:
+            if not is_almost_same_document(gold_doc, retr_doc):
+                retr_doc_to_include = retr_doc
+                break
+        if retr_doc_to_include is not None:
+            passages = [gold_doc, retr_doc_to_include]
         else:
-            passages = [gold_doc, first_retrieved_doc]
+            passages = [gold_doc]
         fmt_passages = "\n".join([p.fmt_content for p in passages])
-        prompt = self.prompt.format(
-            question=question,
-            reference=reference,
-            answer=answer,
-            reference_passages=fmt_passages
-        )
+
+        if self.use_gold_answer:
+            prompt = GPT_EVAL_ACC_PROMPT.format(
+                question=question,
+                reference=reference,
+                reference_passages=fmt_passages,
+                answer=answer,
+            )
+        else:
+            prompt = GPT_EVAL_NOANS_ACC_PROMPT.format(
+                question=question,
+                reference_passages=fmt_passages,
+                answer=answer,
+            )
 
         ### generate
         logger.info(f"GPT4Eval Prompt:\n {prompt}")

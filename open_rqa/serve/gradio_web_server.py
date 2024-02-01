@@ -3,7 +3,8 @@ import datetime
 import json
 import os
 import time
-
+import re
+import markdown
 import gradio as gr
 import requests
 
@@ -66,12 +67,24 @@ def get_model_list():
 
 
 def document_view(idx: int, document: Document):
-    view = gr.Markdown(
-        value=document.fmt_content,
-        autoscroll=False,
+    #$ gradio MD has some issues where some MD docs throws runtime errors that cannot be caught in the code = app hangs
+    # view = gr.Markdown(
+    #     value=document.fmt_content,
+    #     visible=True,
+    #     elem_classes=["retr_document"],
+    #     line_breaks=True,
+    # )
+    preprocessed = document.fmt_content.replace("\nContent:", "\n\nContent:")\
+                                            .replace("#.", "- ")\
+                                            .replace(".. gcp::", "For GCP")\
+                                            .replace(".. aws::", "For AWS")\
+                                            .replace(".. azure::", "For Azure")
+    preprocessed = re.sub(r'^---', '\n---\n', preprocessed)
+    preprocessed = re.sub("\n\n+", "\n\n", preprocessed)
+    md_html = markdown.markdown(preprocessed, extensions=['extra', 'toc', 'nl2br'])
+    view = gr.HTML(
+        value=md_html,
         visible=True,
-        header_links=True,
-        max_height=50,
         elem_classes=["retr_document"],
     )
     return view
@@ -349,8 +362,10 @@ block_css = """
 }
 
 .retr_document {
-    max-height: 175px;
-    min-height: 175px;
+    max-height: 300px;
+    min-height: 300px;
+    overflow-y: scroll;
+    overflow-clip-margin: content-box;
 }
 
 """.strip()

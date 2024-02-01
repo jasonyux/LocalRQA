@@ -105,8 +105,7 @@ python scripts/test/test_e2e.py \
 Databricks Vicuna+e5:
 ```bash
 python scripts/test/test_e2e.py \
---qa_model_name_or_path model_checkpoints/databricks_vincuna-13b-5e6-train7_e5-ft/checkpoint-300 \
-# --qa_model_name_or_path model_checkpoints/databricks_vincuna-7b-5e6-train7_e5-ft/checkpoint-400 \
+--qa_model_name_or_path model_checkpoints/databricks_vincuna-7b-5e6-train7_e5-ft/checkpoint-400 \
 --embedding_model_name_or_path model_checkpoints/retriever_model/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05_retriever_train/checkpoint-120 \
 --document_path data/database/databricks/databricks_400.pkl \
 --index_path data/database/databricks/databricks_400_e51e4_inbatch256_chunk400hard0.05_checkpoint120 \
@@ -190,7 +189,7 @@ python scripts/train/qa_llm/train_w_gt_fid.py \
 
 Databricks Vicuna + e5:
 ```bash
-python scripts/train/qa_llm/train_w_gt.py \
+python scripts/train/qa_llm/train_w_fixed_retriever.py \
 --use_flash_attention true \
 --per_device_train_batch_size 4 \
 --per_device_eval_batch_size 4 \
@@ -217,7 +216,7 @@ python scripts/train/qa_llm/train_w_gt.py \
 Databricks Starling-LM-7B-alpha + E5
 
 ```bash
-torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_gt.py \
+torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_fixed_retriever.py \
 --use_flash_attention true \
 --per_device_train_batch_size 2 \
 --per_device_eval_batch_size 2 \
@@ -247,7 +246,7 @@ torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_gt.
 
 Databricks OpenChat + BGE:
 ```bash
-python scripts/train/qa_llm/train_w_gt.py \
+python scripts/train/qa_llm/train_w_fixed_retriever.py \
 --use_flash_attention true \
 --per_device_train_batch_size 2 \
 --per_device_eval_batch_size 2 \
@@ -302,7 +301,7 @@ python scripts/train/qa_llm/train_w_gt_fid.py \
 ```
 Faire Vicuna + e5:
 ```bash
-python scripts/train/qa_llm/train_w_gt.py \
+python scripts/train/qa_llm/train_w_fixed_retriever.py \
 --use_flash_attention true \
 --per_device_train_batch_size 4 \
 --per_device_eval_batch_size 4 \
@@ -366,6 +365,15 @@ Currently our list of supported acceleration frameworks include `vLLM`, `SGLang`
 
 ## Serving Static Results for Evaluation
 
+To evaluate the first 50 predictions from a prediction file (as done in our paper), run:
+
+```bash
+python open_rqa/serve/gradio_static_server.py \
+--file_path model_checkpoints/databricks_e2e_tests/vicuna13b-ft_e5-ft/test-predictions.jsonl \  # prediction file output from scripts/test/test_e2e.py
+--include_idx 1-50
+```
+
+we also allow a fine-grained customization (if needed) of which data to include in the evaluation. For example:
 
 ```bash
 python open_rqa/serve/gradio_static_server.py \

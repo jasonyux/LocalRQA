@@ -39,6 +39,8 @@ class SupervisedRQADataset(torch.utils.data.Dataset):
         tokenizer: AutoTokenizer,
         assistant_prefix: str = "ASSISTANT",
         user_prefix: str = "USER",
+        sep_user = " ",
+        sep_sys = "</s>",
         max_length=650,  # should be enough for one 400 token passgae + answer
         start_data_idx=0,
         end_data_idx=None,
@@ -50,6 +52,8 @@ class SupervisedRQADataset(torch.utils.data.Dataset):
         self.end_data_idx = end_data_idx
         self.assistant_prefix = assistant_prefix
         self.user_prefix = user_prefix
+        self.sep_user = sep_user
+        self.sep_sys = sep_sys
 
         flattened_formatted_data = self.prepare_data(qa_w_doc_data)
         self.data = self.encode_data(flattened_formatted_data)
@@ -66,13 +70,15 @@ class SupervisedRQADataset(torch.utils.data.Dataset):
             f"Missing necessary fields in qa_w_doc_data: {qa_w_doc_data[0].keys()}"
         
         formatted_data = []
-        for sample in qa_w_doc_data:
+        for i, sample in enumerate(qa_w_doc_data):
             gold_docs = [Document.from_dict(doc) for doc in sample['gold_docs']]
             chat_history = sample['chat_history']
             question = sample['question']
             gold_answer = sample['gold_answer']
             # format dialogue
             dialogue_session = DialogueSession.from_list(chat_history)
+            dialogue_session.sep_sys = self.sep_sys
+            dialogue_session.sep_user = self.sep_user
             dialogue_session.assistant_prefix = self.assistant_prefix
             dialogue_session.user_prefix = self.user_prefix
             dialogue_session.add_user_message(question)
@@ -82,16 +88,16 @@ class SupervisedRQADataset(torch.utils.data.Dataset):
             )
             fmt_dialogue = dialogue_session.to_string()
 
-            # gold prompt
+            # prompt with retrieved documents
+            formatted_gold_docs_string = "\n".join([doc.fmt_content for doc in gold_docs])
             fmt_prompt = RQA_PROMPT_TRAIN.format(
-                formatted_documents='\n'.join([d.fmt_content for d in gold_docs]),
-                formatted_chat=fmt_dialogue,
+                formatted_documents=formatted_gold_docs_string,
+                formatted_chat_w_answer=fmt_dialogue,
             )
             formatted_data.append(fmt_prompt)
-        # print two exapmle data
+        # print one example data
         logger.info("Example formatted data:")
         logger.info(formatted_data[0])
-        logger.info(formatted_data[1])
         return formatted_data
     
     def encode_data(self, text_data: List[str]):

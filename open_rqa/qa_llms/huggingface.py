@@ -52,14 +52,14 @@ class HuggingFaceQAModel(BaseQAModel):
         
         ### intialize model
         if model is None:
-            model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_init_kwargs)
+            model = AutoModelForCausalLM.from_pretrained(model_name_or_path, trust_remote_code=True, **model_init_kwargs)
             model.eval()
         if not next(model.parameters()).is_cuda:
             model = model.cuda()
 
         ### initialize tokenizer
         if tokenizer is None:
-            tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+            tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=True)
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"  # left for generation

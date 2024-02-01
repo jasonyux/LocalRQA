@@ -4,7 +4,7 @@ from transformers import (
 )
 from accelerate.utils import DistributedType
 from dataclasses import dataclass, field
-from open_rqa.trainers.qa_llm.datasets import SupervisedRQAwRetrieverDataset
+from open_rqa.trainers.qa_llm.datasets import SupervisedRQADataset
 from open_rqa.trainers.qa_llm.supervised_trainer import SupervisedTrainer
 from open_rqa.trainers.qa_llm.arguments import E2EQATrainingArguments
 from open_rqa.trainers.utils import (
@@ -16,7 +16,6 @@ from open_rqa.retrievers.faiss_retriever import FaissRetriever
 from open_rqa.evaluation.evaluator import EvaluatorConfig
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from functools import partial
 import open_rqa.trainers.dist_utils as dist_utils
 import torch
 import wandb
@@ -83,7 +82,7 @@ class DataArguments:
     )
     full_dataset_index_path: str = field(
         default='data/database/databricks/databricks_400_tmp',
-        metadata={"help": "Path for cached full dataset index"},
+        metadata={"help": "Path for cached full dataset index. If first time, this will be created."},
     )
     assistant_prefix: str = field(
         default="ASSISTANT",
@@ -105,14 +104,54 @@ class DataArguments:
         default=2048,
         metadata={"help": "The maximum total input sequence length, INCLUDING source documents"},
     )
-    embedding_model: str = field(
-        default="",
-        metadata={"help": "What embedding model to train with (e.g., intfloat/e5-base). If empty, train with ground truth."},
+    eval_embedding_model: str = field(
+        default='text-embedding-ada-002',
+        metadata={"help": "The embedding model used for E2E evaluation."},
     )
-    embedding_max_num_to_retrieve: int = field(
-        default=3,
-        metadata={"help": "Max number of documents to retrieve (excluding the gold doc), if embedding_model is none empty"},
+
+
+def init_datasets(data_args: DataArguments, tokenizer):
+    with jsonlines.open(data_args.train_file) as fread:
+        train_data = list(fread)
+    with jsonlines.open(data_args.eval_file) as fread:
+        eval_data = list(fread)
+    with jsonlines.open(data_args.test_file) as fread:
+        test_data = list(fread)
+    
+    train_dset = SupervisedRQADataset(
+        qa_w_doc_data=train_data,
+        tokenizer=tokenizer,
+        assistant_prefix=data_args.assistant_prefix,
+        user_prefix=data_args.user_prefix,
+        sep_user=data_args.sep_user,
+        sep_sys=data_args.sep_sys,
+        max_length=data_args.max_seq_length,
+        end_data_idx=None,
+        shuffle=True
     )
+    eval_dset = SupervisedRQADataset(
+        qa_w_doc_data=eval_data,
+        tokenizer=tokenizer,
+        assistant_prefix=data_args.assistant_prefix,
+        user_prefix=data_args.user_prefix,
+        sep_user=data_args.sep_user,
+        sep_sys=data_args.sep_sys,
+        max_length=data_args.max_seq_length,
+        end_data_idx=None,
+        shuffle=True
+    )
+    test_dset = SupervisedRQADataset(
+        qa_w_doc_data=test_data,
+        tokenizer=tokenizer,
+        assistant_prefix=data_args.assistant_prefix,
+        user_prefix=data_args.user_prefix,
+        sep_user=data_args.sep_user,
+        sep_sys=data_args.sep_sys,
+        max_length=data_args.max_seq_length,
+        end_data_idx=None,
+        shuffle=True
+    )
+    return train_dset, eval_dset, test_dset
 
 
 def init_embedding_model(model_name):
@@ -127,79 +166,16 @@ def init_embedding_model(model_name):
         )
 
 
-def retriever_init_fn(embedding_model, documents, index_path):
-    retriever = FaissRetriever(
-        documents,
-        embeddings=embedding_model,
-        index_path=index_path
-    )
-    return retriever
+def init_retriever_for_eval(data_args: DataArguments):
+    embedding_model = init_embedding_model(data_args.eval_embedding_model)
 
-
-def init_datasets(data_args: DataArguments, tokenizer, tmp_output_dir: str, embedding_model):
-    with jsonlines.open(data_args.train_file) as fread:
-        train_data = list(fread)
-    with jsonlines.open(data_args.eval_file) as fread:
-        eval_data = list(fread)
-    with jsonlines.open(data_args.test_file) as fread:
-        test_data = list(fread)
-    
-    train_index_save_path = os.path.join(tmp_output_dir, 'train_index')
-    train_dset = SupervisedRQAwRetrieverDataset(
-        qa_w_doc_data=train_data,
-        embedding_model=embedding_model,
-        retriever_init_fn=partial(retriever_init_fn, index_path=train_index_save_path),
-        max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
-        tokenizer=tokenizer,
-        assistant_prefix=data_args.assistant_prefix,
-        user_prefix=data_args.user_prefix,
-        sep_user=data_args.sep_user,
-        sep_sys=data_args.sep_sys,
-        max_length=data_args.max_seq_length,
-        end_data_idx=None,
-        shuffle=True
-    )
-    eval_index_save_path = os.path.join(tmp_output_dir, 'eval_index')
-    eval_dset = SupervisedRQAwRetrieverDataset(
-        qa_w_doc_data=eval_data,
-        embedding_model=embedding_model,
-        retriever_init_fn=partial(retriever_init_fn, index_path=eval_index_save_path),
-        max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
-        tokenizer=tokenizer,
-        assistant_prefix=data_args.assistant_prefix,
-        user_prefix=data_args.user_prefix,
-        sep_user=data_args.sep_user,
-        sep_sys=data_args.sep_sys,
-        max_length=data_args.max_seq_length,
-        end_data_idx=None,
-        shuffle=True
-    )
-    test_index_save_path = os.path.join(tmp_output_dir, 'test_index')
-    test_dset = SupervisedRQAwRetrieverDataset(
-        qa_w_doc_data=test_data,
-        embedding_model=embedding_model,
-        retriever_init_fn=partial(retriever_init_fn, index_path=test_index_save_path),
-        max_num_to_retrieve=data_args.embedding_max_num_to_retrieve,
-        tokenizer=tokenizer,
-        assistant_prefix=data_args.assistant_prefix,
-        user_prefix=data_args.user_prefix,
-        sep_user=data_args.sep_user,
-        sep_sys=data_args.sep_sys,
-        max_length=data_args.max_seq_length,
-        end_data_idx=None,
-        shuffle=True
-    )
-    return train_dset, eval_dset, test_dset
-
-
-def init_retriever_for_eval(data_args: DataArguments, embedding_model):
     with open(data_args.full_dataset_file_path, 'rb') as fread:
         full_dataset = pickle.load(fread)
     logger.info(f"Embedding {len(full_dataset)} documents from {data_args.full_dataset_file_path}")
     
-    eval_retriever = retriever_init_fn(
-        embedding_model=embedding_model,
-        documents=full_dataset,
+    eval_retriever = FaissRetriever(
+        full_dataset,
+        embeddings=embedding_model,
         index_path=data_args.full_dataset_index_path
     )
     logger.info("initialized retriever for evaluation")
@@ -209,23 +185,24 @@ def init_retriever_for_eval(data_args: DataArguments, embedding_model):
 def main(model_args: ModelArguments, data_args: DataArguments, logger_args: LoggerArguments, training_args: E2EQATrainingArguments):
     random.seed(0)
 
-    logger.info('training with retrieved documents from embedding model')
-    tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path)
+    logger.info('training with gold (q, a, doc) pairs.')
+    tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    embedding_model = init_embedding_model(data_args.embedding_model)
-    train_dset, eval_dset, test_dset = init_datasets(data_args, tokenizer, training_args.output_dir, embedding_model)
-    eval_retriever = init_retriever_for_eval(data_args, embedding_model)
+    train_dset, eval_dset, test_dset = init_datasets(data_args, tokenizer)
+    eval_retriever = init_retriever_for_eval(data_args)
     
     if model_args.use_flash_attention:
         model = AutoModelForCausalLM.from_pretrained(
             model_args.model_name_or_path,
             torch_dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2"
+            attn_implementation="flash_attention_2",
+            trust_remote_code=True
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(
             model_args.model_name_or_path,
+            trust_remote_code=True
         )
 
     ### if it is already initialized, huggingface will use it
