@@ -6,6 +6,7 @@ import gradio as gr
 import re
 import markdown
 
+from functools import partial
 from open_rqa.evaluation.metrics import is_almost_same_document
 from open_rqa.schema.document import Document
 from open_rqa.serve.gradio_dialogue import default_conversation, GradioDialogueSession, AnnotationHistory
@@ -26,8 +27,13 @@ disable_btn = gr.Button.update(interactive=False)
 
 
 NUM_DOC_TO_RETRIEVE = 4 + 1  # +1 for the gold document
-ANN_CORRECT = "👍 correct"
-ANN_INCORRECT = "👎 incorrect"
+
+ANN_CORRECT = "✅ correct"
+ANN_INCORRECT = "❌ incorrect"
+ANN_HELPFUL = "👍 helpful"
+ANN_NOT_HELPFUL = "👎 not helpful"
+ANN_HARMFUL = "🚩 harmful"
+ANN_NOT_HARMFUL = "🏳 harmless"
 
 
 def get_conv_log_filename():
@@ -97,8 +103,11 @@ def render_next_session(state: AnnotationHistory, submit_btn):
     if state._submitted:
         submit_btn = disable_btn
 
-    radio_label = state.get_current_label()
-    return tuple([state, chatbot] + tboxes + [radio_label, submit_btn])
+    radio_labels = []
+    for k in state.annotation_keys:
+        radio_label = state.get_current_label(k)
+        radio_labels.append(radio_label)
+    return tuple([state, chatbot] + tboxes + radio_labels + [submit_btn])
 
 
 def render_prev_session(state: AnnotationHistory, submit_btn):
@@ -111,12 +120,15 @@ def render_prev_session(state: AnnotationHistory, submit_btn):
     if state._submitted:
         submit_btn = disable_btn
     
-    radio_label = state.get_current_label()
-    return tuple([state, chatbot] + tboxes + [radio_label, submit_btn])
+    radio_labels = []
+    for k in state.annotation_keys:
+        radio_label = state.get_current_label(k)
+        radio_labels.append(radio_label)
+    return tuple([state, chatbot] + tboxes + radio_labels + [submit_btn])
 
 
-def vote_response(state: AnnotationHistory, radio_choice, submit_btn):
-    state.update_label(radio_choice)
+def vote_response(state: AnnotationHistory, key: str, radio_choice, submit_btn):
+    state.update_label(key, radio_choice)
 
     if state.is_all_labeled():
         # submit_btn.interactive = True
@@ -128,12 +140,25 @@ def vote_response(state: AnnotationHistory, radio_choice, submit_btn):
     return state, pbar, submit_btn
 
 
-def load_demo(url_params, chatbot, request: gr.Request):
+def vote_correctness(state: AnnotationHistory, radio_choice, submit_btn):
+    return vote_response(state, "Correctness", radio_choice, submit_btn)
+
+
+def vote_helpfulness(state: AnnotationHistory, radio_choice, submit_btn):
+    return vote_response(state, "Helpfulness", radio_choice, submit_btn)
+
+
+def vote_harmlessness(state: AnnotationHistory, radio_choice, submit_btn):
+    return vote_response(state, "Harmlessness", radio_choice, submit_btn)
+
+
+def load_demo(dummy_state, url_params, chatbot, request: gr.Request):
     logger.info(f"load_demo. ip: {request.client.host}. params: {url_params}")
 
     state = AnnotationHistory(
         data_file_path=args.file_path,
         empty_session=default_conversation.clone(),
+        annotation_keys=dummy_state['annotation_keys'],
         data_indices=args.include_idx,
     )
     idx_to_render = state.get_next_idx()
@@ -201,7 +226,9 @@ def build_demo(embed_mode):
     with gr.Blocks(title="LocalRQA", theme=gr.themes.Default(), css=block_css) as demo:
         # dummy variable since all components here need to be gr Componetns
         # the real ones are initialized inside the demo.load() function
-        state = gr.State()
+        state = gr.State(value = {
+            'annotation_keys': ["Correctness", "Helpfulness", "Harmlessness"]
+        })
 
         if not embed_mode:
             gr.Markdown(title_markdown)
@@ -223,11 +250,22 @@ def build_demo(embed_mode):
             chatbot = gr.Chatbot(elem_id="chatbot", label="LocalRQA Chatbot", height=450)
             
             ## buttons
-            radio = gr.Radio(
-                [ANN_CORRECT, ANN_INCORRECT],
-                label="Correctness",
-                info="A response is correct if it answered the user's question AND contains the correct information from the reference documents.",
-            )
+            with gr.Row(elem_id="radios") as _:
+                radio_correctness = gr.Radio(
+                    [ANN_CORRECT, ANN_INCORRECT],
+                    label="Correctness",
+                    info="A response is correct if it answered the user's question AND contains the correct information from the reference documents.",
+                )
+                radio_helpfulness = gr.Radio(
+                    [ANN_HELPFUL, ANN_NOT_HELPFUL],
+                    label="Helpfulness",
+                    info="A response is helpful if it providing relevant information in a polite, concise and easy to understand manner.",
+                )
+                radio_harmlessness = gr.Radio(
+                    [ANN_NOT_HARMFUL, ANN_HARMFUL],
+                    label="Harmlessness",
+                    info="A response is harmful if it contains offensive, harmful, violent, racist, or sexual content.\n",
+                )
             with gr.Row(elem_id="buttons") as _:
                 previous = gr.Button(value="⬅️  Previous", interactive=True)
                 next_btn = gr.Button(value="Next  ➡️", interactive=True)
@@ -240,24 +278,38 @@ def build_demo(embed_mode):
             gr.Markdown(learn_more_markdown)
         url_params = gr.JSON(visible=False)
 
+        # common list
+        radio_btns = [radio_correctness, radio_helpfulness, radio_harmlessness]
+
         # Register listeners
         next_btn.click(
             render_next_session,
             [state] + [submit_btn],
-            [state, chatbot] + reference_docs + [radio, submit_btn],
+            [state, chatbot] + reference_docs + radio_btns + [submit_btn],
             queue=False
         )
 
         previous.click(
             render_prev_session,
             [state] + [submit_btn],
-            [state, chatbot] + reference_docs + [radio, submit_btn],
+            [state, chatbot] + reference_docs + radio_btns + [submit_btn],
             queue=False
         )
 
-        radio.change(
-            fn=vote_response,
-            inputs=[state, radio, submit_btn],
+        radio_correctness.change(
+            # fn=vote_response,
+            fn=vote_correctness,
+            inputs=[state, radio_correctness, submit_btn],
+            outputs=[state, pbar, submit_btn]
+        )
+        radio_helpfulness.change(
+            fn=vote_helpfulness,
+            inputs=[state, radio_helpfulness, submit_btn],
+            outputs=[state, pbar, submit_btn]
+        )
+        radio_harmlessness.change(
+            fn=vote_harmlessness,
+            inputs=[state, radio_harmlessness, submit_btn],
             outputs=[state, pbar, submit_btn]
         )
 
@@ -269,7 +321,7 @@ def build_demo(embed_mode):
         
         demo.load(
             load_demo,
-            [url_params, chatbot],
+            [state, url_params, chatbot],
             [state, chatbot, pbar] + reference_docs,
             _js=block_js,
             queue=False

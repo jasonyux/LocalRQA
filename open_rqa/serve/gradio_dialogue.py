@@ -68,8 +68,9 @@ conv_templates = {
 
 @dataclass
 class AnnotationHistory:
-    def __init__(self, data_file_path: str, empty_session: GradioDialogueSession, data_indices=''):
+    def __init__(self, data_file_path: str, empty_session: GradioDialogueSession, annotation_keys: list, data_indices=''):
         self.empty_session = empty_session
+        self.annotation_keys = annotation_keys  # useful if more than 1 annotation per data
         self.parsed_data_indices = self.parse_int_range(data_indices)
         self.all_sessions, self.all_indices = self.load(data_file_path)
         
@@ -120,7 +121,7 @@ class AnnotationHistory:
 
             all_formatted_data[idx] = {
                 'session': session,
-                'annotation': None  # none is also used by gr.Radio to select nothing
+                'annotation': {k: None for k in self.annotation_keys}  # none is also used by gr.Radio to select nothing
             }
         
         all_indices = list(all_formatted_data.keys())
@@ -137,17 +138,24 @@ class AnnotationHistory:
     def get_current_idx(self):
         return self.all_indices[self._current_idx]
 
-    def update_label(self, label):
+    def update_label(self, key, label):
         if label is None:
             return
         idx = self.get_current_idx()
-        self.all_sessions[idx]['annotation'] = label
-        self._labeled_indicies.add(idx)
+        self.all_sessions[idx]['annotation'][key] = label
+        
+        fully_labeled = True
+        for k in self.annotation_keys:
+            if self.all_sessions[idx]['annotation'][k] is None:
+                fully_labeled = False
+                break
+        if fully_labeled:
+            self._labeled_indicies.add(idx)
         return
 
-    def get_current_label(self):
+    def get_current_label(self, key):
         idx = self.get_current_idx()
-        return self.all_sessions[idx]['annotation']
+        return self.all_sessions[idx]['annotation'][key]
 
     def get_num_labeled(self):
         return len(self._labeled_indicies)
