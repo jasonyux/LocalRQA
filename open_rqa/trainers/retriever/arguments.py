@@ -52,6 +52,38 @@ class FidTrainingArgs:
 
 
 @dataclass
+class ReplugTrainingArgs:
+	lm_model_path: str = field(
+		default="stabilityai/stablelm-zephyr-3b",
+		metadata={"help": "lm model path to compute LM likelihood"},
+	)
+	text_maxlength: int = field(
+		default=512,
+		metadata={"help": "maximum number of tokens in text segments (question+passage)"},
+	)
+	lm_temperature: float = field(
+		default=0.1,
+		metadata={"help": "Temperature for lm likelihood score"},
+	)
+	retrieve_temperature: float = field(
+		default=0.1,
+		metadata={"help": "Temperature for retrieval similarity score"},
+	)
+	num_docs: int = field(
+		default=20,
+		metadata={"help": "number of documents retrieved for each question in training"},
+	)
+	refresh_step: int = field(
+		default=10,
+		metadata={"help": "The document index refresh steps"}
+	)
+	search_algo: str = field(
+		default='inner_product',
+		metadata={"help": "choose from 'cosine', 'inner_product', 'cosine_w_bm25', 'inner_product_w_bm25'"}
+	)
+
+
+@dataclass
 class DataArguments:
 	"""
 	Arguments pertaining to what data we are going to input our model for training and eval.

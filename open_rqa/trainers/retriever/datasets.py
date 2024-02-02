@@ -5,6 +5,7 @@ import torch
 import random
 import json
 import pickle
+import jsonlines
 
 
 
@@ -57,7 +58,50 @@ class ContrastiveRetrievalDataset(torch.utils.data.Dataset):
 		return self.data[idx]
 
 
-class Dataset(torch.utils.data.Dataset):
+class ReplugDataset(torch.utils.data.Dataset):
+	def __init__(self,
+			raw_data: List[Dict],
+			start_data_idx=0,
+			end_data_idx=None,
+			document_fmt_str='title: {title} content: {content}',
+			shuffle=False):
+		self.start_data_idx = start_data_idx
+		self.end_data_idx = end_data_idx
+		self.document_fmt_str = document_fmt_str
+
+		self.data = raw_data
+		if shuffle:
+			# usually the training data files are ALREADY shuffled
+			# in the case of few shot experiments, we want to explicitly shuffle the data
+			random.seed(42)
+			random.shuffle(self.data)
+		return
+
+	def __len__(self):
+		return len(self.data)
+
+	def get_target(self, example):
+		if 'gold_answer' in example:
+			target = example['gold_answer']
+			return target
+		elif 'answers' in example:
+			return random.choice(example['answers'])
+		else:
+			return None
+
+	def __getitem__(self, index):
+		example = self.data[index]
+		question = example['question']
+		target = self.get_target(example)
+		
+		return {
+			'index' : index,
+			'question' : question,
+			'target' : target,
+			'gold_docs': example['gold_docs']
+		}
+
+class FidDataset(torch.utils.data.Dataset):
 	def __init__(self,
 				 data,
 				 n_context=None,
@@ -119,6 +163,7 @@ class Dataset(torch.utils.data.Dataset):
 	def get_example(self, index):
 		return self.data[index]
 
+
 def encode_passages(batch_text_passages, tokenizer, max_length):
 	passage_ids, passage_masks = [], []
 	for k, text_passages in enumerate(batch_text_passages):
@@ -136,7 +181,7 @@ def encode_passages(batch_text_passages, tokenizer, max_length):
 	passage_masks = torch.cat(passage_masks, dim=0)
 	return passage_ids, passage_masks.bool()
 
-class Collator(object):
+class FidCollator(object):
 	def __init__(self, text_maxlength, tokenizer, answer_maxlength=20):
 		self.tokenizer = tokenizer
 		self.text_maxlength = text_maxlength
@@ -157,27 +202,27 @@ class Collator(object):
 		return (index, None, None, passage_ids, passage_masks)
 
 
-def load_data(data_path=None):
-    assert data_path
-    if data_path.endswith('.jsonl'):
-        data = open(data_path, 'r')
-    elif data_path.endswith('.json'):
-        with open(data_path, 'r') as fin:
-            data = json.load(fin)
-    examples = []
-    for k, example in enumerate(data):
-        if data_path is not None and data_path.endswith('.jsonl'):
-            example = json.loads(example)
-        if not 'id' in example:
-            example['id'] = k
-        for c in example['ctxs']:
-            if not 'score' in c:
-                c['score'] = 1.0 / (k + 1)
-        examples.append(example)
-    if data_path is not None and data_path.endswith('.jsonl'):
-        data.close()
+def load_fid_data(data_path=None):
+	assert data_path
+	if data_path.endswith('.jsonl'):
+		data = open(data_path, 'r')
+	elif data_path.endswith('.json'):
+		with open(data_path, 'r') as fin:
+			data = json.load(fin)
+	examples = []
+	for k, example in enumerate(data):
+		if data_path is not None and data_path.endswith('.jsonl'):
+			example = json.loads(example)
+		if not 'id' in example:
+			example['id'] = k
+		for c in example['ctxs']:
+			if not 'score' in c:
+				c['score'] = 1.0 / (k + 1)
+		examples.append(example)
+	if data_path is not None and data_path.endswith('.jsonl'):
+		data.close()
 
-    return examples
+	return examples
 
 
 class RetrieverCollator(object):

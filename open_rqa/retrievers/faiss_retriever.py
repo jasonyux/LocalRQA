@@ -21,7 +21,8 @@ class FaissRetriever(BaseRetriever):
         self,
         texts: List[Document],
         embeddings=OpenAIEmbeddings(model='text-embedding-ada-002'),
-        index_path="./index"
+        index_path="./index",
+        **kwargs
     ) -> None:
         """
 
@@ -35,10 +36,10 @@ class FaissRetriever(BaseRetriever):
         cached_embedder = CacheBackedEmbeddings.from_bytes_store(
             embeddings, fs, namespace="customized"
         )
-        docs = self.prepare_docs_for_retrieval(texts)
+        self.docs = self.prepare_docs_for_retrieval(texts)
 
-        super().__init__(docs, cached_embedder)
-        self.retriever = self._init_retriever()
+        super().__init__(self.docs, cached_embedder)
+        self.retriever = self._init_retriever(**kwargs)
         return
 
     def prepare_docs_for_retrieval(self, texts: List[Document]):
@@ -67,7 +68,7 @@ class FaissRetriever(BaseRetriever):
             _type_: retriever
         """
         # print('_init_retriever', self.texts[0].metadata.keys())
-        docsearch = FAISS.from_documents(self.texts, self.embeddings)
+        docsearch = FAISS.from_documents(self.docs, self.embeddings)
         
         retriever = docsearch.as_retriever(**kwargs)
         return retriever
@@ -94,6 +95,31 @@ class FaissRetriever(BaseRetriever):
                 our_doc.metadata = metadata
                 our_docs.append(our_doc)
             
+            all_docs.append(our_docs)
+
+        output = RetrievalOutput(
+            batch_source_documents=all_docs
+        )
+        return output
+    
+    def retrieve_w_score(self, batch_questions: List[str]):
+        all_docs = []
+        for query in batch_questions:
+            if self.retriever.search_type != "similarity":
+                raise ValueError(f"Only search_type='similarity' is supported with scores")
+            docs_and_scores = self.retriever.vectorstore.similarity_search_with_score(query, k=self.retriever.search_kwargs.get('k'))
+            for doc, score in docs_and_scores:
+                doc.metadata = {**doc.metadata, **{"retrieve_score": score}}
+            docs = [doc for (doc, _) in docs_and_scores]
+            # convert back to ours
+            our_docs = []
+            for doc in docs:
+                our_doc = Document.from_langchain_doc(doc)
+                metadata = deepcopy(doc.metadata)
+                our_doc.page_content = metadata.pop('page_content', None)
+                our_doc.fmt_content = metadata.pop('fmt_content', None)
+                our_doc.metadata = metadata
+                our_docs.append(our_doc)
             all_docs.append(our_docs)
 
         output = RetrievalOutput(

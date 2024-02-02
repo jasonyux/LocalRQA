@@ -39,7 +39,7 @@ def compute_embedding(encoded_inputs, outputs, pooling_type):
 		raise NotImplementedError("Other pooling types haven't been implemented yet!")
 	return embedding
 
-def embed_document_batch(tokenizer, model, pooling_type, batch, batch_size=8, to_list=False):
+def embed_document_batch(tokenizer, model, pooling_type, batch, batch_size=8, device="cuda:0", to_list=False):
 	b = batch_iterator(batch, batch_size=batch_size, shuffle=False)
 	embeddings = []
 	for bb in b:
@@ -49,7 +49,7 @@ def embed_document_batch(tokenizer, model, pooling_type, batch, batch_size=8, to
 			truncation=True
 		)
 		for k, v in encoded_inputs.items():
-			encoded_inputs[k] = v.to(model.device)
+			encoded_inputs[k] = v.to(device)
 		outputs = model(**encoded_inputs, output_hidden_states=True)
 		# [len(texts), 768)]
 		embedding = compute_embedding(encoded_inputs, outputs, pooling_type)
@@ -73,7 +73,7 @@ class LocalEmbeddings(Embeddings):
 		return
 
 	def embed_documents(self, texts: List[str]) -> List[List[float]]:
-		embeddings = embed_document_batch(self.tokenizer, self.model, self.pooling_type, texts, to_list=True)
+		embeddings = embed_document_batch(self.tokenizer, self.model, self.pooling_type, texts, device=self.device, to_list=True)
 		return embeddings
 
 	def embed_query(self, text) -> List[float]:

@@ -17,7 +17,7 @@ import wandb
 
 from open_rqa.trainers.retriever.arguments import ModelArguments, DataArguments, FidTrainingArgs, RetrievalQATrainingArguments
 from open_rqa.qa_llms.fid import FiDT5
-from open_rqa.trainers.retriever.datasets import Dataset, Collator, RetrieverCollator, load_data
+from open_rqa.trainers.retriever.datasets import FidDataset, FidCollator, RetrieverCollator, load_fid_data
 from open_rqa.trainers.retriever.retriever_fid_trainer import FidRetrieverTrainer, EvaluatorConfig
 from open_rqa.config.retriever_config import SEARCH_CONFIG
 
@@ -54,9 +54,9 @@ def get_crossattention_score(model_args, data_file, fid_args, training_args):
 	if tokenizer.pad_token_id is None:
 		tokenizer.pad_token = tokenizer.eos_token
 
-	collator_function = Collator(fid_args.text_maxlength, tokenizer)
-	eval_examples = load_data(data_file)
-	eval_dataset = Dataset(
+	collator_function = FidCollator(fid_args.text_maxlength, tokenizer)
+	eval_examples = load_fid_data(data_file)
+	eval_dataset = FidDataset(
 		eval_examples, 
 		fid_args.n_context,
 		score_key="score"
@@ -135,8 +135,8 @@ if __name__ == "__main__":
 	collator_function = RetrieverCollator(
 		tokenizer
 	)
-	train_dataset = Dataset(train_examples, fid_args.n_context, score_key="crossattention_score")
-	eval_dataset = Dataset(eval_examples, fid_args.n_context, score_key="crossattention_score")
+	train_dataset = FidDataset(train_examples, fid_args.n_context, score_key="crossattention_score")
+	eval_dataset = FidDataset(eval_examples, fid_args.n_context, score_key="crossattention_score")
 
 
 	eval_config = EvaluatorConfig(
