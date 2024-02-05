@@ -26,7 +26,7 @@ class FidTrainingArgs:
 		metadata={"help": "maximum number of tokens in text segments (question+passage)"},
 	)
 	n_context: int = field(
-		default=100,
+		default=50,
 		metadata={"help": "num of candidates passages for each question"},
 	)
 	apply_question_mask: bool = field(
@@ -40,6 +40,14 @@ class FidTrainingArgs:
 	)
 	projection: bool = field(
 		default=False
+	)
+	reader_temperature: float = field(
+		default=0.1,
+		metadata={"help": "Temperature for lm likelihood score"},
+	)
+	reader_batch_size: int = field(
+		default=4,
+		metadata={"help": "The batch size for reader to calculate cross attention score"},
 	)
 	indexing_dimension: int = field(
 		default=768,

@@ -65,8 +65,7 @@ def get_crossattention_score(model_args, data_file, fid_args, training_args):
 	eval_dataloader = DataLoader(
 		eval_dataset, 
 		sampler=eval_sampler, 
-		batch_size=training_args.per_device_train_batch_size,
-		num_workers=20, 
+		batch_size=fid_args.reader_batch_size,
 		collate_fn=collator_function
 	)
 	
@@ -119,6 +118,10 @@ if __name__ == "__main__":
 		eval_filepath_wscore = data_args.eval_file.split(".json")[0] + "_wscore.json"
 		with open(eval_filepath_wscore, 'w') as fout:
 			json.dump(eval_examples, fout, indent=4)
+
+		# manually modify the cross attention score for the gold document
+		modify_score(train_examples)
+		modify_score(eval_examples)
 	else:
 		# load the train and eval data with score
 		train_examples = json.load(open(data_args.train_file, "r"))

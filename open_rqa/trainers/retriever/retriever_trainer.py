@@ -168,7 +168,7 @@ class RetrieverTrainer(Trainer):
 
 		wrapped_model = self.wrap_model_for_eval(
 			loaded_documents, 
-			LocalEmbeddings(model, self.tokenizer), 
+			LocalEmbeddings(model, self.tokenizer, pooling_type=self.args.pooling_type), 
 			index_path=os.path.join(self.args.output_dir, f"step-{self.state.global_step}-index")
 		)
 		
