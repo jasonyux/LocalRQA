@@ -1,7 +1,27 @@
 import argparse
 from dataclasses import dataclass, field
 from transformers import TrainingArguments
-from open_rqa.config.retriever_config import SEARCH_CONFIG
+
+
+@dataclass
+class LoggerArguments:
+    """
+    Arguments pertaining to using wandb for logging
+    """
+
+    run_group: str = field(
+        default="debug",
+        metadata={"help": "wandb run group"}
+    )
+    run_project: str = field(
+	    default="localRQA",
+	    metadata={"help": "wandb run project"}
+	)
+    run_entity: str = field(
+	    default="localRQA",
+	    metadata={"help": "wandb run entity"}
+	)
+    
 
 @dataclass
 class ModelArguments:
@@ -53,10 +73,6 @@ class FidTrainingArgs:
 		default=768,
 		metadata={"help": "token embedding dimension"},
 	)
-	search_algo: str = field(
-		default='inner_product',
-		metadata={"help": "choose from 'cosine', 'inner_product', 'cosine_w_bm25', 'inner_product_w_bm25'"}
-	)
 
 
 @dataclass
@@ -84,10 +100,6 @@ class ReplugTrainingArgs:
 	refresh_step: int = field(
 		default=10,
 		metadata={"help": "The document index refresh steps"}
-	)
-	search_algo: str = field(
-		default='inner_product',
-		metadata={"help": "choose from 'cosine', 'inner_product', 'cosine_w_bm25', 'inner_product_w_bm25'"}
 	)
 
 
@@ -128,10 +140,6 @@ class ContrasitiveTrainingArgs:
 	temperature: float = field(
 		default=0.05,
 		metadata={"help": "Temperature for contrastive loss"},
-	)
-	search_algo: str = field(
-		default='inner_product',
-		metadata={"help": "choose from 'cosine', 'inner_product', 'cosine_w_bm25', 'inner_product_w_bm25'"}
 	)
 
 

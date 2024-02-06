@@ -60,7 +60,6 @@ class ReplugRetrieverTrainer(Trainer):
 		data_args: DataArguments,
 		replug_args: ReplugTrainingArgs,
 		eval_config: EvaluatorConfig,
-		eval_search_kwargs: Dict[str, Any],
 		data_collator: Optional[DataCollator] = None,
 		train_dataset: Optional[Dataset] = None,
 		eval_dataset: Optional[Union[Dataset, Dict[str, Dataset]]] = None,
@@ -87,7 +86,6 @@ class ReplugRetrieverTrainer(Trainer):
 		self.data_args = data_args
 		self.replug_args = replug_args
 		self.evaluator_config = eval_config
-		self.eval_search_kwargs = eval_search_kwargs
 		_supported_encoders = (BertModel, BertForMaskedLM)
 		if not isinstance(self.model, _supported_encoders):
 			raise NotImplementedError(f"Model architecture is not supported.")
@@ -156,22 +154,12 @@ class ReplugRetrieverTrainer(Trainer):
 		return seq_probs
 
 	def kldivloss(self, retrieve_scores, lm_scores):
-		# print("************ raw lm_score *************")
-		# print(lm_scores)
-		# print("************ raw retrieve_score *************")
-		# print(retrieve_scores)
-		print("************ softmax retrieve_score *************")
-		print(torch.nn.functional.softmax(retrieve_scores/self.retreive_temp, dim=-1))
 		log_retrieve_scores = torch.nn.functional.log_softmax(retrieve_scores/self.retreive_temp, dim=-1)
 		lm_scores = torch.tensor(lm_scores).to(self.model.device)
 		lm_scores = torch.softmax(lm_scores/self.lm_temp, dim=-1)
 		log_retrieve_scores = log_retrieve_scores.float()
 		lm_scores = lm_scores.float()
 		criterion = torch.nn.KLDivLoss()
-		# print("************ log softmax retrieve_score *************")
-		# print(log_retrieve_scores)
-		print("************ lm_score *************")
-		print(lm_scores)
 		return criterion(log_retrieve_scores, lm_scores)
 
 
@@ -207,6 +195,7 @@ class ReplugRetrieverTrainer(Trainer):
 				all_docs.append(page_content)
 				ctx = {'text': page_content}
 				d['ctxs'].append(ctx)
+			# Optional, not necessary to add if don't have gold document
 			if add_gold:
 				print(RED + "don't have gold in the faiss retrieve" + RESET)
 				ctx = {'text': d["gold_docs"][0]["page_content"]}

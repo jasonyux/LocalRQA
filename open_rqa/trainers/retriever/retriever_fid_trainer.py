@@ -31,7 +31,6 @@ class FidRetrieverTrainer(Trainer):
 		data_args: DataArguments,
 		fid_args: FidTrainingArgs,
 		eval_config: EvaluatorConfig,
-		eval_search_kwargs: Dict[str, Any],
 		data_collator: Optional[DataCollator] = None,
 		train_dataset: Optional[Dataset] = None,
 		eval_dataset: Optional[Union[Dataset, Dict[str, Dataset]]] = None,
@@ -58,7 +57,6 @@ class FidRetrieverTrainer(Trainer):
 		self.data_args = data_args
 		self.fid_args = fid_args
 		self.evaluator_config = eval_config
-		self.eval_search_kwargs = eval_search_kwargs
 		self.loss_fct = torch.nn.KLDivLoss()
 		if self.fid_args.projection:
 			self.proj = nn.Linear(
