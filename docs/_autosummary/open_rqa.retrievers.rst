@@ -28,4 +28,6 @@ open\_rqa.retrievers
    :recursive:
 
    open_rqa.retrievers.base
+   open_rqa.retrievers.bm25_retriever
+   open_rqa.retrievers.faiss_retriever
 

@@ -1,12 +1,12 @@
-.. OpenRQA documentation master file, created by
+.. LocalRQA documentation master file, created by
    sphinx-quickstart on Fri Nov 17 21:45:00 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to OpenRQA's documentation!
+Welcome to LocalRQA's documentation!
 ===================================
 
-OpenRQA is a framework ...
+LocalRQA is a framework ...
 
 .. toctree::
    :maxdepth: 2
@@ -16,7 +16,7 @@ OpenRQA is a framework ...
    :toctree: _autosummary
    :recursive:
 
-   open_rqa
+   local_rqa
 
 Indices and tables
 ==================
