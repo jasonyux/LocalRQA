@@ -183,7 +183,7 @@ class ReplugRetrieverTrainer(Trainer):
 			loaded_documents = self._load_all_docs(self.data_args.full_dataset_file_path)
 			self.wrapped_model = self.wrap_model_for_eval(
 				loaded_documents, 
-				LocalEmbeddings(self.model, self.tokenizer), 
+				LocalEmbeddings(self.model, self.tokenizer, self.args.pooling_type), 
 				index_path=os.path.join(self.args.output_dir, f"step-train-{refresh_step}-index"),
 				search_type="similarity",
 				search_kwargs={'k': num_docs}
@@ -231,7 +231,7 @@ class ReplugRetrieverTrainer(Trainer):
 		for d in inputs:
 			question = d['question']
 			label_str = d['target']
-			gold_anwer_probs = []
+			gold_answer_probs = []
 			for doc in d['ctxs']:
 				input_id, target = self.instruct(question, doc, label_str)
 				input_ids_tensor = torch.tensor([input_id], dtype=torch.int64)
@@ -243,10 +243,10 @@ class ReplugRetrieverTrainer(Trainer):
 
 				with torch.no_grad():	
 					outputs = self.lm_model(**inputs_dict, labels=targets_tensor)
-				gold_anwer_prob = self.get_seq_prob(self.lm_tokenizer, outputs.logits, targets_tensor)
-				gold_anwer_probs.extend(gold_anwer_prob)
+				gold_answer_prob = self.get_seq_prob(self.lm_tokenizer, outputs.logits, targets_tensor)
+				gold_answer_probs.extend(gold_answer_prob)
 
-			lm_scores.append(gold_anwer_probs)
+			lm_scores.append(gold_answer_probs)
 		loss = self.kldivloss(retrieve_scores, lm_scores)
 		return loss
 	
@@ -306,7 +306,7 @@ class ReplugRetrieverTrainer(Trainer):
 		loaded_documents = self._load_all_docs(self.data_args.full_dataset_file_path)
 		self.wrapped_model = self.wrap_model_for_eval(
 			loaded_documents, 
-			LocalEmbeddings(model, self.tokenizer), 
+			LocalEmbeddings(model, self.tokenizer, self.args.pooling_type), 
 			index_path=os.path.join(self.args.output_dir, f"step-eval-{self.state.global_step}-index")
 		)
 

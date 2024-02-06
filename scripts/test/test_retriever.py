@@ -50,9 +50,9 @@ class TestArguments:
         metadata={"help": "faiss or BM25"},
     )
     test_bszv: int = field(
-		default=8,
-		metadata={"help": "Batch size per GPU/TPU core/CPU for evaluation."}
-	)
+        default=8,
+        metadata={"help": "Batch size per GPU/TPU core/CPU for evaluation."}
+    )
     output_dir: str = field(
         default="model_checkpoints/debug_test",
         metadata={"help": "Path to the output directory for saving test predictions and results"},
@@ -106,9 +106,9 @@ def test(model_args: ModelArguments, test_args: TestArguments):
 
     ### evaluation
     eval_config = EvaluatorConfig(
-		gen_latency = False,
-		batch_size = test_args.test_bszv
-	)
+        gen_latency = False,
+        batch_size = test_args.test_bszv
+    )
     loaded_eval_data = load_eval_data(test_args.eval_data_path)
     evaluator = RetrieverEvaluator(
         config=eval_config,
