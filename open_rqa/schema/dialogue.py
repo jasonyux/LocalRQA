@@ -101,7 +101,7 @@ class DialogueSession:
                 history += f"{turn.to_string()}" + self.sep_user
         elif self.sep_style == SeparatorStyle.TWO:
             for turn in self.history:
-                if turn.speaker.lower() in ["system", "assistant"]:
+                if turn.speaker == self.assistant_prefix or turn.speaker.lower() in ["system", "assistant"]:
                     history += f"{turn.to_string()}" + self.sep_sys
                 else:
                     history += f"{turn.to_string()}" + self.sep_user

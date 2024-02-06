@@ -1,4 +1,4 @@
-open\_rqa.schema.dialogue
+﻿open\_rqa.schema.dialogue
 =========================
 
 .. automodule:: open_rqa.schema.dialogue
@@ -18,7 +18,9 @@ open\_rqa.schema.dialogue
    .. autosummary::
    
       DialogueSession
+      DialogueTurn
       RQAOutput
+      SeparatorStyle
    
    
 

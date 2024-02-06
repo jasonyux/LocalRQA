@@ -1,4 +1,4 @@
-open\_rqa.trainers
+﻿open\_rqa.trainers
 ==================
 
 .. automodule:: open_rqa.trainers
@@ -20,4 +20,13 @@ open\_rqa.trainers
    
 
 
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   open_rqa.trainers.dist_utils
+   open_rqa.trainers.utils
 

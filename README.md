@@ -10,6 +10,13 @@ docker run -it --gpus all --shm-size=256m \
 jasonyux/nvcr_torch:23.08 bash
 ```
 
+Generate documentations using `sphinx`:
+
+go to the `docs` folder and run:
+```
+docs$ make html
+```
+
 # Prepare Document
 ```bash
 python scripts/data/process_docs.py \
