@@ -161,6 +161,108 @@ faire best contriever = model_checkpoints/retriever_model/contriever-ms_1e4_fair
 ```
 
 # Training
+Databricks contriever(DCA)
+```bash
+python scripts/train/retriever/train_fid_retriever.py \
+--full_dataset_file_path data/training/databricks_400.pkl \
+--train_file data/training/databricks_new/train_w_q_fid.json \
+--eval_file data/training/databricks_new/eval_w_q_fid.json \
+--model_name_or_path facebook/contriever-msmarco \
+--reader_model_path google/flan-t5-xl \
+--reader_temperature 0.1 \
+--with_score False \
+--projection True \
+--n_context 50 \
+--do_train True \
+--do_eval True \
+--learning_rate 1e-5 \
+--reader_batch_size 4 \
+--per_device_train_batch_size 10 \
+--per_device_eval_batch_size 10 \
+--metric_for_best_model eval_retr/document_recall/recall \
+--max_steps 150 \
+--eval_steps 5 \
+--save_steps 5 \
+--logging_steps 1 \
+--seed 16 \
+--output_dir result/model_checkpoints/fid/fid_contriever-ms_1e5_databricks_inbatch10_chunk400_fulldoc
+```
+
+Faire contriever(RPG)
+```bash
+python scripts/train/retriever/train_replug_retriever.py \
+--full_dataset_file_path data/training/faire_400.pkl \
+--train_file data/training/faire_new/train_w_qa.jsonl \
+--eval_file data/training/faire_new/eval_w_qa.jsonl \
+--model_name_or_path facebook/contriever-msmarco \
+--lm_model_path stabilityai/stablelm-zephyr-3b \
+--refresh_step 10 \
+--text_maxlength 512 \
+--lm_temperature 0.1 \
+--retrieve_temperature 0.1 \
+--num_docs 20 \
+--do_train True \
+--do_eval True \
+--pooling_type mean \
+--learning_rate 2e-5 \
+--per_device_train_batch_size 4 \
+--per_device_eval_batch_size 4 \
+--metric_for_best_model eval_retr/document_recall/recall \
+--max_steps 250 \
+--eval_steps 5 \
+--save_steps 5 \
+--logging_steps 1 \
+--output_dir result/model_checkpoints/replug/contriever-msmarco_mean_2e5_faire_eval_inbatch4_chunk400_fulldoc_temp0.1
+```
+
+Databricks E5(CTL)
+```bash
+python scripts/train/retriever/train_ctl_retriever.py \
+--full_dataset_file_path data/training/databricks_400.pkl \
+--train_file data/training/databricks_new/train_w_q.jsonl \
+--eval_file data/training/databricks_new/eval_w_q.jsonl \
+--model_path intfloat/e5-base-v2 \
+--pooling_type mean \
+--do_train True \
+--do_eval True \
+--learning_rate 1e-4 \
+--per_device_train_batch_size 256 \
+--per_device_eval_batch_size 128 \
+--hard_neg_ratio 0.05 \
+--contrastive_loss inbatch_contrastive \
+--metric_for_best_model eval_retr/document_recall/recall \
+--max_steps 150 \
+--eval_steps 5 \
+--save_steps 5 \
+--logging_steps 1 \
+--temperature 1 \
+--output_dir result/model_checkpoints/e5/e5_databricks_1e4_inbatch256_chunk400_fulldoc_temp1_hard0.05
+```
+
+Databricks BGE(CTL)
+```bash
+python scripts/train/retriever/train_ctl_retriever.py \
+--full_dataset_file_path data/training/databricks_400.pkl \
+--train_file data/training/databricks_new/train_w_q.jsonl \
+--eval_file data/training/databricks_new/eval_w_q.jsonl \
+--model_name_or_path BAAI/bge-base-en-v1.5 \
+--pooling_type mean \
+--do_train True \
+--do_eval True \
+--learning_rate 1e-5 \
+--per_device_train_batch_size 256 \
+--per_device_eval_batch_size 128 \
+--hard_neg_ratio 0.05 \
+--contrastive_loss inbatch_contrastive \
+--metric_for_best_model eval_retr/document_recall/recall \
+--max_steps 150 \
+--eval_steps 5 \
+--save_steps 5 \
+--logging_steps 1 \
+--temperature 1 \
+--output_dir result/model_checkpoints/bge/bge_1e5_mean_databricks_inbatch256_chunk400_fulldoc_temp1_hard0.05
+```
+
 
 Databricks Fusion-in-decoder + Contriever
 ```bash
