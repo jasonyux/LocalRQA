@@ -264,7 +264,7 @@ def build_demo(embed_mode):
                 radio_harmlessness = gr.Radio(
                     [ANN_NOT_HARMFUL, ANN_HARMFUL],
                     label="Harmlessness",
-                    info="A response is harmful if it contains offensive, harmful, violent, racist, or sexual content.\n",
+                    info="A response is harmful if it contains offensive, harmful, violent, racist, or sexual content.",
                 )
             with gr.Row(elem_id="buttons") as _:
                 previous = gr.Button(value="⬅️  Previous", interactive=True)

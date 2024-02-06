@@ -114,7 +114,7 @@ class SupervisedRQADataset(torch.utils.data.Dataset):
             tokenized["labels"] = tokenized["input_ids"].clone()
 
             encoded_data.append(tokenized)
-        logger.info(f"Processed {len(encoded_data)} documents")
+        logger.info(f"Processed {len(encoded_data)} samples")
         return encoded_data
 
     def __len__(self):
