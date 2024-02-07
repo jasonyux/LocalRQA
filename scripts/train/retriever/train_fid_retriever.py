@@ -1,10 +1,6 @@
 import sys
-from typing import List, Dict, Type
-import pickle
-import argparse
 import os
 import json
-import jsonlines
 import numpy as np
 
 from transformers import (
@@ -15,14 +11,14 @@ import torch
 from torch.utils.data import DataLoader, SequentialSampler
 import wandb
 
-from open_rqa.trainers.utils import (
+from local_rqa.trainers.utils import (
     init_logger,
     create_dir_if_not_exists
 )
-from open_rqa.trainers.retriever.arguments import ModelArguments, DataArguments, FidTrainingArgs, RetrievalQATrainingArguments, LoggerArguments
-from open_rqa.qa_llms.fid import FiDT5
-from open_rqa.trainers.retriever.datasets import FidDataset, FidCollator, RetrieverCollator, load_fid_data
-from open_rqa.trainers.retriever.retriever_fid_trainer import FidRetrieverTrainer, EvaluatorConfig
+from local_rqa.trainers.retriever.arguments import ModelArguments, DataArguments, FidTrainingArgs, RetrievalQATrainingArguments, LoggerArguments
+from local_rqa.qa_llms.fid import FiDT5
+from local_rqa.trainers.retriever.datasets import FidDataset, FidCollator, RetrieverCollator, load_fid_data
+from local_rqa.trainers.retriever.retriever_fid_trainer import FidRetrieverTrainer, EvaluatorConfig
 
 
 def evaluate(model, dataset, dataloader, tokenizer):

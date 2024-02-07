@@ -5,7 +5,7 @@ from langchain.document_loaders import *
 from langchain.text_splitter import *
 from transformers import AutoTokenizer
 
-from open_rqa.text_loaders.langchain_text_loader import LangChainTextLoader
+from local_rqa.text_loaders.langchain_text_loader import LangChainTextLoader
 
 
 def add_parser_arguments(parser: argparse.ArgumentParser):

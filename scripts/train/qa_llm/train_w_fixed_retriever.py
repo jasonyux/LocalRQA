@@ -4,20 +4,20 @@ from transformers import (
 )
 from accelerate.utils import DistributedType
 from dataclasses import dataclass, field
-from open_rqa.trainers.qa_llm.datasets import SupervisedRQAwRetrieverDataset
-from open_rqa.trainers.qa_llm.supervised_trainer import SupervisedTrainer
-from open_rqa.trainers.qa_llm.arguments import E2EQATrainingArguments
-from open_rqa.trainers.utils import (
+from local_rqa.trainers.qa_llm.datasets import SupervisedRQAwRetrieverDataset
+from local_rqa.trainers.qa_llm.supervised_trainer import SupervisedTrainer
+from local_rqa.trainers.qa_llm.arguments import E2EQATrainingArguments
+from local_rqa.trainers.utils import (
     remove_optimizer_weights,
     init_logger,
     create_dir_if_not_exists
 )
-from open_rqa.retrievers.faiss_retriever import FaissRetriever
-from open_rqa.evaluation.evaluator import EvaluatorConfig
+from local_rqa.retrievers.faiss_retriever import FaissRetriever
+from local_rqa.evaluation.evaluator import EvaluatorConfig
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from functools import partial
-import open_rqa.trainers.dist_utils as dist_utils
+import local_rqa.trainers.dist_utils as dist_utils
 import torch
 import wandb
 import random

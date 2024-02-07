@@ -1,7 +1,4 @@
 import sys
-from typing import List, Dict, Type
-import pickle
-import argparse
 import os
 import json
 import jsonlines
@@ -12,13 +9,13 @@ from transformers import (
 )
 import wandb
 
-from open_rqa.trainers.utils import (
+from local_rqa.trainers.utils import (
     init_logger,
     create_dir_if_not_exists
 )
-from open_rqa.trainers.retriever.arguments import ModelArguments, DataArguments, ReplugTrainingArgs, RetrievalQATrainingArguments, LoggerArguments
-from open_rqa.trainers.retriever.datasets import ReplugDataset, NoopDataCollator
-from open_rqa.trainers.retriever.retriever_replug_trainer import ReplugRetrieverTrainer, EvaluatorConfig
+from local_rqa.trainers.retriever.arguments import ModelArguments, DataArguments, ReplugTrainingArgs, RetrievalQATrainingArguments, LoggerArguments
+from local_rqa.trainers.retriever.datasets import ReplugDataset, NoopDataCollator
+from local_rqa.trainers.retriever.retriever_replug_trainer import ReplugRetrieverTrainer, EvaluatorConfig
 
 
 def main(model_args, data_args, replug_args, training_args, logger_args):

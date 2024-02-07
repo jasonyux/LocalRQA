@@ -1,10 +1,10 @@
 from transformers import HfArgumentParser
-from open_rqa.retrievers.faiss_retriever import FaissRetriever
-from open_rqa.retrievers.bm25_retriever import BM25Retriever
-from open_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
-from open_rqa.trainers.utils import init_logger, create_dir_if_not_exists
-from open_rqa.schema.document import Document
-from open_rqa.constants import OPENAI_MODEL_NAMES
+from local_rqa.retrievers.faiss_retriever import FaissRetriever
+from local_rqa.retrievers.bm25_retriever import BM25Retriever
+from local_rqa.evaluation.evaluator import RetrieverEvaluator, EvaluatorConfig
+from local_rqa.trainers.utils import init_logger, create_dir_if_not_exists
+from local_rqa.schema.document import Document
+from local_rqa.constants import OPENAI_MODEL_NAMES
 from langchain.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 from dataclasses import dataclass, field
 from typing import List, Dict

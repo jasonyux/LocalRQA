@@ -1,11 +1,11 @@
-from open_rqa.qa_llms.openai import OpenAIQAModel
-from open_rqa.qa_llms.huggingface import HuggingFaceQAModel
-from open_rqa.qa_llms.base import BaseQAModel
-from open_rqa.trainers.utils import init_logger
-from open_rqa.schema.document import Document
-from open_rqa.evaluation.utils import normalize_answer
-from open_rqa.evaluation.metrics import is_almost_same_document
-from open_rqa.constants import OPENAI_MODEL_NAMES, QA_ERROR_MSG
+from local_rqa.qa_llms.openai import OpenAIQAModel
+from local_rqa.qa_llms.huggingface import HuggingFaceQAModel
+from local_rqa.qa_llms.base import BaseQAModel
+from local_rqa.trainers.utils import init_logger
+from local_rqa.schema.document import Document
+from local_rqa.evaluation.utils import normalize_answer
+from local_rqa.evaluation.metrics import is_almost_same_document
+from local_rqa.constants import OPENAI_MODEL_NAMES, QA_ERROR_MSG
 from collections import defaultdict
 from tqdm.auto import tqdm
 from typing import Dict, List, Callable

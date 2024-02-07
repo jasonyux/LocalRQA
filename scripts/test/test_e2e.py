@@ -1,11 +1,11 @@
 from transformers import HfArgumentParser
-from open_rqa.pipelines.retrieval_qa import SimpleRQA
-from open_rqa.retrievers.faiss_retriever import FaissRetriever
-from open_rqa.evaluation.evaluator import E2EEvaluator, EvaluatorConfig
-from open_rqa.trainers.utils import init_logger, create_dir_if_not_exists
-from open_rqa.schema.document import Document
-from open_rqa.schema.dialogue import DialogueSession
-from open_rqa.constants import OPENAI_MODEL_NAMES
+from local_rqa.pipelines.retrieval_qa import SimpleRQA
+from local_rqa.retrievers.faiss_retriever import FaissRetriever
+from local_rqa.evaluation.evaluator import E2EEvaluator, EvaluatorConfig
+from local_rqa.trainers.utils import init_logger, create_dir_if_not_exists
+from local_rqa.schema.document import Document
+from local_rqa.schema.dialogue import DialogueSession
+from local_rqa.constants import OPENAI_MODEL_NAMES
 from langchain.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 from dataclasses import dataclass, field
 from typing import List, Dict
