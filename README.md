@@ -17,6 +17,11 @@ go to the `docs` folder and run:
 docs$ make html
 ```
 
+# Preparing data by downloading existing RQA dsets
+
+see `scripts/data/load_hf_data.py` which should be quite self-explanatory.
+
+
 # Prepare Document
 ```bash
 python scripts/data/process_docs.py \
