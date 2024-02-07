@@ -6,7 +6,9 @@
 Welcome to LocalRQA's documentation!
 ===================================
 
-LocalRQA is a framework ...
+LocalRQA is an open-source toolkit that enables researchers to quickly train, test, and serve retrieval-augmented question-answering (RQA) systems.
+LOCALRQA provides a full suite of tools from generating QA data to locally training, testing, and serving an RQA system.
+Compared to other existing toolkits, LOCALRQA *features a wide selection of training algorithms, testing methods, and serving tools curated from the latest RQA search*.
 
 .. toctree::
    :maxdepth: 2
