@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("../"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "LocalRQA"
-copyright = "2023, Xiao Yu, Yunan Lu"
+copyright = "2024, Xiao Yu, Yunan Lu"
 author = "Xiao Yu, Yunan Lu"
 
 # -- General configuration ---------------------------------------------------
