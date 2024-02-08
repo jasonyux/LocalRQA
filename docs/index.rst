@@ -10,15 +10,33 @@ LocalRQA is an open-source toolkit that enables researchers to quickly train, te
 LOCALRQA provides a full suite of tools from generating QA data to locally training, testing, and serving an RQA system.
 Compared to other existing toolkits, LOCALRQA *features a wide selection of training algorithms, testing methods, and serving tools curated from the latest RQA search*.
 
+
+🚀 Why LocalRQA?
+==================
+
+Some text here
+
+
+How can LocalRQA help?
+==================
+
+Some text here
+
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Getting Started
+   :hidden:
 
-.. autosummary::
-   :toctree: _autosummary
-   :recursive:
+   getting_started/scripts.md
 
-   local_rqa
+.. toctree::
+   :maxdepth: 1
+   :caption: API Reference
+   :hidden:
+
+   api_reference/local_rqa.rst
+
 
 Indices and tables
 ==================

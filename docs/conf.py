@@ -18,21 +18,29 @@ author = "Xiao Yu, Yunan Lu"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+
 extensions = [
-    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.autodoc.typehints",
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
-    'autoapi.extension'
+    "m2r2",
+    "myst_nb",
+    "sphinxcontrib.autodoc_pydantic",
+    "sphinx_automodapi.automodapi",
 ]
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
-autoapi_dirs = ['../local_rqa']
+# automodapi requires this to avoid duplicates apparently
+numpydoc_show_class_members = False
+
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "DOCS_README.md"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -40,3 +48,4 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = 'sphinx_book_theme'
 html_static_path = ["_static"]
+

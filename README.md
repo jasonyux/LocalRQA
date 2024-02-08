@@ -10,17 +10,6 @@ docker run -it --gpus all --shm-size=256m \
 jasonyux/nvcr_torch:23.08 bash
 ```
 
-# Generate documentations using `sphinx`:
-
-1. make sure you installed sphinx. This includes:
-      ```bash
-      pip install sphinx-book-theme
-      ```
-2. go to the `docs` folder and run:
-      ```
-      make html
-      ```
-
 # Preparing data by downloading existing RQA dsets
 
 see `scripts/data/load_hf_data.py` which should be quite self-explanatory.
