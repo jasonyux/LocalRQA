@@ -20,7 +20,7 @@ class FaissRetriever(BaseRetriever):
     def __init__(
         self,
         texts: List[Document],
-        embeddings=OpenAIEmbeddings(model='text-embedding-ada-002'),
+        embeddings=None,
         index_path="./index",
         **kwargs
     ) -> None:
@@ -46,10 +46,10 @@ class FaissRetriever(BaseRetriever):
         """prepare documents so that LangChain FAISS would recognize it, and embed using our fmt_content
 
         Args:
-            texts (List[Document]): _description_
+            texts (List[Document]): List of Document
 
         Returns:
-            _type_: _description_
+            List[LangChainDocument]: List of Langchain Document
         """
         langhchain_docs = []
         for doc in texts:
@@ -74,14 +74,6 @@ class FaissRetriever(BaseRetriever):
         return retriever
     
     def retrieve(self, batch_questions: List[str]) -> RetrievalOutput:
-        """given a batched query and dialogue history, retrieve relevant documents
-
-        Args:
-            batch_questions (List[str]): _description_
-
-        Returns:
-            RetrievalOutput: _description_
-        """
         all_docs = []
         for query in batch_questions:
             docs = self.retriever.get_relevant_documents(query)
@@ -103,6 +95,17 @@ class FaissRetriever(BaseRetriever):
         return output
     
     def retrieve_w_score(self, batch_questions: List[str]):
+        """_summary_
+
+        Args:
+            batch_questions (List[str]): List of questions
+
+        Raises:
+            ValueError: The retriever search_type must be "similarity"
+
+        Returns:
+            RetrievalOutput: List of Documents with score in the metadata
+        """
         all_docs = []
         for query in batch_questions:
             if self.retriever.search_type != "similarity":
@@ -133,8 +136,22 @@ class FaissRetriever(BaseRetriever):
         database_path: Optional[str] = None,
         document_path: Optional[str] = None,
         index_path: str = "./index",
-        embeddings = OpenAIEmbeddings(model='text-embedding-ada-002')
+        embeddings = None
     ):
+        """Load document index from disk
+
+        Args:
+            database_path (Optional[str], optional): folder for the document and index files. Defaults to None.
+            document_path (Optional[str], optional): document path. Defaults to None.
+            index_path (str, optional): index path. Defaults to "./index".
+            embeddings (_type_, optional): retriever embedding model. Defaults to None.
+
+        Raises:
+            ValueError: both database_path and document_path cannot be None
+
+        Returns:
+            FaissRetriever: faiss retriever
+        """
         if database_path is not None:
             # assume the following filenames
             document_path = os.path.join(database_path, "documents.pkl")

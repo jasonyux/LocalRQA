@@ -15,10 +15,10 @@ class LangChainTextLoader(BaseTextLoader):
         """Customized text loader by using different document_loaders provided in LangChain
 
         Args:
-            save_folder (str, optional): _description_. Defaults to "data".
-            save_filename (str, optional): _description_. Defaults to "parsed_docs".
-            loader_func (_type_, optional): _description_. Defaults to DirectoryLoader.
-            splitter_func (_type_, optional): _description_. Defaults to CharacterTextSplitter.
+            save_folder (str, optional): The folder to save the document pickle file. Defaults to "data".
+            save_filename (str, optional): The document pickle file name. Defaults to "parsed_docs".
+            loader_func (_type_, optional): Loader function supported by LangChain. Defaults to DirectoryLoader.
+            splitter_func (_type_, optional): Splitter function supported by LangChain. Defaults to CharacterTextSplitter.
         """
         self.loader_func = loader_func
         self.splitter_func = splitter_func
@@ -70,14 +70,14 @@ class LangChainTextLoader(BaseTextLoader):
 if __name__ == "__main__":
     ## Example of load document by using GoogleDriveLoader, split the docs by using CharacterTextSplitter
     loader_func, split_func = GoogleDriveLoader, CharacterTextSplitter
-    loader_parameters = {'folder_id': "1KARQJvcjAbsofjyFpke-z7Udk3m_NnIF", 'recursive': True}
+    loader_parameters = {'folder_id': "<folder_id>", 'recursive': True}
     splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
     kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
     docs = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
 
     ## Examples of load document from website url by using SeleniumURLLoader
     loader_func, split_func = SeleniumURLLoader, CharacterTextSplitter
-    loader_parameters = {'urls': ["https://python.langchain.com/docs/modules/data_connection/document_loaders/file_directory"]}
+    loader_parameters = {'urls': ["<website_url>"]}
     splitter_parameters = {'chunk_size': 500, 'chunk_overlap': 200, 'separator': "\n\n"}
     kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
     docs = LangChainTextLoader(loader_func, split_func).load_data(**kwargs)
@@ -98,12 +98,7 @@ if __name__ == "__main__":
 
         return metadata
 
-    json_list_docs = json.load(open("/local2/data/shared/rqa/training/faire_raw/faire_texts.json", "r"))
-    jsonl_filepath = '/local2/data/shared/rqa/training/faire_raw/faire_texts.jsonl'
-    with open(jsonl_filepath, 'w') as file:
-        for json_obj in json_list_docs:
-            json_str = json.dumps(json_obj)
-            file.write(json_str + '\n')
+    jsonl_filepath = '<jsonl filepath>'
     loader_func, splitter_func = JSONLoader, RecursiveCharacterTextSplitter.from_huggingface_tokenizer
     loader_parameters = {
         'file_path': jsonl_filepath,
@@ -115,5 +110,5 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained("facebook/contriever-msmarco")
     splitter_parameters = {'tokenizer': tokenizer, 'chunk_size': 400, 'chunk_overlap': 50}
     kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
-    documents = LangChainTextLoader(save_folder="/local2/data/shared/rqa/training", save_filename="faire_400", 
+    documents = LangChainTextLoader(save_folder="data", save_filename="faire_400", 
                                     loader_func=loader_func, splitter_func=splitter_func).load_data(**kwargs)

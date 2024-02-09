@@ -8,12 +8,12 @@ import os
 
 class LlamaIndexTextLoader(BaseTextLoader):
     def __init__(self, save_folder="./data", save_filename="parsed_docs", loader_func="SimpleDirectoryReader"):
-        """Customized text loader by using different document_loaders provided in LangChain
+        """Customized text loader by using different document_loaders provided in LlamaIndex
 
         Args:
             save_folder (str, optional): The folder to save the downloaded loader function from llamaIndex and the documents file. Defaults to "data".
-            save_filename (str, optional): _description_. Defaults to "parsed_docs".
-            loader_func (_type_, optional): _description_. Defaults to SimpleDirectoryReader.
+            save_filename (str, optional): The document pickle file name. Defaults to "parsed_docs".
+            loader_func (_type_, optional): Loader function supported by LlamaIndex. Defaults to SimpleDirectoryReader.
         """
         self.loader_func = download_loader(loader_func, custom_path=save_folder)
         self.save_folder = save_folder
@@ -27,7 +27,7 @@ class LlamaIndexTextLoader(BaseTextLoader):
             ValueError: loader_params must be specified for the corresponding loader_function
 
         Returns:
-            List[Document]: splitted documents
+            List[Document]
         """
         loader_parameters = kwargs.get('loader_params')
         if not loader_parameters:

@@ -34,20 +34,17 @@ class BM25Tokenizer:
 
 class BM25Retriever(BaseRetriever):
     def __init__(self, texts: List[Document]) -> None:
+        """Initialize BM25 Retriever
+
+        Args:
+            texts (List[Document]): documents for retriever
+        """
         self.bm25_tokenizer = BM25Tokenizer()
         formatted_texts = [doc.to_dict()['fmt_content'] for doc in texts]
         self.bm25 = BM25Okapi(formatted_texts, tokenizer=self.bm25_tokenizer)
         self.documents = texts
 
     def retrieve(self, batch_questions: List[str]) -> RetrievalOutput:
-        """given a batched query and dialogue history, retrieve relevant documents
-
-        Args:
-            batch_questions (List[str]): _description_
-
-        Returns:
-            RetrievalOutput: _description_
-        """
         all_docs = []
         for query in batch_questions:
             tokenized_query = self.bm25_tokenizer(query)

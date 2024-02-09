@@ -29,10 +29,10 @@ class BaseRetriever(Component):
         """given a batched query, retrieve relevant documents (query rephrasing is handled by the RQA pipeline)
 
         Args:
-            batch_questions (List[str]): _description_
+            batch_questions (List[str]): The list of questions
 
         Returns:
-            RetrievalOutput: _description_
+            RetrievalOutput: The retrieved documents for the questions
         """
         raise NotImplementedError
 
@@ -42,9 +42,6 @@ class BaseRetriever(Component):
 
 class DummyRetriever(BaseRetriever):
     """a mock retriever used for testing
-
-    Args:
-        BaseRetriever (_type_): _description_
     """
     def retrieve(
         self,
