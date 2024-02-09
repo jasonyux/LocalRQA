@@ -12,6 +12,8 @@ from local_rqa.evaluation.utils import normalize_answer
 from local_rqa.schema.document import Document
 from openai import OpenAI
 
+import pytrec_eval
+
 
 logger = logging.getLogger(__name__)
 
@@ -187,6 +189,55 @@ class DocumentRecall(RunningMetic):
             "num_seen": 0,
             "num_correct": 0,
             "num_likely_correct": 0,
+        }
+        return
+
+
+class DocumentNDCG(RunningMetic):
+    def __init__(self, name="document_ndcg"):
+        self.name = name
+        self.state = {
+            "qrel": {},
+            "pred": {},
+            "ndcgs": 0
+        }
+        self.reset()
+        return
+    
+    def update(self, batch_retrieved_docs, batch_gold_docs):
+        bsz = len(batch_retrieved_docs)
+        temperature = 0.1
+        for i in range(bsz):
+            self.state['qrel'][f'q_{i}'] = {}
+            self.state['pred'][f'q_{i}'] = {}
+
+            retrieved_docs = batch_retrieved_docs[i]
+            gold_docs = batch_gold_docs[i]
+
+            for idx, rdoc in enumerate(retrieved_docs):
+                for gdoc in gold_docs:
+                    if is_same_document(rdoc, gdoc):
+                        self.state['qrel'][f'q_{i}'][f'doc_{idx}'] = 1
+                    else:
+                        self.state['qrel'][f'q_{i}'][f'doc_{idx}'] = 0
+                    
+                self.state['pred'][f'q_{i}'][f'doc_{idx}'] = round((1/rdoc.metadata['retrieve_score'])/temperature,4)
+        return
+    
+    def compute(self):
+        evaluator = pytrec_eval.RelevanceEvaluator(self.state['qrel'], {'ndcg'})
+        scores = evaluator.evaluate(self.state['pred'])
+        for k, v in scores.items():
+            self.state['ndcgs'] += v['ndcg']
+        return {
+            "ndcg": round(self.state['ndcgs'] / len(scores), 4),
+        }
+    
+    def reset(self):
+        self.state = {
+            "qrel": {},
+            "pred": {},
+            "ndcgs": 0
         }
         return
 
@@ -663,6 +714,7 @@ class Latency(MonitoringMetric):
 METRICS = {
     "document_accuracy": DocumentAccuracy,
     "document_recall": DocumentRecall,
+    "ndcg": DocumentNDCG,
     'f1': F1,
     'precision': Precision,
     'rouge': ROUGE,

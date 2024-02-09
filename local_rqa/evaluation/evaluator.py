@@ -28,6 +28,10 @@ class EvaluatorConfig:
         default=True,
         metadata={"help": "Whether to compute recall on if all gold documents are retrieved"},
     )
+    retr_ndcg: bool = field(
+        default=False,
+        metadata={"help": "Whether to compute ndcg"},
+    )
     retr_latency: bool = field(
         default=True,
         metadata={"help": "Whether to compute latency for retrieval"},
@@ -180,7 +184,7 @@ class RetrieverEvaluator(Evaluator):
             for metric in self.retr_metrics:
                 if isinstance(metric, MonitoringMetric):
                     metric.start()
-            retr_output: RetrievalOutput = wrapped_model.retrieve(batch["question"])
+            retr_output: RetrievalOutput = wrapped_model.retrieve_w_score(batch["question"])
             retrieved_docs: List[List[Document]] = retr_output.batch_source_documents
             # Recall@1
             retrieved_docs = [[docs[0]] for docs in retrieved_docs] # comment out if want to get result for Recall@4

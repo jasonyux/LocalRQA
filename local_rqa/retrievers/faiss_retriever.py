@@ -107,9 +107,10 @@ class FaissRetriever(BaseRetriever):
         for query in batch_questions:
             if self.retriever.search_type != "similarity":
                 raise ValueError(f"Only search_type='similarity' is supported with scores")
-            docs_and_scores = self.retriever.vectorstore.similarity_search_with_score(query, k=self.retriever.search_kwargs.get('k'))
+            k_value = 4 if not self.retriever.search_kwargs.get('k') else self.retriever.search_kwargs.get('k')
+            docs_and_scores = self.retriever.vectorstore.similarity_search_with_score(query, k=k_value)
             for doc, score in docs_and_scores:
-                doc.metadata = {**doc.metadata, **{"retrieve_score": score}}
+                doc.metadata = {**doc.metadata, **{"retrieve_score": float(score)}}
             docs = [doc for (doc, _) in docs_and_scores]
             # convert back to ours
             our_docs = []
