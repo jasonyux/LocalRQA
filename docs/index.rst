@@ -27,8 +27,19 @@ Some text here
    :maxdepth: 1
    :caption: Getting Started
    :hidden:
+   
+   getting_started/installation.rst
+   getting_started/quickstart.rst
 
-   getting_started/scripts.md
+.. toctree::
+   :maxdepth: 1
+   :caption: Modules
+   :hidden:
+
+   modules/data_preparation.rst
+   modules/training_eval.rst
+   modules/serving.rst
+   modules/usecases.rst
 
 .. toctree::
    :maxdepth: 1
