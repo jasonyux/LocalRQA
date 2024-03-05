@@ -143,11 +143,37 @@ class DocumentRecall(RunningMetic):
         self.name = name
         self.state = {
             "num_seen": 0,
-            "num_correct": 0,
+            "num_correct_1": 0,
+            "num_correct_4": 0,
             "num_likely_correct": 0,
         }
         self.reset()
         return
+    
+    def calculate_recall(self, retrieved_docs, gold_docs, num):
+        all_found = []
+        all_likely_found = []
+        for gdoc in gold_docs:
+            is_found = [is_same_document(rdoc, gdoc) for rdoc in retrieved_docs]
+            if any(is_found):
+                all_found.append(True)
+            else:
+                all_found.append(False)
+
+            is_likely_found = [is_almost_same_document(rdoc, gdoc) for rdoc in retrieved_docs]
+            if any(is_likely_found):
+                all_likely_found.append(True)
+            else:
+                all_likely_found.append(False)
+        if all(all_found):
+            if num == 4:
+                self.state["num_correct_4"] += 1
+            elif num == 1:
+                self.state["num_correct_1"] += 1
+            else:
+                raise NotImplementedError
+        if all(all_likely_found):
+            self.state["num_likely_correct"] += 1
     
     def update(self, batch_retrieved_docs, batch_gold_docs):
         bsz = len(batch_retrieved_docs)
@@ -157,37 +183,26 @@ class DocumentRecall(RunningMetic):
             retrieved_docs = batch_retrieved_docs[i]
             gold_docs = batch_gold_docs[i]
 
-            # measure if all the documents from the gold set are retrieved
-            all_found = []
-            all_likely_found = []
-            for gdoc in gold_docs:
-                is_found = [is_same_document(rdoc, gdoc) for rdoc in retrieved_docs]
-                if any(is_found):
-                    all_found.append(True)
-                else:
-                    all_found.append(False)
+            # recall@4: measure if all the documents from the gold set are retrieved
+            self.calculate_recall(retrieved_docs, gold_docs, num=4)
 
-                is_likely_found = [is_almost_same_document(rdoc, gdoc) for rdoc in retrieved_docs]
-                if any(is_likely_found):
-                    all_likely_found.append(True)
-                else:
-                    all_likely_found.append(False)
-            if all(all_found):
-                self.state["num_correct"] += 1
-            if all(all_likely_found):
-                self.state["num_likely_correct"] += 1
+            # recall@1
+            retrieved_docs = [batch_retrieved_docs[i][0]]
+            self.calculate_recall(retrieved_docs, gold_docs, num=1)
         return
     
     def compute(self):
         return {
-            "recall": self.state["num_correct"] / self.state["num_seen"],
+            "recall4": self.state["num_correct_4"] / self.state["num_seen"],
+            "recall1": self.state["num_correct_1"] / self.state["num_seen"],
             "likely_recall": self.state["num_likely_correct"] / self.state["num_seen"],
         }
     
     def reset(self):
         self.state = {
             "num_seen": 0,
-            "num_correct": 0,
+            "num_correct_1": 0,
+            "num_correct_4": 0,
             "num_likely_correct": 0,
         }
         return

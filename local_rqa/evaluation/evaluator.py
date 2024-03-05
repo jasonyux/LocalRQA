@@ -186,8 +186,6 @@ class RetrieverEvaluator(Evaluator):
                     metric.start()
             retr_output: RetrievalOutput = wrapped_model.retrieve_w_score(batch["question"])
             retrieved_docs: List[List[Document]] = retr_output.batch_source_documents
-            # Recall@1
-            retrieved_docs = [[docs[0]] for docs in retrieved_docs] # comment out if want to get result for Recall@4
 
             gold_docs = []
             for gdoc in batch["gold_docs"]:
