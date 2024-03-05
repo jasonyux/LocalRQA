@@ -36,10 +36,19 @@ Some text here
    :caption: Modules
    :hidden:
 
-   modules/data_preparation.rst
-   modules/training_eval.rst
+   modules/data.rst
+   modules/training.rst
+   modules/evaluation.rst
    modules/serving.rst
-   modules/usecases.rst
+
+   
+.. toctree::
+   :maxdepth: 1
+   :caption: Use Cases
+   :hidden:
+
+   usecases/databricks.rst
+   usecases/faire.rst
 
 .. toctree::
    :maxdepth: 1
