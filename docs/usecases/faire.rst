@@ -4,7 +4,9 @@ Faire
 Data Generation
 ---------------
 
-We crawled guides and FAQ documents from `faire.com/support<faire.com/support>`_, and then processed the data to only keep raw texts (e.g., removing image hyperlinks). After applying our document preparation steps, we obtain a documents of 1,758 passages with a maximum length of 400 tokens: ``faire_400.pkl``. Then, run the data generation scripts to generate questions and answers for each document.
+We crawled guides and FAQ documents from faire_,  and then processed the data to only keep raw texts (e.g., removing image hyperlinks). After applying our document preparation steps, we obtain a documents of 1,758 passages with a maximum length of 400 tokens: ``faire_400.pkl``. Then, run the data generation scripts to generate questions and answers for each document.
+
+.. _faire: https://www.faire.com/support
 
 **Generate Questions**
 ::
@@ -27,3 +29,86 @@ We crawled guides and FAQ documents from `faire.com/support<faire.com/support>`_
     --save_name train_w_qa.jsonl \
     --save_dir data/training/faire_new \
     --end_data_idx 4
+
+It will save ``train_w_qa.jsonl, train_w_a.jsonl, eval_w_qa.jsonl, eval_w_a.jsonl, test_w_qa.jsonl, test_w_a.jsonl`` under ``data/training/faire_new`` folder.
+
+
+
+Retriever Training
+------------------
+
+Take CTL retriever trainer with BGE model as an example, the finetuned retriever model will be saved under ``result/model_checkpoints/bge/bge_1e5_mean_faire_inbatch256_temp1.2_hard0.05`` folder with highest recall@4 score.
+::
+
+    python scripts/train/retriever/train_ctl_retriever.py \
+    --full_dataset_file_path data/training/faire_400.pkl \
+    --train_file data/training/faire_new/train_w_q.jsonl \
+    --eval_file data/training/faire_new/test_w_q.jsonl \
+    --model_name_or_path BAAI/bge-base-en-v1.5 \
+    --pooling_type mean \
+    --do_train True \
+    --do_eval True \
+    --learning_rate 1e-5 \
+    --per_device_train_batch_size 256 \
+    --per_device_eval_batch_size 128 \
+    --hard_neg_ratio 0.05 \
+    --contrastive_loss inbatch_contrastive \
+    --metric_for_best_model eval_retr/document_recall/recall4 \
+    --max_steps 100 \
+    --eval_steps 2 \
+    --save_steps 2 \
+    --logging_steps 1 \
+    --temperature 1.2 \
+    --output_dir result/model_checkpoints/bge/bge_1e5_mean_faire_inbatch256_temp1.2_hard0.05
+
+
+Generator Training
+------------------
+
+By using the finetuned retriever from the previous step, train the generation model ``berkeley-nest/Starling-LM-7B-alpha`` further with fixed retriever.
+::
+
+    torchrun --nproc_per_node=1 --master_port=20001 scripts/train/qa_llm/train_w_fixed_retriever.py \
+    --use_flash_attention true \
+    --per_device_train_batch_size 2 \
+    --per_device_eval_batch_size 2 \
+    --deepspeed scripts/train/ds_config.json \
+    --learning_rate 1e-5 \
+    --num_train_epochs 2 \
+    --gradient_accumulation_steps 4 \
+    --bf16 true \
+    --model_name_or_path berkeley-nest/Starling-LM-7B-alpha \
+    --assistant_prefix "GPT4 Correct Assistant" \
+    --user_prefix "GPT4 Correct User" \
+    --sep_user "<|end_of_turn|>" \
+    --sep_sys "<|end_of_turn|>" \
+    --embedding_model model_checkpoints/retriever_model/bge_1e5_mean_faire_inbatch256_temp1.2_hard0.05/checkpoint-56 \
+    --embedding_max_num_to_retrieve 3 \
+    --logging_steps 10 \
+    --eval_steps 50 \
+    --save_steps 50 \
+    --output_dir model_checkpoints/faire_Starling7b-1e5-train2_bge-ft \
+    --run_group faire_vicuna \
+    --train_file data/training/faire_new/train_w_qa.jsonl \
+    --eval_file data/training/faire_new/eval_w_qa.jsonl \
+    --test_file data/training/faire_new/test_w_qa.jsonl \
+    --full_dataset_file_path data/database/faire/faire_400.pkl \
+    --full_dataset_index_path data/database/faire/faire_400_bge1e5_inbatch256_chunk400hard0.05_checkpoint56
+
+
+- Test
+
+Finally, the test script could evaluate the automatical metrics: recall@k, ROUGE-L, GPT4-Acc.
+::
+
+    python scripts/test/test_e2e.py \
+    --qa_model_name_or_path model_checkpoints/faire_Starling7b-1e5-train2_bge-ft/checkpoint-50 \
+    --assistant_prefix "GPT4 Correct Assistant" \
+    --user_prefix "GPT4 Correct User" \
+    --sep_user "<|end_of_turn|>" \
+    --sep_sys "<|end_of_turn|>" \
+    --embedding_model_name_or_path model_checkpoints/retriever_model/bge_1e5_mean_faire_inbatch256_temp1.2_hard0.05/checkpoint-56 \
+    --document_path data/database/faire/faire_400.pkl \
+    --index_path data/database/faire/faire_400_bge1e5_inbatch256_chunk400hard0.05_checkpoint56 \
+    --eval_data_path data/training/faire_new/test_w_qa.jsonl \
+    --output_dir model_checkpoints/faire_e2e_tests/faire_Starling7b-1e5-train2_bge-ft

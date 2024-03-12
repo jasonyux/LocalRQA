@@ -25,7 +25,7 @@ The sample command to train a retriever with DCA method with ``google/flan-t5-xl
     --reader_batch_size 4 \
     --per_device_train_batch_size 10 \
     --per_device_eval_batch_size 10 \
-    --metric_for_best_model eval_retr/document_recall/recall \
+    --metric_for_best_model eval_retr/document_recall/recall4 \
     --output_dir path/to/save/dir
 
 where train_w_q_fid.json is in the following format, where "ctxs" indicates the initial list of passages for each question retrieved::
@@ -71,7 +71,7 @@ The sample command to train a retriever with RPG method with ``stabilityai/stabl
     --pooling_type mean \
     --per_device_train_batch_size 4 \
     --per_device_eval_batch_size 4 \
-    --metric_for_best_model eval_retr/document_recall/recall \
+    --metric_for_best_model eval_retr/document_recall/recall4 \
     --output_dir path/to/save/dir
 
 
@@ -91,5 +91,5 @@ The sample command to train a retriever with CTL method.
     --per_device_eval_batch_size 128 \
     --hard_neg_ratio 0.05 \
     --contrastive_loss inbatch_contrastive \
-    --metric_for_best_model eval_retr/document_recall/recall \
+    --metric_for_best_model eval_retr/document_recall/recall4 \
     --output_dir path/to/save/dir
