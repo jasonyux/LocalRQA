@@ -1,3 +1,5 @@
+.. _evaluation-main:
+
 Evaluation
 ==========
 

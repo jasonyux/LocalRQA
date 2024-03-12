@@ -1,3 +1,5 @@
+.. _train-main:
+
 Training
 ========
 

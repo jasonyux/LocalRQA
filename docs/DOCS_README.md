@@ -6,8 +6,7 @@
     ```
 2. go to the root project directory and update the API documentations with auto generated docstrings:
     ```bash
-    /workspace/LocalRQA$ sphinx-apidoc -a --tocfile index -o docs/api_reference local_rqa/
-    sphinx-apidoc --implicit-namespaces --tocfile index -o docs/api_reference local_rqa/
+    /workspace/LocalRQA$ sphinx-apidoc --implicit-namespaces --tocfile index -o docs/api_reference local_rqa/
     ```
     this will generate `.rst` stuff under `docs/api_reference`.
 3. if you skipped the previous step (not always needed unless you updated your documentations), make sure the you have `_static` and `_templates` (empty folders) under your `docs`:
