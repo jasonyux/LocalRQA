@@ -51,7 +51,7 @@ Take CTL retriever trainer with E5 model as an example, the finetuned retriever 
     --per_device_eval_batch_size 128 \
     --hard_neg_ratio 0.05 \
     --contrastive_loss inbatch_contrastive \
-    --metric_for_best_model eval_retr/document_recall/recall \
+    --metric_for_best_model eval_retr/document_recall/recall4 \
     --max_steps 150 \
     --eval_steps 5 \
     --save_steps 5 \
