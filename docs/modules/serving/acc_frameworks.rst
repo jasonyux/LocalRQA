@@ -7,14 +7,14 @@ RQA systems need time to perform retrieval and generate a response. If you are u
 
 To speed up retrieval:
 
-* `FAISS <https://github.com/facebookresearch/faiss>`_ (Johnson et al.,2019)
+* `FAISS <https://github.com/facebookresearch/faiss>`_
 
 
 To speed up text generation:
 
-* `Text Generation Inference <https://github.com/huggingface/text-generation-inference>`_ (Huggingface, 2023)
-* `vLLM <https://github.com/vllm-project/vllm>`_ (Kwon et al., 2023)
-* `SGLang <https://github.com/sgl-project/sglang>`_ (Zheng et al., 2023)
+* `Text Generation Inference <https://github.com/huggingface/text-generation-inference>`_
+* `vLLM <https://github.com/vllm-project/vllm>`_
+* `SGLang <https://github.com/sgl-project/sglang>`_
 
 
 By default, our ``SimpleRQA`` class (in :ref:`quickstart` and in :ref:`serving-interactive-eval`) uses ``FAISS`` for retrieval and no acceleration framework for text generation. However, you can **easily drop in any of the above acceleration frameworks in a two-step process**:
