@@ -1,15 +1,11 @@
 from transformers import HfArgumentParser
 from local_rqa.pipelines.retrieval_qa import SimpleRQA
-from local_rqa.retrievers.faiss_retriever import FaissRetriever
 from local_rqa.evaluation.evaluator import E2EEvaluator, EvaluatorConfig
 from local_rqa.trainers.utils import init_logger, create_dir_if_not_exists
 from local_rqa.schema.document import Document
 from local_rqa.schema.dialogue import DialogueSession
-from local_rqa.constants import OPENAI_MODEL_NAMES
-from langchain.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 from dataclasses import dataclass, field
 from typing import List, Dict
-import pickle
 import logging
 import os
 import sys
@@ -84,54 +80,19 @@ class TestArguments:
     )
 
 
-def init_rqa_model(model_args: ModelArguments, documents: List[Document], index_path: str):
+def init_rqa_model(model_args: ModelArguments, document_path: str, index_path: str):
     ### init retriever
-    if model_args.embedding_model_name_or_path in OPENAI_MODEL_NAMES:
-        embedding_model = OpenAIEmbeddings(
-            model=model_args.embedding_model_name_or_path,
-            organization=os.environ['OPENAI_ORGANIZATION']
-        )
-    else:
-        embedding_model = HuggingFaceEmbeddings(
-            model_name=model_args.embedding_model_name_or_path
-        )
-    logger.info(f"Initializing retriever with {model_args.embedding_model_name_or_path} and {index_path}")
-    retriever = FaissRetriever(
-        documents,
-        embeddings=embedding_model,
-        index_path=index_path
+    rqa_model = SimpleRQA.from_scratch(
+        document_path=document_path,
+        index_path=index_path,
+        qa_model_name_or_path=model_args.qa_model_name_or_path,
+        qa_is_fid=model_args.qa_is_fid,
+        embedding_model_name_or_path=model_args.embedding_model_name_or_path,
+        assistant_prefix=model_args.assistant_prefix,
+        user_prefix=model_args.user_prefix,
+        sep_user=model_args.sep_user,
+        sep_sys=model_args.sep_sys,
     )
-
-    ### init qa model
-    logger.info(f"Initializing qa model with {model_args.qa_model_name_or_path}")
-    if model_args.qa_model_name_or_path in OPENAI_MODEL_NAMES:
-        rqa_model = SimpleRQA.from_openai(
-            retriever=retriever,
-            qa_model_name=model_args.qa_model_name_or_path,
-            user_prefix=model_args.user_prefix,
-            assistant_prefix=model_args.assistant_prefix,
-            sep_user=model_args.sep_user,
-            sep_sys=model_args.sep_sys,
-        )
-    else:
-        if model_args.qa_is_fid:
-            rqa_model = SimpleRQA.from_huggingface_fid(
-                retriever=retriever,
-                qa_model_name_or_path=model_args.qa_model_name_or_path,
-                user_prefix=model_args.user_prefix,
-                assistant_prefix=model_args.assistant_prefix,
-                sep_user=model_args.sep_user,
-                sep_sys=model_args.sep_sys,
-            )
-        else:
-            rqa_model = SimpleRQA.from_huggingface(
-                retriever=retriever,
-                qa_model_name_or_path=model_args.qa_model_name_or_path,
-                user_prefix=model_args.user_prefix,
-                assistant_prefix=model_args.assistant_prefix,
-                sep_user=model_args.sep_user,
-                sep_sys=model_args.sep_sys,
-            )
     return rqa_model
 
 
@@ -150,13 +111,8 @@ def load_eval_data(eval_data_path) -> List[Dict]:
 
 
 def test(model_args: ModelArguments, test_args: TestArguments):
-    ### load documents database
-    with open(test_args.document_path, 'rb') as fread:
-        documents = pickle.load(fread)
-    logger.info(f"Loaded {len(documents)} documents from {test_args.document_path}")
-
     ### init rqa model
-    rqa_model = init_rqa_model(model_args, documents, test_args.index_path)
+    rqa_model = init_rqa_model(model_args, test_args.document_path, test_args.index_path)
 
     ### evaluation
     eval_config = EvaluatorConfig(  # type: ignore
