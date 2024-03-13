@@ -312,6 +312,8 @@ document.write(`
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -333,12 +335,16 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.acquire_worker_semaphore">acquire_worker_semaphore() (in module local_rqa.serve.base_model_worker)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.add_model_args">add_model_args() (in module local_rqa.serve.model_worker)</a>
+</li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.add_system_message">add_system_message() (local_rqa.schema.dialogue.DialogueSession method)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.GradioDialogueSession.add_system_message">(local_rqa.serve.gradio_dialogue.GradioDialogueSession method)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.add_text">add_text() (in module local_rqa.serve.gradio_web_server)</a>
+</li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.add_user_message">add_user_message() (local_rqa.schema.dialogue.DialogueSession method)</a>
 
       <ul>
@@ -346,6 +352,8 @@ document.write(`
 </li>
       </ul></li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory">AnnotationHistory (class in local_rqa.serve.gradio_dialogue)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.AnswerStats">AnswerStats (class in local_rqa.evaluation.metrics)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.api_count_token">api_count_token() (in module local_rqa.serve.base_model_worker)</a>
 </li>
@@ -369,8 +377,18 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.FidTrainingArgs.apply_question_mask">apply_question_mask (local_rqa.trainers.retriever.arguments.FidTrainingArgs attribute)</a>
 </li>
-      <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.assistant_prefix">assistant_prefix (local_rqa.schema.dialogue.DialogueSession attribute)</a>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.args">args (in module local_rqa.serve.gradio_static_server)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.args">(in module local_rqa.serve.gradio_web_server)</a>
 </li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.assistant_prefix">assistant_prefix (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.assistant_prefix">(local_rqa.schema.dialogue.DialogueSession attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.retrieval_qa.AutoRQA">AutoRQA (class in local_rqa.pipelines.retrieval_qa)</a>
 </li>
   </ul></td>
@@ -393,26 +411,38 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.text_loaders.html#local_rqa.text_loaders.base.BaseTextLoader">BaseTextLoader (class in local_rqa.text_loaders.base)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.base.GenerationOutput.batch_answers">batch_answers (local_rqa.qa_llms.base.GenerationOutput attribute)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.RQAOutput.batch_answers">(local_rqa.schema.dialogue.RQAOutput attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.RQAOutput.batch_dialogue_session">batch_dialogue_session (local_rqa.schema.dialogue.RQAOutput attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.batch_iterator">batch_iterator() (in module local_rqa.trainers.qa_llm.datasets)</a>
 
       <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.with_retriever_trainer.batch_iterator">(in module local_rqa.trainers.qa_llm.with_retriever_trainer)</a>
+</li>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.embeddings.batch_iterator">(in module local_rqa.trainers.retriever.embeddings)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.batch_size">batch_size (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.retrievers.html#local_rqa.retrievers.base.RetrievalOutput.batch_source_documents">batch_source_documents (local_rqa.retrievers.base.RetrievalOutput attribute)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.RQAOutput.batch_source_documents">(local_rqa.schema.dialogue.RQAOutput attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.BLEU">BLEU (class in local_rqa.evaluation.metrics)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.build_demo">build_demo() (in module local_rqa.serve.gradio_static_server)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.build_demo">(in module local_rqa.serve.gradio_web_server)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -421,7 +451,13 @@ document.write(`
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentRecall.calculate_recall">calculate_recall() (local_rqa.evaluation.metrics.DocumentRecall method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.WorkerInfo.check_heart_beat">check_heart_beat (local_rqa.serve.controller.WorkerInfo attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.CheckpointWrapper">CheckpointWrapper (class in local_rqa.qa_llms.fid)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.clear_history">clear_history() (in module local_rqa.serve.gradio_web_server)</a>
 </li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.clone">clone() (local_rqa.schema.dialogue.DialogueSession method)</a>
 
@@ -437,17 +473,65 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.base.RQAPipeline.components">components() (local_rqa.pipelines.base.RQAPipeline method)</a>
 </li>
-      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.embeddings.compute_embedding">compute_embedding() (in module local_rqa.trainers.retriever.embeddings)</a>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.AnswerStats.compute">compute() (local_rqa.evaluation.metrics.AnswerStats method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.BLEU.compute">(local_rqa.evaluation.metrics.BLEU method)</a>
 </li>
-      <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.CONTEXT_OVERFLOW">CONTEXT_OVERFLOW (local_rqa.constants.ErrorCode attribute)</a>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentAccuracy.compute">(local_rqa.evaluation.metrics.DocumentAccuracy method)</a>
 </li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentNDCG.compute">(local_rqa.evaluation.metrics.DocumentNDCG method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentRecall.compute">(local_rqa.evaluation.metrics.DocumentRecall method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.F1.compute">(local_rqa.evaluation.metrics.F1 method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.GPT4Eval.compute">(local_rqa.evaluation.metrics.GPT4Eval method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Latency.compute">(local_rqa.evaluation.metrics.Latency method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.MonitoringMetric.compute">(local_rqa.evaluation.metrics.MonitoringMetric method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Precision.compute">(local_rqa.evaluation.metrics.Precision method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.ROUGE.compute">(local_rqa.evaluation.metrics.ROUGE method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.RunningMetic.compute">(local_rqa.evaluation.metrics.RunningMetic method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.embeddings.compute_embedding">compute_embedding() (in module local_rqa.trainers.retriever.embeddings)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer.compute_loss">compute_loss() (local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer.compute_loss">(local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer.compute_loss">(local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer.compute_loss">(local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.compute_loss">(local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer.compute_loss">(local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.E2EEvaluator.compute_performance">compute_performance() (local_rqa.evaluation.evaluator.E2EEvaluator method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.RetrieverEvaluator.compute_performance">(local_rqa.evaluation.evaluator.RetrieverEvaluator method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.CONTEXT_OVERFLOW">CONTEXT_OVERFLOW (local_rqa.constants.ErrorCode attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ContrasitiveTrainingArgs">ContrasitiveTrainingArgs (class in local_rqa.trainers.retriever.arguments)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ContrasitiveTrainingArgs.contrastive_loss">contrastive_loss (local_rqa.trainers.retriever.arguments.ContrasitiveTrainingArgs attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.ContrastiveRetrievalDataset">ContrastiveRetrievalDataset (class in local_rqa.trainers.retriever.datasets)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller">Controller (class in local_rqa.serve.controller)</a>
 </li>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.CONTROLLER_NO_WORKER">CONTROLLER_NO_WORKER (local_rqa.constants.ErrorCode attribute)</a>
 </li>
@@ -457,7 +541,11 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.create_background_tasks">create_background_tasks() (in module local_rqa.serve.base_model_worker)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.create_controller">create_controller() (in module local_rqa.serve.controller)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.html#local_rqa.trainers.utils.create_dir_if_not_exists">create_dir_if_not_exists() (in module local_rqa.trainers.utils)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.create_model_worker">create_model_worker() (in module local_rqa.serve.model_worker)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.cross_attention_forward">cross_attention_forward() (in module local_rqa.qa_llms.fid)</a>
 </li>
@@ -477,23 +565,41 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueTurn">DialogueTurn (class in local_rqa.schema.dialogue)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.DispatchMethod">DispatchMethod (class in local_rqa.serve.controller)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.do_eval">do_eval (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.do_eval">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.do_train">do_train (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.do_train">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.document.Document">Document (class in local_rqa.schema.document)</a>
 </li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.document_similarity">document_similarity() (in module local_rqa.evaluation.metrics)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.document_view">document_view() (in module local_rqa.serve.gradio_static_server)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.document_view">(in module local_rqa.serve.gradio_web_server)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentAccuracy">DocumentAccuracy (class in local_rqa.evaluation.metrics)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentNDCG">DocumentNDCG (class in local_rqa.evaluation.metrics)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentRecall">DocumentRecall (class in local_rqa.evaluation.metrics)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments.documents_path">documents_path (local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.downvote_last_response">downvote_last_response() (in module local_rqa.serve.gradio_web_server)</a>
 </li>
       <li><a href="api_reference/local_rqa.retrievers.html#local_rqa.retrievers.base.DummyRetriever">DummyRetriever (class in local_rqa.retrievers.base)</a>
 </li>
@@ -503,6 +609,10 @@ document.write(`
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.e2e_latency">e2e_latency (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.E2EEvaluator">E2EEvaluator (class in local_rqa.evaluation.evaluator)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments">E2EQATrainingArguments (class in local_rqa.trainers.qa_llm.arguments)</a>
 </li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.em">em() (in module local_rqa.evaluation.scores)</a>
@@ -512,6 +622,8 @@ document.write(`
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.embeddings.LocalEmbeddings.embed_documents">embed_documents() (local_rqa.trainers.retriever.embeddings.LocalEmbeddings method)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.embeddings.LocalEmbeddings.embed_query">embed_query() (local_rqa.trainers.retriever.embeddings.LocalEmbeddings method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer.embed_text">embed_text() (local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer method)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.SupervisedFiDRQAwRetrieverDataset.encode_data">encode_data() (local_rqa.trainers.qa_llm.datasets.SupervisedFiDRQAwRetrieverDataset method)</a>
 
@@ -529,8 +641,6 @@ document.write(`
       </ul></li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.encode_passages">encode_passages() (in module local_rqa.trainers.retriever.datasets)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.EncoderWrapper">EncoderWrapper (class in local_rqa.qa_llms.fid)</a>
 </li>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.ENGINE_OVERLOADED">ENGINE_OVERLOADED (local_rqa.constants.ErrorCode attribute)</a>
@@ -539,6 +649,8 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments.eval_data_path">eval_data_path (local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.DataArguments.eval_file">eval_file (local_rqa.trainers.retriever.arguments.DataArguments attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.eval_steps">eval_steps (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
@@ -547,12 +659,38 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.eval_steps">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.E2EEvaluator.evaluate">evaluate() (local_rqa.evaluation.evaluator.E2EEvaluator method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.Evaluator.evaluate">(local_rqa.evaluation.evaluator.Evaluator method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.RetrieverEvaluator.evaluate">(local_rqa.evaluation.evaluator.RetrieverEvaluator method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer.evaluation_loop">evaluation_loop() (local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer.evaluation_loop">(local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer.evaluation_loop">(local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer.evaluation_loop">(local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.evaluation_loop">(local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer.evaluation_loop">(local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer method)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.evaluation_strategy">evaluation_strategy (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.evaluation_strategy">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.Evaluator">Evaluator (class in local_rqa.evaluation.evaluator)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig">EvaluatorConfig (class in local_rqa.evaluation.evaluator)</a>
+</li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.exact_match_score">exact_match_score() (in module local_rqa.evaluation.scores)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.FidTrainingArgs.extract_cls">extract_cls (local_rqa.trainers.retriever.arguments.FidTrainingArgs attribute)</a>
@@ -563,6 +701,8 @@ document.write(`
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.F1">F1 (class in local_rqa.evaluation.metrics)</a>
+</li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.f1">f1() (in module local_rqa.evaluation.scores)</a>
 </li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.f1_score">f1_score() (in module local_rqa.evaluation.scores)</a>
@@ -573,9 +713,15 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.FidDataset">FidDataset (class in local_rqa.trainers.retriever.datasets)</a>
 </li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer">FidRetrieverTrainer (class in local_rqa.trainers.retriever.retriever_fid_trainer)</a>
+</li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5">FiDT5 (class in local_rqa.qa_llms.fid)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.FidTrainingArgs">FidTrainingArgs (class in local_rqa.trainers.retriever.arguments)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer">FixedRetrieverTrainer (class in local_rqa.trainers.qa_llm.with_retriever_trainer)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.flag_last_response">flag_last_response() (in module local_rqa.serve.gradio_web_server)</a>
 </li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.document.Document.fmt_content">fmt_content (local_rqa.schema.document.Document attribute)</a>
 </li>
@@ -589,14 +735,14 @@ document.write(`
       </ul></li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.forward_">forward_() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueTurn.from_dict">from_dict() (local_rqa.schema.dialogue.DialogueTurn static method)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.document.Document.from_dict">(local_rqa.schema.document.Document static method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.retrievers.html#local_rqa.retrievers.faiss_retriever.FaissRetriever.from_disk">from_disk() (local_rqa.retrievers.faiss_retriever.FaissRetriever static method)</a>
 </li>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.retrieval_qa.SimpleRQA.from_huggingface">from_huggingface() (local_rqa.pipelines.retrieval_qa.SimpleRQA static method)</a>
@@ -617,6 +763,8 @@ document.write(`
       </ul></li>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.retrieval_qa.SimpleRQA.from_sglang">from_sglang() (local_rqa.pipelines.retrieval_qa.SimpleRQA static method)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.DispatchMethod.from_str">from_str() (local_rqa.serve.controller.DispatchMethod class method)</a>
+</li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.from_t5">from_t5() (local_rqa.qa_llms.fid.FiDT5 static method)</a>
 </li>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.retrieval_qa.SimpleRQA.from_tgi">from_tgi() (local_rqa.pipelines.retrieval_qa.SimpleRQA static method)</a>
@@ -631,6 +779,20 @@ document.write(`
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_answer_stats">gen_answer_stats (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_bleu">gen_bleu (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_f1">gen_f1 (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_gpt4eval">gen_gpt4eval (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_latency">gen_latency (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_precision">gen_precision (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.gen_rouge">gen_rouge (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.base.BaseQAModel.generate">generate() (local_rqa.qa_llms.base.BaseQAModel method)</a>
 
       <ul>
@@ -654,11 +816,17 @@ document.write(`
 </li>
       </ul></li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.BaseModelWorker.generate_gate">generate_gate() (local_rqa.serve.base_model_worker.BaseModelWorker method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.ModelWorker.generate_gate">(local_rqa.serve.model_worker.ModelWorker method)</a>
 </li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.sglang.SGLangClient.generate_stream">generate_stream() (local_rqa.qa_llms.sglang.SGLangClient method)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.vllm.VLLMClient.generate_stream">(local_rqa.qa_llms.vllm.VLLMClient method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.ModelWorker.generate_stream">(local_rqa.serve.model_worker.ModelWorker method)</a>
 </li>
       </ul></li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_rqa.GradioRQA.generate_stream_from_api">generate_stream_from_api() (local_rqa.serve.gradio_rqa.GradioRQA method)</a>
@@ -668,25 +836,37 @@ document.write(`
 </li>
       </ul></li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.BaseModelWorker.generate_stream_gate">generate_stream_gate() (local_rqa.serve.base_model_worker.BaseModelWorker method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.ModelWorker.generate_stream_gate">(local_rqa.serve.model_worker.ModelWorker method)</a>
 </li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.base.GenerationOutput">GenerationOutput (class in local_rqa.qa_llms.base)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.get_conv_log_filename">get_conv_log_filename() (in module local_rqa.serve.gradio_static_server)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.get_conv_log_filename">(in module local_rqa.serve.gradio_web_server)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.get_crossattention_scores">get_crossattention_scores() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory.get_current_idx">get_current_idx() (local_rqa.serve.gradio_dialogue.AnnotationHistory method)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory.get_current_label">get_current_label() (local_rqa.serve.gradio_dialogue.AnnotationHistory method)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.FidDataset.get_example">get_example() (local_rqa.trainers.retriever.datasets.FidDataset method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_rqa.GradioRQA.get_model">get_model() (local_rqa.serve.gradio_rqa.GradioRQA method)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_rqa.GradioSimpleRQA.get_model">(local_rqa.serve.gradio_rqa.GradioSimpleRQA method)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.get_model_list">get_model_list() (in module local_rqa.serve.gradio_web_server)</a>
+</li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory.get_next_idx">get_next_idx() (local_rqa.serve.gradio_dialogue.AnnotationHistory method)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory.get_num_labeled">get_num_labeled() (local_rqa.serve.gradio_dialogue.AnnotationHistory method)</a>
@@ -700,6 +880,8 @@ document.write(`
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.BaseModelWorker.get_queue_length">get_queue_length() (local_rqa.serve.base_model_worker.BaseModelWorker method)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.html#local_rqa.trainers.dist_utils.get_rank">get_rank() (in module local_rqa.trainers.dist_utils)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.get_seq_prob">get_seq_prob() (local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.BaseModelWorker.get_status">get_status() (local_rqa.serve.base_model_worker.BaseModelWorker method)</a>
 </li>
@@ -715,6 +897,16 @@ document.write(`
         <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_rqa.GradioSimpleRQA.get_tokenizer">(local_rqa.serve.gradio_rqa.GradioSimpleRQA method)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.get_worker_address">get_worker_address() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.get_worker_address">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.get_worker_status">get_worker_status() (local_rqa.serve.controller.Controller method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.GPT4Eval">GPT4Eval (class in local_rqa.evaluation.metrics)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.gradient_checkpointing">gradient_checkpointing (local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.GRADIO_REQUEST_ERROR">GRADIO_REQUEST_ERROR (local_rqa.constants.ErrorCode attribute)</a>
@@ -739,13 +931,23 @@ document.write(`
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.handle_no_worker">handle_no_worker() (local_rqa.serve.controller.Controller method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.handle_worker_timeout">handle_worker_timeout() (local_rqa.serve.controller.Controller method)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ContrasitiveTrainingArgs.hard_neg_ratio">hard_neg_ratio (local_rqa.trainers.retriever.arguments.ContrasitiveTrainingArgs attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.heart_beat_controller">heart_beat_controller() (in module local_rqa.serve.controller)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.heart_beat_worker">heart_beat_worker() (in module local_rqa.serve.base_model_worker)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.history">history (local_rqa.schema.dialogue.DialogueSession attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.http_generate">http_generate() (in module local_rqa.serve.gradio_web_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.http_retrieve">http_retrieve() (in module local_rqa.serve.gradio_web_server)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.huggingface.HuggingFaceFiDQAModel">HuggingFaceFiDQAModel (class in local_rqa.qa_llms.huggingface)</a>
 </li>
@@ -769,15 +971,25 @@ document.write(`
         <li><a href="api_reference/local_rqa.html#local_rqa.utils.init_logger">(in module local_rqa.utils)</a>
 </li>
       </ul></li>
-      <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.INTERNAL_ERROR">INTERNAL_ERROR (local_rqa.constants.ErrorCode attribute)</a>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.E2EEvaluator.init_metrics">init_metrics() (local_rqa.evaluation.evaluator.E2EEvaluator method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.RetrieverEvaluator.init_metrics">(local_rqa.evaluation.evaluator.RetrieverEvaluator method)</a>
 </li>
-      <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.INVALID_AUTH_KEY">INVALID_AUTH_KEY (local_rqa.constants.ErrorCode attribute)</a>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.instruct">instruct() (local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.INTERNAL_ERROR">INTERNAL_ERROR (local_rqa.constants.ErrorCode attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.INVALID_AUTH_KEY">INVALID_AUTH_KEY (local_rqa.constants.ErrorCode attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.INVALID_MODEL">INVALID_MODEL (local_rqa.constants.ErrorCode attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory.is_all_labeled">is_all_labeled() (local_rqa.serve.gradio_dialogue.AnnotationHistory method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.is_almost_same_document">is_almost_same_document() (in module local_rqa.evaluation.metrics)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.base.BaseQAModel.is_api_model">is_api_model (local_rqa.qa_llms.base.BaseQAModel attribute)</a>
 
@@ -791,6 +1003,28 @@ document.write(`
       </ul></li>
       <li><a href="api_reference/local_rqa.trainers.html#local_rqa.trainers.dist_utils.is_main">is_main() (in module local_rqa.trainers.dist_utils)</a>
 </li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.is_same_document">is_same_document() (in module local_rqa.evaluation.metrics)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.GPT4Eval.judge">judge() (local_rqa.evaluation.metrics.GPT4Eval method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer.kldivloss">kldivloss() (local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.kldivloss">(local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -799,10 +1033,20 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.text_loaders.html#local_rqa.text_loaders.langchain_text_loader.LangChainTextLoader">LangChainTextLoader (class in local_rqa.text_loaders.langchain_text_loader)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.WorkerInfo.last_heart_beat">last_heart_beat (local_rqa.serve.controller.WorkerInfo attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Latency">Latency (class in local_rqa.evaluation.metrics)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.learning_rate">learning_rate (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
       <ul>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.learning_rate">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.list_models">list_models() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.list_models">(local_rqa.serve.controller.Controller method)</a>
 </li>
       </ul></li>
       <li><a href="api_reference/local_rqa.text_loaders.html#local_rqa.text_loaders.llamaindex_text_loader.LlamaIndexTextLoader">LlamaIndexTextLoader (class in local_rqa.text_loaders.llamaindex_text_loader)</a>
@@ -823,7 +1067,17 @@ document.write(`
         <li><a href="api_reference/local_rqa.text_loaders.html#local_rqa.text_loaders.llamaindex_text_loader.LlamaIndexTextLoader.load_data">(local_rqa.text_loaders.llamaindex_text_loader.LlamaIndexTextLoader method)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.load_demo">load_demo() (in module local_rqa.serve.gradio_static_server)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.load_demo">(in module local_rqa.serve.gradio_web_server)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.load_demo_refresh_model_list">load_demo_refresh_model_list() (in module local_rqa.serve.gradio_web_server)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.load_fid_data">load_fid_data() (in module local_rqa.trainers.retriever.datasets)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.load_model">load_model() (in module local_rqa.serve.model_worker)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.load_t5">load_t5() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
@@ -853,6 +1107,20 @@ document.write(`
 
       <ul>
         <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.evaluation.evaluator
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation.evaluator">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.evaluation.metrics
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation.metrics">module</a>
 </li>
       </ul></li>
       <li>
@@ -981,8 +1249,6 @@ document.write(`
         <li><a href="api_reference/local_rqa.retrievers.html#module-local_rqa.retrievers">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     local_rqa.retrievers.base
 
@@ -1004,6 +1270,8 @@ document.write(`
         <li><a href="api_reference/local_rqa.schema.html#module-local_rqa.schema">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     local_rqa.schema.dialogue
 
@@ -1033,6 +1301,13 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    local_rqa.serve.controller
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.controller">module</a>
+</li>
+      </ul></li>
+      <li>
     local_rqa.serve.gradio_dialogue
 
       <ul>
@@ -1044,6 +1319,27 @@ document.write(`
 
       <ul>
         <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_rqa">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.serve.gradio_static_server
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_static_server">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.serve.gradio_web_server
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_web_server">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.serve.model_worker
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.model_worker">module</a>
 </li>
       </ul></li>
       <li>
@@ -1117,10 +1413,31 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    local_rqa.trainers.qa_llm.supervised_fid_trainer
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.supervised_fid_trainer">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.trainers.qa_llm.supervised_trainer
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.supervised_trainer">module</a>
+</li>
+      </ul></li>
+      <li>
     local_rqa.trainers.qa_llm.with_retriever_fid_trainer
 
       <ul>
         <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.with_retriever_fid_trainer">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.trainers.qa_llm.with_retriever_trainer
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.with_retriever_trainer">module</a>
 </li>
       </ul></li>
       <li>
@@ -1152,6 +1469,27 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    local_rqa.trainers.retriever.retriever_fid_trainer
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.retriever_fid_trainer">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.trainers.retriever.retriever_replug_trainer
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.retriever_replug_trainer">module</a>
+</li>
+      </ul></li>
+      <li>
+    local_rqa.trainers.retriever.retriever_trainer
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.retriever_trainer">module</a>
+</li>
+      </ul></li>
+      <li>
     local_rqa.trainers.utils
 
       <ul>
@@ -1175,6 +1513,16 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.logging_steps">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.DispatchMethod.LOTTERY">LOTTERY (local_rqa.serve.controller.DispatchMethod attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.lr_scheduler_kwargs">lr_scheduler_kwargs (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments.lr_scheduler_kwargs">(local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments attribute)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.lr_scheduler_kwargs">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.lr_scheduler_type">lr_scheduler_type (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
       <ul>
@@ -1191,6 +1539,8 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.max_steps">max_steps (local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.mean">mean() (in module local_rqa.evaluation.metrics)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.embeddings.mean_pooling">mean_pooling() (in module local_rqa.trainers.retriever.embeddings)</a>
 </li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueTurn.message">message (local_rqa.schema.dialogue.DialogueTurn attribute)</a>
@@ -1205,7 +1555,11 @@ document.write(`
       </ul></li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ModelArguments.model_name_or_path">model_name_or_path (local_rqa.trainers.retriever.arguments.ModelArguments attribute)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.WorkerInfo.model_names">model_names (local_rqa.serve.controller.WorkerInfo attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ModelArguments">ModelArguments (class in local_rqa.trainers.retriever.arguments)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.ModelWorker">ModelWorker (class in local_rqa.serve.model_worker)</a>
 </li>
       <li>
     module
@@ -1218,6 +1572,10 @@ document.write(`
         <li><a href="api_reference/local_rqa.html#module-local_rqa.constants">local_rqa.constants</a>
 </li>
         <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation">local_rqa.evaluation</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation.evaluator">local_rqa.evaluation.evaluator</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation.metrics">local_rqa.evaluation.metrics</a>
 </li>
         <li><a href="api_reference/local_rqa.evaluation.html#module-local_rqa.evaluation.scores">local_rqa.evaluation.scores</a>
 </li>
@@ -1269,9 +1627,17 @@ document.write(`
 </li>
         <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.base_model_worker">local_rqa.serve.base_model_worker</a>
 </li>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.controller">local_rqa.serve.controller</a>
+</li>
         <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_dialogue">local_rqa.serve.gradio_dialogue</a>
 </li>
         <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_rqa">local_rqa.serve.gradio_rqa</a>
+</li>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_static_server">local_rqa.serve.gradio_static_server</a>
+</li>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.gradio_web_server">local_rqa.serve.gradio_web_server</a>
+</li>
+        <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.model_worker">local_rqa.serve.model_worker</a>
 </li>
         <li><a href="api_reference/local_rqa.serve.html#module-local_rqa.serve.test_message">local_rqa.serve.test_message</a>
 </li>
@@ -1293,7 +1659,13 @@ document.write(`
 </li>
         <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.datasets">local_rqa.trainers.qa_llm.datasets</a>
 </li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.supervised_fid_trainer">local_rqa.trainers.qa_llm.supervised_fid_trainer</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.supervised_trainer">local_rqa.trainers.qa_llm.supervised_trainer</a>
+</li>
         <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.with_retriever_fid_trainer">local_rqa.trainers.qa_llm.with_retriever_fid_trainer</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#module-local_rqa.trainers.qa_llm.with_retriever_trainer">local_rqa.trainers.qa_llm.with_retriever_trainer</a>
 </li>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever">local_rqa.trainers.retriever</a>
 </li>
@@ -1303,11 +1675,21 @@ document.write(`
 </li>
         <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.embeddings">local_rqa.trainers.retriever.embeddings</a>
 </li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.retriever_fid_trainer">local_rqa.trainers.retriever.retriever_fid_trainer</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.retriever_replug_trainer">local_rqa.trainers.retriever.retriever_replug_trainer</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#module-local_rqa.trainers.retriever.retriever_trainer">local_rqa.trainers.retriever.retriever_trainer</a>
+</li>
         <li><a href="api_reference/local_rqa.trainers.html#module-local_rqa.trainers.utils">local_rqa.trainers.utils</a>
 </li>
         <li><a href="api_reference/local_rqa.html#module-local_rqa.utils">local_rqa.utils</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.MonitoringMetric">MonitoringMetric (class in local_rqa.evaluation.metrics)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1342,10 +1724,16 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.openai.OpenAIQAModel">OpenAIQAModel (class in local_rqa.qa_llms.openai)</a>
 </li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.output_dir">output_dir (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments.output_dir">(local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments attribute)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.output_dir">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.output_dir">output_dir (local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
-</li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.overwrite_forward_crossattention">overwrite_forward_crossattention() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
   </ul></td>
@@ -1378,8 +1766,24 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.SupervisedRQAwRetrieverDataset.pre_retrieve_all_docs">(local_rqa.trainers.qa_llm.datasets.SupervisedRQAwRetrieverDataset method)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Precision">Precision (class in local_rqa.evaluation.metrics)</a>
+</li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.precision">precision() (in module local_rqa.evaluation.scores)</a>
 </li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer.prediction_step">prediction_step() (local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer.prediction_step">(local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer.prediction_step">(local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer.prediction_step">(local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.prediction_step">(local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer.prediction_step">(local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.SupervisedFiDRQAwRetrieverDataset.prepare_data">prepare_data() (local_rqa.trainers.qa_llm.datasets.SupervisedFiDRQAwRetrieverDataset method)</a>
@@ -1426,6 +1830,8 @@ document.write(`
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.WorkerInfo.queue_length">queue_length (local_rqa.serve.controller.WorkerInfo attribute)</a>
+</li>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.QUOTA_EXCEEDED">QUOTA_EXCEEDED (local_rqa.constants.ErrorCode attribute)</a>
 </li>
   </ul></td>
@@ -1460,13 +1866,35 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.recall">recall() (in module local_rqa.evaluation.scores)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.receive_heart_beat">receive_heart_beat() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.receive_heart_beat">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.refresh_all_workers">refresh_all_workers() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.refresh_all_workers">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ReplugTrainingArgs.refresh_step">refresh_step (local_rqa.trainers.retriever.arguments.ReplugTrainingArgs attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.regenerate">regenerate() (in module local_rqa.serve.gradio_web_server)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.BaseModelWorker.register_to_controller">register_to_controller() (local_rqa.serve.base_model_worker.BaseModelWorker method)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.register_worker">register_worker() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.register_worker">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.base_model_worker.release_worker_semaphore">release_worker_semaphore() (in module local_rqa.serve.base_model_worker)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.html#local_rqa.trainers.utils.remove_optimizer_weights">remove_optimizer_weights() (in module local_rqa.trainers.utils)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.remove_stale_workers_by_expiration">remove_stale_workers_by_expiration() (local_rqa.serve.controller.Controller method)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.remove_unused_columns">remove_unused_columns (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
@@ -1474,6 +1902,14 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.remove_unused_columns">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.remove_worker">remove_worker() (local_rqa.serve.controller.Controller method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.render_next_session">render_next_session() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.render_prev_session">render_prev_session() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.render_single_session">render_single_session() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_rqa.GradioRQA.rephrase_question_for_retrieval">rephrase_question_for_retrieval() (local_rqa.serve.gradio_rqa.GradioRQA method)</a>
 
       <ul>
@@ -1484,6 +1920,8 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.ReplugDataset">ReplugDataset (class in local_rqa.trainers.retriever.datasets)</a>
 </li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer">ReplugRetrieverTrainer (class in local_rqa.trainers.retriever.retriever_replug_trainer)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ReplugTrainingArgs">ReplugTrainingArgs (class in local_rqa.trainers.retriever.arguments)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.report_to">report_to (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
@@ -1492,7 +1930,49 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.report_to">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.AnswerStats.reset">reset() (local_rqa.evaluation.metrics.AnswerStats method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.BLEU.reset">(local_rqa.evaluation.metrics.BLEU method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentAccuracy.reset">(local_rqa.evaluation.metrics.DocumentAccuracy method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentNDCG.reset">(local_rqa.evaluation.metrics.DocumentNDCG method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentRecall.reset">(local_rqa.evaluation.metrics.DocumentRecall method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.F1.reset">(local_rqa.evaluation.metrics.F1 method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.GPT4Eval.reset">(local_rqa.evaluation.metrics.GPT4Eval method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Latency.reset">(local_rqa.evaluation.metrics.Latency method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.MonitoringMetric.reset">(local_rqa.evaluation.metrics.MonitoringMetric method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Precision.reset">(local_rqa.evaluation.metrics.Precision method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.ROUGE.reset">(local_rqa.evaluation.metrics.ROUGE method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.RunningMetic.reset">(local_rqa.evaluation.metrics.RunningMetic method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.E2EEvaluator.reset_all_metrics">reset_all_metrics() (local_rqa.evaluation.evaluator.E2EEvaluator method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.RetrieverEvaluator.reset_all_metrics">(local_rqa.evaluation.evaluator.RetrieverEvaluator method)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.reset_score_storage">reset_score_storage() (local_rqa.qa_llms.fid.FiDT5 method)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.retr_document_accuracy">retr_document_accuracy (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.retr_document_recall">retr_document_recall (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.retr_latency">retr_latency (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.retr_ndcg">retr_ndcg (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.retrievers.html#local_rqa.retrievers.base.RetrievalOutput">RetrievalOutput (class in local_rqa.retrievers.base)</a>
 </li>
@@ -1502,8 +1982,6 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments">(class in local_rqa.trainers.retriever.arguments)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.retrievers.html#local_rqa.retrievers.base.BaseRetriever.retrieve">retrieve() (local_rqa.retrievers.base.BaseRetriever method)</a>
 
       <ul>
@@ -1517,6 +1995,8 @@ document.write(`
 </li>
         <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_rqa.GradioSimpleRQA.retrieve">(local_rqa.serve.gradio_rqa.GradioSimpleRQA method)</a>
 </li>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.model_worker.ModelWorker.retrieve">(local_rqa.serve.model_worker.ModelWorker method)</a>
+</li>
       </ul></li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.ReplugTrainingArgs.retrieve_temperature">retrieve_temperature (local_rqa.trainers.retriever.arguments.ReplugTrainingArgs attribute)</a>
 </li>
@@ -1525,6 +2005,12 @@ document.write(`
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.retriever_init">retriever_init() (in module local_rqa.trainers.qa_llm.datasets)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.datasets.RetrieverCollator">RetrieverCollator (class in local_rqa.trainers.retriever.datasets)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.RetrieverEvaluator">RetrieverEvaluator (class in local_rqa.evaluation.evaluator)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer">RetrieverTrainer (class in local_rqa.trainers.retriever.retriever_trainer)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.ROUGE">ROUGE (class in local_rqa.evaluation.metrics)</a>
 </li>
       <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.scores.rouge_score">rouge_score() (in module local_rqa.evaluation.scores)</a>
 </li>
@@ -1564,12 +2050,16 @@ document.write(`
       </ul></li>
       <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.LoggerArguments.run_project">run_project (local_rqa.trainers.retriever.arguments.LoggerArguments attribute)</a>
 </li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.RunningMetic">RunningMetic (class in local_rqa.evaluation.metrics)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.save_annotations">save_annotations() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments.save_steps">save_steps (local_rqa.trainers.qa_llm.arguments.E2EQATrainingArguments attribute)</a>
 
       <ul>
@@ -1606,21 +2096,31 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.sep_style">sep_style (local_rqa.schema.dialogue.DialogueSession attribute)</a>
 </li>
-      <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.sep_sys">sep_sys (local_rqa.schema.dialogue.DialogueSession attribute)</a>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.sep_sys">sep_sys (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.sep_sys">(local_rqa.schema.dialogue.DialogueSession attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.sep_user">sep_user (local_rqa.schema.dialogue.DialogueSession attribute)</a>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.sep_user">sep_user (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.sep_user">(local_rqa.schema.dialogue.DialogueSession attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.SeparatorStyle">SeparatorStyle (class in local_rqa.schema.dialogue)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.set_checkpoint">set_checkpoint() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.AccelerationFramework.SGLANG">SGLANG (local_rqa.constants.AccelerationFramework attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.sglang.SGLangClient">SGLangClient (class in local_rqa.qa_llms.sglang)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.sglang.SGLangQAModel">SGLangQAModel (class in local_rqa.qa_llms.sglang)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.DispatchMethod.SHORTEST_QUEUE">SHORTEST_QUEUE (local_rqa.serve.controller.DispatchMethod attribute)</a>
 </li>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.retrieval_qa.SimpleRQA">SimpleRQA (class in local_rqa.pipelines.retrieval_qa)</a>
 </li>
@@ -1634,11 +2134,29 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueTurn.speaker">speaker (local_rqa.schema.dialogue.DialogueTurn attribute)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.WorkerInfo.speed">speed (local_rqa.serve.controller.WorkerInfo attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Latency.start">start() (local_rqa.evaluation.metrics.Latency method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.MonitoringMetric.start">(local_rqa.evaluation.metrics.MonitoringMetric method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Latency.stop">stop() (local_rqa.evaluation.metrics.Latency method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.MonitoringMetric.stop">(local_rqa.evaluation.metrics.MonitoringMetric method)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.SupervisedFiDRQAwRetrieverDataset">SupervisedFiDRQAwRetrieverDataset (class in local_rqa.trainers.qa_llm.datasets)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer">SupervisedFiDTrainer (class in local_rqa.trainers.qa_llm.supervised_fid_trainer)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.SupervisedRQADataset">SupervisedRQADataset (class in local_rqa.trainers.qa_llm.datasets)</a>
 </li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.datasets.SupervisedRQAwRetrieverDataset">SupervisedRQAwRetrieverDataset (class in local_rqa.trainers.qa_llm.datasets)</a>
+</li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer">SupervisedTrainer (class in local_rqa.trainers.qa_llm.supervised_trainer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1698,14 +2216,42 @@ document.write(`
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.unwrap_encoder">unwrap_encoder() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.AnswerStats.update">update() (local_rqa.evaluation.metrics.AnswerStats method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.BLEU.update">(local_rqa.evaluation.metrics.BLEU method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentAccuracy.update">(local_rqa.evaluation.metrics.DocumentAccuracy method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentNDCG.update">(local_rqa.evaluation.metrics.DocumentNDCG method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.DocumentRecall.update">(local_rqa.evaluation.metrics.DocumentRecall method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.F1.update">(local_rqa.evaluation.metrics.F1 method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.GPT4Eval.update">(local_rqa.evaluation.metrics.GPT4Eval method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.Precision.update">(local_rqa.evaluation.metrics.Precision method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.ROUGE.update">(local_rqa.evaluation.metrics.ROUGE method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.metrics.RunningMetic.update">(local_rqa.evaluation.metrics.RunningMetic method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.pipelines.html#local_rqa.pipelines.base.RQAPipeline.update_dialogue_session">update_dialogue_session() (local_rqa.pipelines.base.RQAPipeline method)</a>
 </li>
       <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_dialogue.AnnotationHistory.update_label">update_label() (local_rqa.serve.gradio_dialogue.AnnotationHistory method)</a>
 </li>
-      <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.user_prefix">user_prefix (local_rqa.schema.dialogue.DialogueSession attribute)</a>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.upvote_last_response">upvote_last_response() (in module local_rqa.serve.gradio_web_server)</a>
 </li>
+      <li><a href="api_reference/local_rqa.evaluation.html#local_rqa.evaluation.evaluator.EvaluatorConfig.user_prefix">user_prefix (local_rqa.evaluation.evaluator.EvaluatorConfig attribute)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.schema.html#local_rqa.schema.dialogue.DialogueSession.user_prefix">(local_rqa.schema.dialogue.DialogueSession attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1714,13 +2260,25 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.ErrorCode.VALIDATION_TYPE_ERROR">VALIDATION_TYPE_ERROR (local_rqa.constants.ErrorCode attribute)</a>
 </li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.violates_moderation">violates_moderation() (in module local_rqa.serve.gradio_web_server)</a>
+</li>
       <li><a href="api_reference/local_rqa.html#local_rqa.constants.AccelerationFramework.VLLM">VLLM (local_rqa.constants.AccelerationFramework attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.vllm.VLLMClient">VLLMClient (class in local_rqa.qa_llms.vllm)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.vllm.vLLMQAModel">vLLMQAModel (class in local_rqa.qa_llms.vllm)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.vote_correctness">vote_correctness() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.vote_harmlessness">vote_harmlessness() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.vote_helpfulness">vote_helpfulness() (in module local_rqa.serve.gradio_static_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_web_server.vote_last_response">vote_last_response() (in module local_rqa.serve.gradio_web_server)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.gradio_static_server.vote_response">vote_response() (in module local_rqa.serve.gradio_static_server)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1740,12 +2298,46 @@ document.write(`
         <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments.weight_decay">(local_rqa.trainers.retriever.arguments.RetrievalQATrainingArguments attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.FidTrainingArgs.with_score">with_score (local_rqa.trainers.retriever.arguments.FidTrainingArgs attribute)</a>
+</li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.worker_api_generate_stream">worker_api_generate_stream() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.worker_api_generate_stream">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.worker_api_get_status">worker_api_get_status() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.worker_api_get_status">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.worker_api_retrieval">worker_api_retrieval() (in module local_rqa.serve.controller)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.Controller.worker_api_retrieval">(local_rqa.serve.controller.Controller method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.arguments.FidTrainingArgs.with_score">with_score (local_rqa.trainers.retriever.arguments.FidTrainingArgs attribute)</a>
+      <li><a href="api_reference/local_rqa.serve.html#local_rqa.serve.controller.WorkerInfo">WorkerInfo (class in local_rqa.serve.controller)</a>
 </li>
       <li><a href="api_reference/local_rqa.qa_llms.html#local_rqa.qa_llms.fid.FiDT5.wrap_encoder">wrap_encoder() (local_rqa.qa_llms.fid.FiDT5 method)</a>
 </li>
+      <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer.wrap_model_for_eval">wrap_model_for_eval() (local_rqa.trainers.qa_llm.supervised_fid_trainer.SupervisedFiDTrainer method)</a>
+
+      <ul>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer.wrap_model_for_eval">(local_rqa.trainers.qa_llm.supervised_trainer.SupervisedTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer.wrap_model_for_eval">(local_rqa.trainers.qa_llm.with_retriever_trainer.FixedRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer.wrap_model_for_eval">(local_rqa.trainers.retriever.retriever_fid_trainer.FidRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer.wrap_model_for_eval">(local_rqa.trainers.retriever.retriever_replug_trainer.ReplugRetrieverTrainer method)</a>
+</li>
+        <li><a href="api_reference/local_rqa.trainers.retriever.html#local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer.wrap_model_for_eval">(local_rqa.trainers.retriever.retriever_trainer.RetrieverTrainer method)</a>
+</li>
+      </ul></li>
       <li><a href="api_reference/local_rqa.trainers.qa_llm.html#local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments.write_predictions">write_predictions (local_rqa.trainers.qa_llm.arguments.RetrievalQATrainingArguments attribute)</a>
 
       <ul>

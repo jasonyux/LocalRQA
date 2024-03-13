@@ -31,6 +31,12 @@
     ```
     then visit: `http://localhost:5500/_build/html/index.html` to see the documentations!
 
+    alternatively, if you want things to be auto-reload when you update the documentations, you can use `sphinx-autobuild` (a pip package):
+    ```bash
+    /workspace/LocalRQA$ sphinx-autobuild docs docs/_build/html
+    ```
+    then visit: `http://localhost:8000` to see the documentations!
+
 
 ## How to add a custom page on the sidebar?
 
