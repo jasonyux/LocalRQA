@@ -5,7 +5,7 @@ Interactive Chat
 
 An interactive chat page allows real users to perform multi-turn chat with the model while providing feedback on the quality of the responses. This is useful for collecting human feedback on the model's performance in a more natural setting.
 
-At a high level, you will need to prepare 1) your embedding and generative model of choice, and 2) a document and index database. Then, to handle asynchronous requests, you will launch 1) a model controller to manage model workers, 2) model workers to actually run the models, and 3) a web server to serve the interactive chat page.
+At a high level, **you will need to prepare** 1) your embedding and generative model of choice, and 2) a document and index database. Then, to handle asynchronous requests, you will launch 1) a model controller to manage model workers, 2) model workers to actually run the models, and 3) a web server to serve the interactive chat page.
 
 .. figure:: /_static/serving/interactive_ui.png
    :scale: 60 %
@@ -14,7 +14,7 @@ At a high level, you will need to prepare 1) your embedding and generative model
    Interactive Chat
 
 
-In more details:
+In more detail:
 
 #. Make sure the ``log`` folder exists under the project root directory. This is because by default, all server logs and annotations will go under ``logs`` folder. 
 

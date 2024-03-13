@@ -1,3 +1,5 @@
+.. _evaluation-e2e:
+
 End-to-End Evaluation
 =====================
 

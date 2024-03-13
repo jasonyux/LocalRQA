@@ -45,7 +45,7 @@ class TestArguments:
                     "and 'gold_docs' and 'gold_answers' for E2E QA.")
         },
     )
-    retirever_type: str = field(
+    retriever_type: str = field(
         default="faiss",
         metadata={"help": "faiss or BM25"},
     )
@@ -60,7 +60,7 @@ class TestArguments:
 
 
 def init_retriever_model(model_args: ModelArguments, test_args: TestArguments, documents: List[Document]):
-    if test_args.retirever_type == "faiss":
+    if test_args.retriever_type == "faiss":
         if model_args.embedding_model_name_or_path in OPENAI_MODEL_NAMES:
             embedding_model = OpenAIEmbeddings(
                 model=model_args.embedding_model_name_or_path,
@@ -76,7 +76,7 @@ def init_retriever_model(model_args: ModelArguments, test_args: TestArguments, d
             embeddings=embedding_model,
             index_path=test_args.index_path
         )
-    elif test_args.retirever_type == "BM25":
+    elif test_args.retriever_type == "BM25":
         retriever = BM25Retriever(documents)
     else:
         raise NotImplementedError("Please choose retriever type from [faiss, BM25]")
