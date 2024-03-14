@@ -15,9 +15,9 @@ At a high level, **all you need to perpare is a JSONL prediction file** (e.g., a
    Static Evaluation
 
 
-In more details:
+In more detail:
 
-#. prepare a JSONL file which contains an input context (e.g., a ``question``), your model's retrieved documents and response (``gen_answer`` and ``retrieved_docs``, respectively), and optionally reference documents (``gold_docs``). For example:
+#. prepare a JSONL file that contains an input context (e.g., a ``question``), your model's retrieved documents and response (``gen_answer`` and ``retrieved_docs``, respectively), and optionally reference documents (``gold_docs``). For example:
       
    .. code-block:: json
 
@@ -27,7 +27,7 @@ In more details:
 
    Note that ``[{"fmt_content": ...}]`` is the dict version of ``local_rqa.schema.document.Document``.
 
-   You can obtain such a JSONL file using the scripts in :ref:`evaluation-main`, or by manually preparing the file.
+   You can obtain such a JSONL file automatically if you use the scripts in :ref:`evaluation-e2e`. Alternatively, you can also manually prepare such a file by following the format above.
 
 #. Run the ``gradio_static_server.py`` script to read the JSONL file and launch a web server. For example:
 
@@ -39,4 +39,4 @@ In more details:
 
    The server will be launched at port 7861 by default.
 
-#. You are all set! Once a user completed all the evaluations and click "Submit", these annotated data will be automatically saved under `logs/YY-MM-DD-HH-mm-annotations.jsonl`.
+#. You are all set! Once a user completes all the 50 evaluations and clicks "Submit", these annotated data will be automatically saved under ``logs/YY-MM-DD-HH-mm-annotations.jsonl``.

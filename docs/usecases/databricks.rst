@@ -65,6 +65,9 @@ Take CTL retriever trainer with E5 model as an example, the finetuned retriever 
 Generator Training
 ------------------
 
+TODO: an example for each training script, as promised in the training section.
+
+
 By using the finetuned retriever from the previous step, train the generation model ``berkeley-nest/Starling-LM-7B-alpha`` further with fixed retriever.
 ::
 
