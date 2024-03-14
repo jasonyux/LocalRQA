@@ -34,7 +34,7 @@ In more details:
    .. code-block:: bash
          
          python open_rqa/serve/gradio_static_server.py \
-         --file_path /path/to/test-predictions.jsonl \
+         --file_path <example/e2e/test-predictions.jsonl> \
          --include_idx 1-50  # (optional) display only the first 50 predictions
 
    The server will be launched at port 7861 by default.

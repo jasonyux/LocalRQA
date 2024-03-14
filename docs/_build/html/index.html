@@ -161,15 +161,20 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="modules/training.html">Training</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/training/training_retriever.html">Retriever</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/training/training_generator.html">Generator</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="modules/training/generator.html">Training a Generator</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/training/generator/sft.html">SFT with Gold Data (SFT)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/training/generator/swr.html">SFT with a Frozen Retriever (SwR)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/training/generator/fid.html">Fusion-in-Decoder (FiD)</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="modules/evaluation.html">Evaluation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="modules/evaluation.html">Evaluation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/evaluation/eval_retriever.html">Retriever Evaluation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/evaluation/eval_e2e.html">End-to-End Evaluation</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="modules/serving.html">Serving</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="modules/serving.html">Serving</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/serving/human_eval.html">Static Human Evaluation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/serving/interactive.html">Interactive Chat</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/serving/acc_frameworks.html">Inference Acceleration Frameworks</a></li>
@@ -183,7 +188,7 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="api_reference/local_rqa.html">local_rqa</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api_reference/local_rqa.html">local_rqa</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="api_reference/local_rqa.evaluation.html">local_rqa.evaluation package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference/local_rqa.guardrails.html">local_rqa.guardrails package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference/local_rqa.pipelines.html">local_rqa.pipelines package</a></li>
@@ -192,7 +197,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api_reference/local_rqa.schema.html">local_rqa.schema package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference/local_rqa.serve.html">local_rqa.serve package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference/local_rqa.text_loaders.html">local_rqa.text_loaders package</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="api_reference/local_rqa.trainers.html">local_rqa.trainers namespace</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api_reference/local_rqa.trainers.html">local_rqa.trainers namespace</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="api_reference/local_rqa.trainers.qa_llm.html">local_rqa.trainers.qa_llm namespace</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api_reference/local_rqa.trainers.retriever.html">local_rqa.trainers.retriever namespace</a></li>
 </ul>

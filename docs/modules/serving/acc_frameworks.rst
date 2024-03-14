@@ -50,10 +50,10 @@ The ``SimpleRQA`` class is used in many contexts, such as during evaluation and 
       # --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
       --qa_model_name_or_path sglang::http://localhost:3000/generate
       --embedding_model_name_or_path intfloat/e5-base-v2 \
-      --document_path <path/to/save/dir/filename.pkl> \
-      --index_path <path/to/save/index> \
-      --eval_data_path <path/to/test_w_qa.jsonl> \
-      --output_dir <path/to/save/result/dir>
+      --document_path <example/documents.pkl> \
+      --index_path <example/index> \
+      --eval_data_path <example/test_w_qa.jsonl> \
+      --output_dir <example/output/dir>
 
 
 
@@ -76,8 +76,8 @@ You can also use this ``<framework-name>::<url>/generate`` in our serving script
     
       export CUDA_VISIBLE_DEVICES=0
       python local_rqa/serve/model_worker.py \
-      --document_path path/to/documents \
-      --index_path path/to/index \
+      --document_path <example/documents.pkl> \
+      --index_path <example/index> \
       --embedding_model_name_or_path intfloat/e5-base-v2 \
       # --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
       --qa_model_name_or_path vllm::http://localhost:8000/generate \

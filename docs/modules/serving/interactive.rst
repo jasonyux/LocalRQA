@@ -31,17 +31,17 @@ In more detail:
 
       export CUDA_VISIBLE_DEVICES=0
       python local_rqa/serve/model_worker.py \
-      --document_path path/to/documents \
-      --index_path path/to/index \
+      --document_path <example/documents.pkl> \
+      --index_path <example/index> \
       --embedding_model_name_or_path intfloat/e5-base-v2 \
       --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
       --model_id simple_rqa
 
    which will:
 
-   * read in the document database saved at ``path/to/documents``
+   * read in the document database saved at ``<example/documents.pkl>``
    * load the embedding and generative model (``intfloat/e5-base-v2`` and ``lmsys/vicuna-7b-v1.5`` in this case). In general, this also works with most models that can be recognized by huggingface's ``AutoModel`` class.
-   * read the index from ``path/to/index`` if not empty, otherwise index all the documents using the embedding model and save the index to ``path/to/index``
+   * read the index from ``<example/index>`` if not empty, otherwise index all the documents using the embedding model and save the index to ``<example/index>``
    * register this worker as ``simple_rqa`` to the controller
    
    For more details on how to obtain the document or index database in step 1 and 3, you can refer to :ref:`quickstart` for a quick example.
@@ -89,8 +89,8 @@ For example, with ``vLLM``:
     
       export CUDA_VISIBLE_DEVICES=0
       python local_rqa/serve/model_worker.py \
-      --document_path path/to/documents \
-      --index_path path/to/index \
+      --document_path <example/documents.pkl> \
+      --index_path <example/index> \
       --embedding_model_name_or_path intfloat/e5-base-v2 \
       # --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
       --qa_model_name_or_path vllm::http://localhost:8000/generate \

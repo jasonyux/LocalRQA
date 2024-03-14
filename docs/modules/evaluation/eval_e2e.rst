@@ -20,20 +20,20 @@ By default, our evaluation script ``scripts/test/test_e2e2.py`` is based on ``Si
 
 .. code-block:: bash
 
-    python scripts/test/test_e2e2.py \
+    python scripts/test/test_e2e.py \
     --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
     --embedding_model_name_or_path intfloat/e5-base-v2 \
-    --document_path <path/to/save/dir/filename.pkl> \
-    --index_path <path/to/save/index> \
-    --eval_data_path <path/to/test_w_qa.jsonl> \
+    --document_path <example/documents.pkl> \
+    --index_path <example/index> \
+    --eval_data_path <example/test_w_qa.jsonl> \
     --gen_gpt4eval false \
-    --output_dir <path/to/save/result/dir>
+    --output_dir <example/output/dir>
 
-this will output a JSONL file containing the evaluation results saved under ``<path/to/save/result/dir>``. The folder will have the following files after evaluation:
+this will output a JSONL file containing the evaluation results saved under ``<example/output/dir>``. The folder will have the following files after evaluation:
 
 .. code-block:: bash
     
-    <path/to/save/result/dir>
+    <example/output/dir>
     ├── all_args.json           # arguments used for evaluation
     ├── score.json              # models performance
     ├── test-predictions.jsonl  # models predictions/outputs
