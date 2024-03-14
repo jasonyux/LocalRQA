@@ -33,20 +33,21 @@ Currently, we provide methods to launch your RQA system in two different ways.
 Acceleration Frameworks
 -------------------------
 
-We also integrate with several inference acceleration frameworks to speed up model's retrieval/answer generation. Currently, we support:
+We also integrate with several inference acceleration frameworks to speed up model's retrieval/answer generation. Currently, we support the following frameworks:
 
-For retrieval:
+To speed up retrieval:
 
-* FAISS (Johnson et al.,2019)
+* `FAISS <https://github.com/facebookresearch/faiss>`_
 
 
-For text generation:
+To speed up text generation:
 
-* Text Generation Inference (Huggingface, 2023)
-* vLLM (Kwon et al., 2023)
-* SGLang (Zheng et al., 2023)
+* `Text Generation Inference <https://github.com/huggingface/text-generation-inference>`_
+* `vLLM <https://github.com/vllm-project/vllm>`_
+* `SGLang <https://github.com/sgl-project/sglang>`_
 
-See :ref:`serving-acc-frameworks` for more details of how to use them with the serving methods mentioned above.
+
+See :ref:`serving-acc-frameworks` for more details on how to use them with the serving methods mentioned above.
 
 
 .. toctree::

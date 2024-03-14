@@ -1,10 +1,7 @@
-import json
 import argparse
-
 from langchain.document_loaders import *
 from langchain.text_splitter import *
 from transformers import AutoTokenizer
-
 from local_rqa.text_loaders.langchain_text_loader import LangChainTextLoader
 
 
@@ -46,6 +43,7 @@ def metadata_func(record: dict, metadata: dict) -> dict:
     metadata['title'] = record.get("title")
     return metadata
 
+
 def main(args):
     loader_func, splitter_func = JSONLoader, RecursiveCharacterTextSplitter.from_huggingface_tokenizer
     loader_parameters = {
@@ -58,8 +56,13 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     splitter_parameters = {'tokenizer': tokenizer, 'chunk_size': args.chunk_size, 'chunk_overlap': args.chunk_overlap_size}
     kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
-    documents = LangChainTextLoader(save_folder=args.save_dir, save_filename=args.save_name, 
-                                    loader_func=loader_func, splitter_func=splitter_func).load_data(**kwargs)
+    documents = LangChainTextLoader(
+        save_folder=args.save_dir,
+        save_filename=args.save_name,
+        loader_func=loader_func,
+        splitter_func=splitter_func
+    ).load_data(**kwargs)
+    return documents
 
 
 if __name__ == "__main__":
