@@ -14,10 +14,10 @@ For example, to evaluate a **retriever**:
 
     python scripts/test/test_retriever.py \
     --embedding_model_name_or_path intfloat/e5-base-v2 \
-    --document_path <path/to/documents/filename.pkl> \
-    --index_path <path/to/index> \
-    --eval_data_path <path/to/test/data/filename.jsonl> \
-    --output_dir <path/to/save/outputs>
+    --document_path <example/documents.pkl> \
+    --index_path <example/index> \
+    --eval_data_path <example/test_w_qa.jsonl> \
+    --output_dir <example/output/dir>
 
 this will load the model ``intfloat/e5-base-v2`` model (from huggingface in this case), read the documents database from ``document_path`` (and index them if ``index_path`` is empty), and evaluate the model on the test data from ``eval_data_path``. The model outputs and scores will be saved in ``output_dir``.
 
@@ -30,10 +30,10 @@ To evaluate **a retriever and a QA model end-to-end**:
     python scripts/test/test_e2e.py \
     --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \
     --embedding_model_name_or_path intfloat/e5-base-v2 \
-    --document_path <path/to/documents/filename.pkl> \
-    --index_path <path/to/index> \
-    --eval_data_path <path/to/test/data/filename.jsonl> \
-    --output_dir <path/to/save/outputs>
+    --document_path <example/documents.pkl> \
+    --index_path <example/index> \
+    --eval_data_path <example/test_w_qa.jsonl> \
+    --output_dir <example/output/dir>
 
 this will load the embedding model ``intfloat/e5-base-v2`` and the QA model ``lmsys/vicuna-7b-v1.5`` (both from huggingface), read the documents database and indices, and evaluate the system as an ``SimpleRQA`` object on the test data from ``eval_data_path``. The system outputs and scores will be saved in ``output_dir``.
 
