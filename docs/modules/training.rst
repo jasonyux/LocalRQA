@@ -10,11 +10,11 @@ To this end, we provide various training algorithms for both dense retrieval and
 +-----------+-----------------+--------------------------+-------------------------+
 | Algorithm |  Target Model   |      Training Data       |         Section         |
 +===========+=================+==========================+=========================+
-| CTL       | Encoder         | (q, p, hard negative p†) |                         |
+| CTL       | Encoder         | (q, p, hard negative p†) | :ref:`training-ret-ctl` |
 +-----------+-----------------+--------------------------+-------------------------+
-| DCA       | Encoder         | (q, p†)                  |                         |
+| DCA       | Encoder         | (q, p†)                  | :ref:`training-ret-dca` |
 +-----------+-----------------+--------------------------+-------------------------+
-| RPG       | Encoder         | (q, p†, a)               |                         |
+| RPG       | Encoder         | (q, p†, a)               | :ref:`training-ret-rpg` |
 +-----------+-----------------+--------------------------+-------------------------+
 | SFT       | Decoder         | (h†, q, p, a)            | :ref:`training-gen-sft` |
 +-----------+-----------------+--------------------------+-------------------------+
@@ -43,5 +43,5 @@ where "h" stands for **chat history**, "q" stands for a **question**, "p" stands
    :caption: Training
    :hidden:
 
-   training/training_retriever.rst
+   training/retriever.rst
    training/generator.rst
