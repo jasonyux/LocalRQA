@@ -7,8 +7,8 @@ Given a user query, a retriever selects *k* most relevant passages from a collec
 LocalRQA implements trainers for encoders that distill from a down-stream LM and trainers that perform contrastive learning using a dataset of *<q,p>* pairs (and optionally hard negative examples):
 
 * :ref:`training-ret-ctl`: finetune the embedding model by using contrastive learning.
-* :ref:`training-ret-rpg`: distill from an LM's probability distribution.
 * :ref:`training-ret-dca`: distill from cross-attention scores of an encoder-decoder model.
+* :ref:`training-ret-rpg`: distill from an LM's probability distribution.
 
 At a high level, we provide ready-to-use training scripts for each algorithm above. These scripts allow you to specify the training data, model, and other hyperparameters in a single command line. For instance, with CTL training:
 
@@ -46,5 +46,5 @@ For more details on each training algorithm/script, please refer to their respec
    :hidden:
 
    retriever/ctl.rst
-   retriever/rpg.rst
    retriever/dca.rst
+   retriever/rpg.rst
