@@ -10,6 +10,13 @@ LocalRQA is an open-source toolkit that enables researchers to quickly train, te
 LOCALRQA provides a full suite of tools from generating QA data to locally training, testing, and serving an RQA system.
 Compared to other existing toolkits, LOCALRQA *features a wide selection of training algorithms, testing methods, and serving tools curated from the latest RQA search*.
 
+.. figure:: /_static/framework.png
+   :align: center
+   :width: 85 %
+   :alt: LocalRQA Framework
+
+   Components in LocalRQA
+
 
 🚀 Why LocalRQA?
 ==================
