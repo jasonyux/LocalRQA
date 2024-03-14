@@ -18,5 +18,5 @@ A table here explaining with algorithm takes in what input, and what is the outp
    :caption: Training
    :hidden:
 
-   training/training_retriever.rst
+   training/retriever.rst
    training/generator.rst
