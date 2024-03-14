@@ -16,7 +16,7 @@ These are often often used in open-ended generation tasks such as machine transl
 Running Evaluation
 ------------------
 
-By default, our evaluation script ``scripts/test/test_e2e2.py`` is based on ``SimpleRQA`` class, which is compatible with most models from huggingface and OpenAI. To use this script, you will need 1) an **embedding model** and a **QA model**, 2) a **document/index database**, 3) a **test dataset**. For example:
+By default, our evaluation script ``scripts/test/test_e2e.py`` is based on ``SimpleRQA`` class, which is compatible with most models from huggingface and OpenAI. To use this script, you will need 1) an **embedding model** and a **QA model**, 2) a **document/index database**, 3) a **test dataset**. For example:
 
 .. code-block:: bash
 
@@ -52,7 +52,7 @@ Note that:
 Customization
 -------------
 
-You can customize the behavior of the evaluation script by either modifying ``scripts/test/test_e2e2.py``, or using the evaluators in your own code. Our evaluation procedure simply consists of three steps:
+You can customize the behavior of the evaluation script by either modifying ``scripts/test/test_e2e.py``, or using the evaluators in your own code. Our evaluation procedure simply consists of three steps:
 
 .. code-block:: python
 
