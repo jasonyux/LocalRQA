@@ -3,6 +3,26 @@
 Faire
 =====
 
+Faire is an online wholesale marketplace connecting independent retailers and brands around the world:
+
+    Now more than ever, consumers are choosing to support local shops over big-box chains. There are millions of thriving small businesses in North America, Europe, and Australia alone, who collectively represent a trillion dollar market. With our global community and the power of technology, Faire is helping fuel the growth of entrepreneurs everywhere.
+
+
+To find out more about Faire, you can visit `faire.com <https://www.faire.com/>`_.
+
+.. figure:: /_static/usecases/faire_logo.jpg
+    :width: 50 %
+    :align: center
+    :alt: Faire
+
+    Image credit: https://www.faire.com/
+
+
+**In this tutorial**, we provide an end-to-end example of using LocalRQA to:
+
+* blablabla
+
+
 Data Generation
 ---------------
 

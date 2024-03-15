@@ -1,9 +1,17 @@
 Installation
 ============
 
-From source
------------
-You can clone the repo and setup docker or create virtual environment by using requirements.txt file.
-::
-    pip install -r requirements.txt
+From GitHub:
 
+.. code-block:: bash
+
+    git clone https://github.com/jasonyux/LocalRQA
+    cd LocalRQA
+
+
+Install package
+
+.. code-block:: bash
+
+    pip install --upgrade pip
+    pip install -e .
