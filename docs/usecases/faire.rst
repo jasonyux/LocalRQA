@@ -334,18 +334,6 @@ To evaluate the generator, for instance ``<example/sft/model/dir>``:
 .. code-block:: bash
 
     python scripts/test/test_e2e.py \
-    --qa_model_name_or_path model_checkpoints/faire_Starling7b-1e5-train2_bge-ft/checkpoint-50 \
-    --assistant_prefix "GPT4 Correct Assistant" \
-    --user_prefix "GPT4 Correct User" \
-    --sep_user "<|end_of_turn|>" \
-    --sep_sys "<|end_of_turn|>" \
-    --embedding_model_name_or_path model_checkpoints/retriever_model/bge_1e5_mean_faire_inbatch256_temp1.2_hard0.05/checkpoint-56 \
-    --document_path data/database/faire/faire_400.pkl \
-    --index_path data/database/faire/faire_400_bge1e5_inbatch256_chunk400hard0.05_checkpoint56 \
-    --eval_data_path data/training/faire_new/test_w_qa.jsonl \
-    --output_dir model_checkpoints/faire_e2e_tests/faire_Starling7b-1e5-train2_bge-ft
-
-    python scripts/test/test_e2e.py \
     --qa_model_name_or_path <example/sft/model/dir/checkpoint-xxx> \
     --assistant_prefix "GPT4 Correct Assistant" \
     --user_prefix "GPT4 Correct User" \

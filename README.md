@@ -1,4 +1,19 @@
-# OpenRQA: retrieval augmented QA systems that can be easily served, trained, and evaluated
+# LocalRQA
+
+:books: <a href="https://arxiv.org/abs/2403.00982">Paper</a> • :rocket: <a href="#getting-started">Getting Started</a> • :pencil2: <a href="demo/README.md">Documentations</a>
+
+LocalRQA is ...
+
+## Installation
+
+blablabla
+
+
+## Getting Started
+
+blablabla
+
+
 
 ```bash
 docker run -it --gpus all --shm-size=256m \
