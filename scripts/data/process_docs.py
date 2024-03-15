@@ -1,6 +1,8 @@
 import argparse
-from langchain.document_loaders import *
-from langchain.text_splitter import *
+# from langchain.document_loaders import *
+# from langchain.text_splitter import *
+from langchain.document_loaders import JSONLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer
 from local_rqa.text_loaders.langchain_text_loader import LangChainTextLoader
 
@@ -46,6 +48,8 @@ def metadata_func(record: dict, metadata: dict) -> dict:
 
 def main(args):
     loader_func, splitter_func = JSONLoader, RecursiveCharacterTextSplitter.from_huggingface_tokenizer
+
+    ## configure how to load the data
     loader_parameters = {
         'file_path': args.document_path,
         'jq_schema': '.',
@@ -53,8 +57,16 @@ def main(args):
         'json_lines': True,
         'metadata_func': metadata_func
     }
+    
+    ## configure how to chunk each piece of text
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-    splitter_parameters = {'tokenizer': tokenizer, 'chunk_size': args.chunk_size, 'chunk_overlap': args.chunk_overlap_size}
+    splitter_parameters = {
+        'tokenizer': tokenizer,
+        'chunk_size': args.chunk_size,
+        'chunk_overlap': args.chunk_overlap_size
+    }
+
+    ## actually load and chunk the data
     kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parameters}
     documents = LangChainTextLoader(
         save_folder=args.save_dir,
