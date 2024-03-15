@@ -128,11 +128,11 @@ Both of the above should result in a document database of 11,136 passages. The c
 Generating QA
 ~~~~~~~~~~~~~~
 
-The above only gives us a document database. To train a QA system, we need question-pasasge-answer triplets. LocalRQA provides the following three-step method to generate QA pairs from a document database:
+The above only gives us a document database. To train a QA system, we need question-passage-answer triplets. LocalRQA provides the following three-step method to generate QA pairs from a document database:
 
 #. select a set of gold passages from the document database
 #. for each gold passage, prompt an LLM to generate a question
-#. for each gold passage and a question, prompt an LLM to generate an answer
+#. for each gold passage and question, prompt an LLM to generate an answer
 
 
 **Generate Questions**
@@ -192,7 +192,7 @@ If you peeked into ``scripts/data/doc_to_q_databricks.py``, you will notice that
         return
 
 
-This means you can customize the prompt used for question generation, and the filter function used to decide which documents to use for question generation. At the end, you the content of ``train_w_q.jsonl`` will look like:
+This means you can customize the prompt used for question generation, and the filter function used to decide which documents to use for question generation. In the end, the content of ``train_w_q.jsonl`` should look like:
 
 .. code-block:: jsonl
 

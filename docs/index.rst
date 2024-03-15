@@ -38,6 +38,7 @@ Some text here
    getting_started/installation.rst
    getting_started/quickstart.rst
 
+
 .. toctree::
    :maxdepth: 1
    :caption: Modules
@@ -48,7 +49,16 @@ Some text here
    modules/evaluation.rst
    modules/serving.rst
 
-   
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Playground
+   :hidden:
+
+   playground/custom_rqa.rst
+   playground/custom_trainer.rst
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Use Cases
@@ -56,6 +66,7 @@ Some text here
 
    usecases/databricks.rst
    usecases/faire.rst
+
 
 .. toctree::
    :maxdepth: 1
