@@ -6,7 +6,7 @@
 Welcome to LocalRQA's documentation!
 ===================================
 
-LocalRQA is an open-source toolkit that enables researchers and developers to easily train, test, and deploy RQA systems using techniques from recent research. Given a collection of documents, you can use pre-built pipelines in our framework to quickly assemble an RQA system using the best off-the-shelf models. Alternatively, you can **create your own training data, train open-source models using algorithms from the latest research, and deploy your very own local RQA system**!
+LocalRQA is an open-source toolkit that enables researchers and developers to easily train, test, and deploy retrival-augmented QA  (RQA) systems using techniques from recent research. Given a collection of documents, you can use pre-built pipelines in our framework to quickly assemble an RQA system using the best off-the-shelf models. Alternatively, you can **create your own training data, train open-source models using algorithms from the latest research, and deploy your very own local RQA system**!
 
 
 .. figure:: /_static/framework.png
