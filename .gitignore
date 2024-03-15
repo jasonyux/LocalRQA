@@ -7,6 +7,9 @@ data
 wandb
 logs
 
+# website
+docs/_build
+
 # environmental variables
 .envs 
 
