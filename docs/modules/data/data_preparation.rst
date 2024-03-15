@@ -13,6 +13,8 @@ To use all components of LocalRQA effortlessly, you need to prepare two types of
 Prepare Data from Scratch
 -------------------------
 
+The following steps present a high-level overview of how to prepare RQA data from scratch. For more concrete examples, please refer to our tutorial with :ref:`use-case-databricks` and :ref:`use-case-faire`!
+
 Prepare Document Pickle File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
