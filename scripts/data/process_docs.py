@@ -39,8 +39,7 @@ def parse_arguments(parser: argparse.ArgumentParser):
 
 
 def metadata_func(record: dict, metadata: dict) -> dict:
-    metadata['source'] = record.get("source")
-    metadata['title'] = record.get("title")
+    metadata = copy.deepcopy(record)
     return metadata
 
 
