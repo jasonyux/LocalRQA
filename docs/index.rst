@@ -6,9 +6,8 @@
 Welcome to LocalRQA's documentation!
 ===================================
 
-LocalRQA is an open-source toolkit that enables researchers to quickly train, test, and serve retrieval-augmented question-answering (RQA) systems.
-LOCALRQA provides a full suite of tools from generating QA data to locally training, testing, and serving an RQA system.
-Compared to other existing toolkits, LOCALRQA *features a wide selection of training algorithms, testing methods, and serving tools curated from the latest RQA search*.
+LocalRQA is an open-source toolkit that enables researchers and developers to easily train, test, and deploy RQA systems using techniques from recent research. Given a collection of documents, you can use pre-built pipelines in our framework to quickly assemble an RQA system using the best off-the-shelf models. Alternatively, you can **create your own training data, train open-source models using algorithms from the latest research, and deploy your very own local RQA system**!
+
 
 .. figure:: /_static/framework.png
    :align: center
@@ -18,16 +17,21 @@ Compared to other existing toolkits, LOCALRQA *features a wide selection of trai
    Components in LocalRQA
 
 
-🚀 Why LocalRQA?
+🌟 Why LocalRQA?
 ==================
 
-Some text here
+
+LocalRQA is a toolkit designed to make researching and developing retrival-augmented QA systems more efficient and effective. It offers a variety of **training** methods curated from latest research (see :ref:`train-main`) and **automatic evaluation** metrics (see :ref:`evaluation-main`) to help users develop new RQA approaches and compare with prior work.
+
+Moreover, LocalRQA doesn't just stop at creating these systems; it also provides tools for **deploying** these systems and improving them through real-world feedback (see :ref:`serving-main`). We offer support with popular inference acceleration frameworks such as ``vLLM`` and ``SGLang``, as well as methods to directly launch your RQA system with an interactive UI to allow users to chat with your system and provide feedback!
+
+With a comprehensive suite of tools, LocalRQA aims to make it easier for researchers and developers to train, test, and deploy novel RQA approaches!
 
 
-How can LocalRQA help?
-==================
+🚀 Getting Started!
+===================
 
-Some text here
+To get started with using LocalRQA, please refer to our :ref:`Installation <installation>` and :ref:`Quickstart <quickstart>` guide!
 
 
 .. toctree::
