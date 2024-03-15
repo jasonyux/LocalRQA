@@ -30,7 +30,7 @@ To find out more about Faire, you can visit `faire.com <https://www.faire.com/>`
 Prepare Data
 ------------
 
-blablabla
+We contacted Faire's Sales team and crawled documents from `faire.com/support <https://www.faire.com/support>`_ according to their suggestions, and then processed the data to only keep raw texts. You can find these data under ``<example/faire/raw>`` directory. These data include the guides and FAQ documents that Faire used to support their retailers.
 
 
 .. code-block:: json
@@ -38,10 +38,14 @@ blablabla
     // docs.jsonl
     [
         {
-            "full_text": "..."
+            "title": "Faire account security best practices",
+            "source": "https://www.faire.com/support/articles/4408644893851",
+            "text": "Faire helps you discover products, manage your orders, and pay invoices..."
         },
         {
-            "full_text": "..."
+            "title": "Resetting my password",
+            "source": "https://www.faire.com/support/articles/360019854651",
+            "text": "If you would like to reset your password, please follow the steps below:..."
         },
         ...
     ]
@@ -313,7 +317,16 @@ By default, our training scripts will perform automatic evaluation during traini
 
 To evaluate your retriever, for instance ``<example/ctl/model/dir>``:
 
-TODO: command here
+.. code-block:: bash
+
+    python scripts/test/test_retriever.py \
+    --embedding_model_name_or_path <example/ctl/model/dir/checkpoint-xxx> \
+    --document_path <example/faire/documents.pkl>\
+    --index_path <example/faire/ctl/index> \
+    --eval_data_path <example/faire/test_w_q.jsonl> \
+    --output_dir <example/retriever>
+
+By default, this will evaluate ``embedding_model_name_or_path`` model's Recall@1, Recall@4 and runtime latency metrics using test data in ``<example/faire/test_w_q.jsonl>``. The result will be saved as ``<example/retriever/test-predictions.jsonl>``. To enble **nDCG** metric, set *retr_ndcg = True* in setting ``EvaluatorConfig``.
 
 
 To evaluate the generator, for instance ``<example/sft/model/dir>``:

@@ -235,16 +235,39 @@ To obtain ``eval_w_qa.jsonl`` and ``test_w_qa.jsonl``, you can simply replace th
 Train a Retriever
 ------------------
 
-Now we have all the data we need. We can first use it to fine-tune a retriever model.
+Now we have all the data we need. We can first use it to fine-tune a retriever model. In this example, we will use ``intfloat/e5-base-v2`` as the base model:
+
 
 .. note::
 
     In this tutorial, we are using one A100 80GB GPU to train all of our models. You may want to adjust hyperparameters such as batch size and gradient accumulation steps if you are using a different setup.
 
 
-TODO. An example CTl training with e5, with some short explanations.
+.. code-block:: bash
 
-For the CTL trained model, use ``--output_dir <example/ctl/model/dir>``
+    python scripts/train/retriever/train_ctl_retriever.py \
+    --pooling_type mean \
+    --learning_rate 1e-4 \
+    --per_device_train_batch_size 256 \
+    --per_device_eval_batch_size 128 \
+    --hard_neg_ratio 0.05 \
+    --metric_for_best_model eval_retr/document_recall/recall4 \
+    --model_name_or_path intfloat/e5-base-v2 \
+    --max_steps 150 \
+    --eval_steps 5 \
+    --save_steps 5 \
+    --logging_steps 1 \
+    --temperature 1 \
+    --output_dir <example/ctl/model/dir> \
+    --train_file <example/faire/train_w_q.jsonl> \
+    --eval_file <example/faire/eval_w_q.jsonl> \
+    --test_file <example/faire/test_w_q.jsonl> \
+    --full_dataset_file_path <example/databricks/documents.pkl>
+
+This will finetune the model using the :ref:`training-ret-ctl` algorithm, log the training process to ``wandb``, and save the model with highest Recall@4 score to ``<example/ctl/model/dir>``.
+
+
+For more details on **other training algorithms we currently support**, please refer to :ref:`training-ret`.
 
 
 Train a Generator
@@ -296,7 +319,16 @@ By default, our training scripts will perform automatic evaluation during traini
 
 To evaluate your retriever, for instance ``<example/ctl/model/dir>``:
 
-TODO: command here
+.. code-block:: bash
+
+    python scripts/test/test_retriever.py \
+    --embedding_model_name_or_path <example/ctl/model/dir/checkpoint-xxx> \
+    --document_path <example/databricks/documents.pkl>\
+    --index_path <example/databricks/ctl/index> \
+    --eval_data_path <example/databricks/test_w_q.jsonl> \
+    --output_dir <example/retriever>
+
+By default, this will evaluate ``embedding_model_name_or_path`` model's Recall@1, Recall@4 and runtime latency metrics using test data in ``<example/databricks/test_w_q.jsonl>``. The result will be saved as ``<example/retriever/test-predictions.jsonl>``. To enble **nDCG** metric, set *retr_ndcg = True* in setting ``EvaluatorConfig``.
 
 
 To evaluate the generator, for instance ``<example/sft/model/dir>``:
