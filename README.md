@@ -1,6 +1,6 @@
 # LocalRQA
 
-:books: <a href="https://arxiv.org/abs/2403.00982">Paper</a> • :rocket: <a href="#getting-started">Getting Started</a> • :pencil2: <a href="demo/README.md">Documentations</a>
+:books: <a href="https://arxiv.org/abs/2403.00982">Paper</a> • :rocket: <a href="#getting-started">Getting Started</a> • :pencil2: <a href="https://jasonyux.com/LocalRQA/">Documentations</a>
 
 LocalRQA is an open-source toolkit that enables researchers and developers to easily train, test, and deploy retrieval-augmented QA (RQA) systems using techniques from recent research. Given a collection of documents, you can use pre-built pipelines in our framework to quickly assemble an RQA system using the best off-the-shelf models. **Alternatively, you can create your own training data, train open-source models using algorithms from the latest research, and deploy your very own local RQA system!**
 
@@ -95,7 +95,7 @@ print(response.batch_answers[0])
 
 ## Train your RQA System
 
-Different from other frameworks, LocalRQA features methods to locally train/test your RQA system using methods curated from latest research. We thus provide a large collection of training and (automatic) evaluation methods to help users easily develop new RQA systems. For a list of supported training algorithms, please refer to ..
+Different from other frameworks, LocalRQA features methods to locally train/test your RQA system using methods curated from latest research. We thus provide a large collection of training and (automatic) evaluation methods to help users easily develop new RQA systems. For a list of supported training algorithms, please refer to [our documentation website](https://jasonyux.com/LocalRQA/modules/training.html).
 
 As a simple example, below is an example script using simple SFT to train ``mistralai/Mistral-7B-Instruct-v0.2``:
 
@@ -137,7 +137,7 @@ To evaluate the first 50 predictions from a prediction file (e.g., produced by o
 
 ```bash
 python local_rqa.serve.gradio_static_server.py \
---file_path <path/to/yourtest-predictions.jsonl> /
+--file_path <path/to/your/test-predictions.jsonl> /
 --include_idx 1-50
 ```
 
@@ -167,7 +167,7 @@ To host your model and launch an interactive chat webpage, you will need to star
       where the `--model_id simple_rqa` is to let the controller know which model this demo page is for, and the `--example` are the example questions that will be shown on the demo page.
 
 
-For more details on model serving, please refer to our documentation website.
+For more details on model serving, please refer to [our documentation website](https://jasonyux.com/LocalRQA/modules/serving.html).
 
 
 
