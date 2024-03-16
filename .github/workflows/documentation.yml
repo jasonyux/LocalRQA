@@ -16,7 +16,7 @@ jobs:
           pip install sphinx myst_parser sphinx-book-theme myst_nb m2r2 sphinx-automodapi==0.16.0 autodoc_pydantic
       - name: Sphinx build
         run: |
-          sphinx-build doc _build
+          cd docs && make html
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
