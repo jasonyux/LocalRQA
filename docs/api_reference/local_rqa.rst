@@ -1,4 +1,4 @@
-local\_rqa
+local\_rqa namespace
 ====================
 
 .. py:module:: local_rqa
@@ -8,7 +8,7 @@ Subpackages
 
 .. toctree::
    :maxdepth: 4
-   
+
    local_rqa.evaluation
    local_rqa.guardrails
    local_rqa.pipelines

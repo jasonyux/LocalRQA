@@ -8,7 +8,7 @@ bitsandbytes
 openai==1.2.4
 tiktoken
 wandb
-langchain
+langchain>=0.1.12
 llama-index
 rouge_score
 rank_bm25

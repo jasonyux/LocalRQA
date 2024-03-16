@@ -21,7 +21,7 @@ LocalRQA is an open-source toolkit that enables researchers and developers to ea
 ==================
 
 
-LocalRQA is a toolkit designed to make researching and developing retrival-augmented QA systems more efficient and effective. It offers a variety of **training** methods curated from latest research (see :ref:`train-main`) and **automatic evaluation** metrics (see :ref:`evaluation-main`) to help users develop new RQA approaches and compare with prior work.
+LocalRQA is a toolkit designed to make researching and developing retrieval-augmented QA systems more efficient and effective. It offers a variety of **training** methods curated from latest research (see :ref:`train-main`) and **automatic evaluation** metrics (see :ref:`evaluation-main`) to help users develop new RQA approaches and compare with prior work.
 
 Moreover, LocalRQA doesn't just stop at creating these systems; it also provides tools for **deploying** these systems and improving them through real-world feedback (see :ref:`serving-main`). We offer support with popular inference acceleration frameworks such as ``vLLM`` and ``SGLang``, as well as methods to directly launch your RQA system with an interactive UI to allow users to chat with your system and provide feedback!
 

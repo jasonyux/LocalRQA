@@ -37,19 +37,3 @@ local\_rqa.trainers.qa\_llm.supervised\_trainer module
    :members:
    :undoc-members:
    :show-inheritance:
-
-local\_rqa.trainers.qa\_llm.with\_retriever\_fid\_trainer module
-----------------------------------------------------------------
-
-.. automodule:: local_rqa.trainers.qa_llm.with_retriever_fid_trainer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-local\_rqa.trainers.qa\_llm.with\_retriever\_trainer module
------------------------------------------------------------
-
-.. automodule:: local_rqa.trainers.qa_llm.with_retriever_trainer
-   :members:
-   :undoc-members:
-   :show-inheritance:
