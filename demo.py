@@ -1,11 +1,10 @@
+import logging
 from langchain_community.document_loaders import SeleniumURLLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.embeddings import *
 from local_rqa.pipelines.retrieval_qa import SimpleRQA
 from local_rqa.schema.dialogue import DialogueSession
 from local_rqa.text_loaders.langchain_text_loader import LangChainTextLoader
 from local_rqa.utils import init_logger
-import logging
 
 
 logger: logging.Logger

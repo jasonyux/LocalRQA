@@ -1,5 +1,5 @@
 from typing import Any, List
-from langchain.document_loaders import *
+from langchain_community.document_loaders import *
 from langchain.text_splitter import *
 from transformers import AutoTokenizer
 from local_rqa.schema.document import Document
