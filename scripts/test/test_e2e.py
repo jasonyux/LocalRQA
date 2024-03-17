@@ -51,7 +51,7 @@ class ModelArguments:
 @dataclass
 class TestArguments:
     document_path: str = field(
-        default='data/database/databricks/databricks_400.pkl',
+        default='example/databricks/database/databricks.pkl',
         metadata={"help": "Path to the file which contains List[Document] for building a database index"},
     )
     index_path: str = field(
@@ -59,7 +59,7 @@ class TestArguments:
         metadata={"help": "Path to the file which will store/contains the index of documents in document_path"},
     )
     eval_data_path: str = field(
-        default='data/training/databricks_new/test_w_qa.jsonl',
+        default='example/databricks/processed/test_w_qa.jsonl',
         metadata={
             "help": ("Path to the eval data JSONL file. It needs to contain fields including 'gold_docs' for retriever, "
                     "and 'gold_docs' and 'gold_answers' for E2E QA.")

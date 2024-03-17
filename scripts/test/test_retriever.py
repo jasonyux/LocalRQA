@@ -31,7 +31,7 @@ class ModelArguments:
 @dataclass
 class TestArguments:
     document_path: str = field(
-        default='data/database/databricks/databricks_400.pkl',
+        default='example/databricks/database/databricks.pkl',
         metadata={"help": "Path to the file which contains List[Document] for building a database index"},
     )
     index_path: str = field(

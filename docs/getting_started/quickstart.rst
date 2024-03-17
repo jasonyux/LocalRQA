@@ -16,6 +16,11 @@ Prepare Document
 
 LocalRQA integrates with frameworks such as LangChain and LlamaIndex to easily ingest text data in various formats, such as JSON data, HTML data, data from Google Drive, etc.
 
+.. note::
+
+    The following step requires ``selenium`` to be installed correctly. If you don't have it configured correctly, you can **skip this step** as we have already prepared the ``databricks_web.pkl`` file for you in the ``example/demo`` folder.
+
+
 For example, you could load data from a website using ``SeleniumURLLoader`` from ``langchain``, then save and parse them into a collection of documents (``docs``):
 
 .. code-block:: python
@@ -32,8 +37,8 @@ For example, you could load data from a website using ``SeleniumURLLoader`` from
 
     # load the data, chunk them, and save them
     docs = LangChainTextLoader(
-        save_folder="<example>",  # change this to your own folder
-        save_filename="<documents.pkl>",
+        save_folder="example/demo",  # change this to your own folder
+        save_filename="databricks_web.pkl",
         loader_func=loader_func,
         splitter_func=split_func
     ).load_data(**kwargs)
@@ -52,8 +57,8 @@ Given a path to a document database (see above), we can directly use ``SimpleRQA
     from local_rqa.schema.dialogue import DialogueSession
 
     rqa = SimpleRQA.from_scratch(
-        document_path="<example/documents.pkl>",
-        index_path="<example/index>",
+        document_path="example/demo/databricks_web.pkl",
+        index_path="example/demo/index",
         embedding_model_name_or_path="intfloat/e5-base-v2",  # embedding model
         qa_model_name_or_path="lmsys/vicuna-7b-v1.5"  # generative model
     )

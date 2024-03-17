@@ -109,19 +109,19 @@ class DataArguments:
     """
 
     train_file: str = field(
-        default="data/training/databricks_new/train_w_qa.jsonl",
+        default="example/databricks/processed/train_w_qa.jsonl",
         metadata={"help": "Path for cached train dataset"},
     )
     eval_file: str = field(
-        default='data/training/databricks_new/eval_w_qa.jsonl',
+        default='example/databricks/processed/eval_w_qa.jsonl',
         metadata={"help": "Path for cached eval dataset"},
     )
     test_file: str = field(
-        default='data/training/databricks_new/test_w_qa.jsonl',
+        default='example/databricks/processed/test_w_qa.jsonl',
         metadata={"help": "Path for cached test dataset"},
     )
     full_dataset_file_path: str = field(
-        default='data/database/databricks/databricks_400.pkl',
+        default='example/databricks/database/databricks.pkl',
         metadata={"help": "Path for cached full dataset file"},
     )
 

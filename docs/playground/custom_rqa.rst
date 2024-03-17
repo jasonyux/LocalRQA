@@ -4,9 +4,119 @@
 Customize your RQA system
 ==========================
 
+Our ``SimpleRQA`` simply takes three ingredients together:
+
+- a document and index database
+- a retrieval model
+- a QA model
+
+At a high level, when you call the ``qa`` method the following happens:
+
+.. code-block:: python
+
+    rqa = SimpleRQA.from_scratch(...)
+    ## rqa.components = [retriever, qa_llm, answer_guardrail]
+    ## SimpleRQA by default adds in an answer guardrail that does NOOP for now
+    
+    response = rqa.qa(
+        batch_questions=['What is DBFS?'],
+        batch_dialogue_session=[DialogueSession()],
+    )
+    ## 1. call retriever.run              with input {batch_questions, batch_dialogue_session}, output {batch_source_documents}
+    ## 2. call qa_llm.run                 with input {batch_questions, batch_dialogue_session, batch_source_documents}, output {batch_answers}
+    ## 3. call answer_guardrail.guardrail with input {batch_questions, batch_dialogue_session, batch_source_documents, batch_answers}, output {RQAOutput}
 
 
-.. code-block::
+This means that to **customize your own RQA system, simply modify this component cascade!** To illustrate this, let's walk through an example of adding a custom answer guardrail module using OpenAI's moderation API.
+
+
+Implementing a Custom Guardrail
+-------------------------------
+
+First, let's implement a simple ``component`` that can be added to the RQA system.
+
+.. note::
+
+    In principle, you do not need to stick with using the ``SimplRQA`` class. In general, other functionalities of our code base rely on **the parent** ``RQAPipeline`` **class**. We use ``SimpleRQA`` here for simplicity.
+
+
+The ``Component`` class
+~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Under the hood, each ``component`` inherits the ``Component`` class, which instructs the RQA pipeline of the following:
+
+.. code-block:: python
+
+    class BaseAnswerGuardrail(Component):
+        ### 1. what input data are required to run the component
+        run_input_keys = [
+            "batch_questions",
+            "batch_source_documents",
+            "batch_dialogue_session",
+            "batch_answers",
+        ]
+
+        @abstractmethod
+        def guardrail(
+            self,
+            batch_questions: List[str],
+            batch_source_documents: List[List[Document]],
+            batch_dialogue_session: List[DialogueSession],
+            batch_answers: List[str],
+        ) -> RQAOutput:
+            ...
+
+        ### 2. the 'forward' pass when this component is called
+        def run(self, *args, **kwargs):
+            return self.guardrail(*args, **kwargs)
+
+
+In this case, because you might to check if the generated answer is faithful to the input question and retrieved documents, the ``run_input_keys`` are set to include both of them. When the ``run`` method is called, the following happens:
+
+#. say the previous component returned the following output:
+
+   .. code-block:: python
+
+        {
+            "batch_questions": ['What is DBFS?'],
+            "batch_source_documents": [ [Document(...)] ],
+            "batch_dialogue_session": [DialogueSession()],
+            "batch_answers": ['DBFS is ...'],
+            "additional_data": "..."
+        }
+    
+#. ``RQAPipeline`` will then choose the relevant data according to ``run_input_keys`` of this component (i.e., remove ``additional_data``), and call ``run`` with:
+
+   .. code-block:: python
+   
+      self.run(
+          batch_questions=['What is DBFS?'],
+          batch_source_documents=[ [Document(...)] ],
+          batch_dialogue_session=[DialogueSession()],
+          batch_answers=['DBFS is ...'],
+      )
+    
+#. the output will then be updated before being passed to the next component. Let's say this component changed the answer to "I'm sorry, I cannot answer that question." and removed the source documents. Then *all available data for the next component* will be:
+
+   .. code-block:: python
+   
+        {
+            "batch_questions": ['What is DBFS?'],
+            "batch_source_documents": [],
+            "batch_dialogue_session": [DialogueSession()],
+            "batch_answers": ["I'm sorry, I cannot answer that question."],
+            "additional_data": "..."
+        }
+
+
+Implementing an ``OpenAIModeration`` component
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now, we can implement a simple answer guardrail that checks if the answer violates OpenAI moderation API. To do this, simply implement the ``guardrail`` method and inherit the ``BaseAnswerGuardrail`` class by **defining its** ``run_input_keys`` **and** ``run`` **method**:
+
+
+.. code-block:: python
     
     from typing import List
     from local_rqa.schema.document import Document
@@ -60,8 +170,18 @@ Customize your RQA system
                 batch_dialogue_session=batch_dialogue_session,
             )
 
+        def run(self, *args, **kwargs):
+            return self.guardrail(*args, **kwargs)
 
-Then 
+
+This will take the ``batch_answers`` and check if they violate `OpenAI moderation API <https://platform.openai.com/docs/guides/moderation>`_. If the answer is flagged, it will be replaced with "I'm sorry, I cannot answer that question." and the source documents will be removed.
+
+
+Adding the Guardrail to ``SimpleRQA``
+-------------------------------------
+
+Finally, we can add this guardrail to the ``SimpleRQA`` system. Since this inherits from the ``Component`` class, ``SimpleRQA`` will understand how to call it. Here's how you can add it to the system:
+
 
 .. code-block:: python
 
@@ -79,3 +199,5 @@ Then
         batch_questions=['What is DBFS?'],
         batch_dialogue_session=[DialogueSession()],
     )
+    # if the answer violates OpenAI moderation API,
+    # the answer will be replaced with "I'm sorry, I cannot answer that question."
