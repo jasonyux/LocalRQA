@@ -30,7 +30,7 @@ pip install -e .
 
 ```bash
 docker pull jasonyux/localrqa
-docker run -it jasonyux/localrqa
+docker run -it jasonyux/localrqa bash
 ```
 
 

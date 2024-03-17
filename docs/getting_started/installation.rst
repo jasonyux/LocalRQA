@@ -31,7 +31,7 @@ From Docker
 .. code-block:: bash
 
     docker pull jasonyux/localrqa
-    docker run -it jasonyux/localrqa
+    docker run -it jasonyux/localrqa bash
 
 
 our code base is located at ``/workspace/LocalRQA``.
