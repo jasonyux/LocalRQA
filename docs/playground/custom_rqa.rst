@@ -59,3 +59,23 @@ Customize your RQA system
                 batch_source_documents=checked_source_documents,
                 batch_dialogue_session=batch_dialogue_session,
             )
+
+
+Then 
+
+.. code-block:: python
+
+    rqa = SimpleRQA.from_scratch(
+        document_path="example/demo/databricks_web.pkl",
+        index_path="example/demo/index",
+        embedding_model_name_or_path="intfloat/e5-base-v2",
+        qa_model_name_or_path="lmsys/vicuna-7b-v1.5"
+    )
+    guardrail = OpenAIModeration()
+    rqa.components.append(guardrail)
+
+    # run QA: retrieval -> QA -> guardrail
+    response = rqa.qa(
+        batch_questions=['What is DBFS?'],
+        batch_dialogue_session=[DialogueSession()],
+    )
