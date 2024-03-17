@@ -55,6 +55,9 @@ from langchain.text_splitter import CharacterTextSplitter
 from local_rqa.text_loaders.langchain_text_loader import LangChainTextLoader
 
 # specify how to load the data and how to chunk them
+# note: this requires selenium to read the web page
+#       if your selenium is not working, you can SKIP this entire section.
+#       We have already provided the `example/demo/databricks_web.pkl` file in this repo.
 loader_func, split_func = SeleniumURLLoader, CharacterTextSplitter
 loader_parameters = {'urls': ["https://docs.databricks.com/en/dbfs/index.html"]}
 splitter_parameters = {'chunk_size': 400, 'chunk_overlap': 50, 'separator': "\n\n"}
@@ -62,7 +65,7 @@ kwargs = {"loader_params": loader_parameters, "splitter_params": splitter_parame
 
 # load the data, chunk them, and save them
 docs = LangChainTextLoader(
-      save_folder="example",  # where data is saved
+      save_folder="example/demo",  # where data is saved
       save_filename="documents.pkl",
       loader_func=loader_func,
       splitter_func=split_func
@@ -80,8 +83,8 @@ from local_rqa.pipelines.retrieval_qa import SimpleRQA
 from local_rqa.schema.dialogue import DialogueSession
 
 rqa = SimpleRQA.from_scratch(
-      document_path="<example/documents.pkl>",
-      index_path="<example/index>",
+      document_path="example/demo/databricks_web.pkl",
+      index_path="example/demo/index",
       embedding_model_name_or_path="intfloat/e5-base-v2",  # embedding model
       qa_model_name_or_path="lmsys/vicuna-7b-v1.5"  # generative model
 )
@@ -95,7 +98,7 @@ print(response.batch_answers[0])
 
 ## Train your RQA System
 
-Different from other frameworks, LocalRQA features methods to locally train/test your RQA system using methods curated from latest research. We thus provide a large collection of training and (automatic) evaluation methods to help users easily develop new RQA systems. For a list of supported training algorithms, please refer to [our documentation website](https://jasonyux.com/LocalRQA/modules/training.html).
+Different from other frameworks, LocalRQA features methods to locally train/test your RQA system using methods curated from the latest research. We thus provide a large collection of training and (automatic) evaluation methods to help users easily develop new RQA systems. For a list of supported training algorithms, please refer to [our documentation website](https://jasonyux.com/LocalRQA/modules/training.html).
 
 As a simple example, below is an example script using simple SFT to train ``mistralai/Mistral-7B-Instruct-v0.2``:
 

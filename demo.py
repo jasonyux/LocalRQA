@@ -12,7 +12,8 @@ logger: logging.Logger
 
 def quickstart():
     ## note: requires selenium to read the web page
-    ## you can also skip this entire section, as we have provided the `example/demo/databricks_web.pkl` file as well
+    ## if your selenium is not working, you can COMMENT OUT until line 26
+    ## We have already provided the `example/demo/databricks_web.pkl` file in this repo
     loader_func, split_func = SeleniumURLLoader, CharacterTextSplitter
     loader_parameters = {'urls': ["https://docs.databricks.com/en/dbfs/index.html"]}
     splitter_parameters = {'chunk_size': 400, 'chunk_overlap': 50, 'separator': "\n\n"}
