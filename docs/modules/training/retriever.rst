@@ -25,7 +25,6 @@ At a high level, we provide ready-to-use training scripts for each algorithm abo
     --per_device_train_batch_size 256 \
     --per_device_eval_batch_size 128 \
     --hard_neg_ratio 0.05 \
-    --contrastive_loss inbatch_contrastive \
     --metric_for_best_model eval_retr/document_recall/recall4 \
     --output_dir model_checkpoints/my_CTL_ret_model
 

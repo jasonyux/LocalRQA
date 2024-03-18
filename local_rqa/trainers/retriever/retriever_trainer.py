@@ -62,10 +62,7 @@ class RetrieverTrainer(Trainer):
         return
 
     def compute_loss(self, model, inputs, return_outputs=False):
-        if self.contrastive_args.contrastive_loss == 'inbatch_contrastive':
-            loss = self._inbatch_contrastive_w_hardneg(model, inputs, return_outputs)
-        else:
-            raise NotImplementedError
+        loss = self._inbatch_contrastive_w_hardneg(model, inputs, return_outputs)
         return loss
     
     def _inbatch_contrastive_w_hardneg(self, model, inputs, return_outputs=False):

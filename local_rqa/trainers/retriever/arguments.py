@@ -132,10 +132,6 @@ class ContrasitiveTrainingArgs:
         default=0.05,
         metadata={"help": "Ratio of hard negatives to sample from the batch"},
     )
-    contrastive_loss: str = field(  # No Need, since this is the only option for now
-        default='inbatch_contrastive',
-        metadata={"help": "Type of contrastive loss to use"},
-    )
     temperature: float = field(
         default=0.05,
         metadata={"help": "Temperature for contrastive loss"},
