@@ -1,0 +1,559 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Quickstart &#8212; LocalRQA  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'getting_started/quickstart';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data" href="../modules/data.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">LocalRQA  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Quickstart</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/data.html">Data</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data/data_description.html">RQA Data Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data/data_preparation.html">Prepare RQA Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/training.html">Training</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/training/retriever.html">Training a Retriever</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/training/retriever/ctl.html">Contrastive Learning (CTL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/training/retriever/dca.html">Distill from Cross-Attention scores (DCA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/training/retriever/rpg.html">Distill from an LM’s probability distribution (RPG)</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/training/generator.html">Training a Generator</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/training/generator/sft.html">SFT with Gold Data (SFT)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/training/generator/swr.html">SFT with a Frozen Retriever (SwR)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/training/generator/fid.html">Fusion-in-Decoder Training (FiD)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/evaluation.html">Evaluation</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/evaluation/eval_retriever.html">Retriever Evaluation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/evaluation/eval_e2e.html">End-to-End Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/serving.html">Serving</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/serving/human_eval.html">Static Human Evaluation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/serving/interactive.html">Interactive Chat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/serving/acc_frameworks.html">Inference Acceleration Frameworks</a></li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Playground</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../playground/custom_rqa.html">Customize your RQA system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../playground/custom_trainer.html">Customize Model Trainers</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../usecases/databricks.html">Databricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usecases/faire.html">Faire</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api_reference/local_rqa.html">local_rqa namespace</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.evaluation.html">local_rqa.evaluation package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.guardrails.html">local_rqa.guardrails package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.pipelines.html">local_rqa.pipelines package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.qa_llms.html">local_rqa.qa_llms package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.retrievers.html">local_rqa.retrievers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.schema.html">local_rqa.schema package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.serve.html">local_rqa.serve package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/local_rqa.text_loaders.html">local_rqa.text_loaders package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../api_reference/local_rqa.trainers.html">local_rqa.trainers namespace</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/local_rqa.trainers.qa_llm.html">local_rqa.trainers.qa_llm namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/local_rqa.trainers.retriever.html">local_rqa.trainers.retriever namespace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/getting_started/quickstart.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Quickstart</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-document">Prepare Document</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-an-rqa-system">Build an RQA System</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="quickstart">
+<span id="id1"></span><h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">#</a></h1>
+<p>In this quickstart we’ll show you:</p>
+<ul class="simple">
+<li><p>How to prepare a document database for your RQA system</p></li>
+<li><p>How to use <code class="docutils literal notranslate"><span class="pre">SimpleRQA</span></code> to quickly configure and run an RQA system</p></li>
+</ul>
+<p>As a reference, the full example code can be found in <code class="docutils literal notranslate"><span class="pre">demo.py</span></code> script at the root of the repository.</p>
+<section id="prepare-document">
+<h2>Prepare Document<a class="headerlink" href="#prepare-document" title="Link to this heading">#</a></h2>
+<p>LocalRQA integrates with frameworks such as LangChain and LlamaIndex to easily ingest text data in various formats, such as JSON data, HTML data, data from Google Drive, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following step requires <code class="docutils literal notranslate"><span class="pre">selenium</span></code> to be installed correctly. If you don’t have it configured correctly, you can <strong>skip this step</strong> as we have already prepared the <code class="docutils literal notranslate"><span class="pre">databricks_web.pkl</span></code> file for you in the <code class="docutils literal notranslate"><span class="pre">example/demo</span></code> folder.</p>
+</div>
+<p>For example, you could load data from a website using <code class="docutils literal notranslate"><span class="pre">SeleniumURLLoader</span></code> from <code class="docutils literal notranslate"><span class="pre">langchain</span></code>, then save and parse them into a collection of documents (<code class="docutils literal notranslate"><span class="pre">docs</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">langchain_community.document_loaders</span> <span class="kn">import</span> <span class="n">SeleniumURLLoader</span>
+<span class="kn">from</span> <span class="nn">langchain.text_splitter</span> <span class="kn">import</span> <span class="n">CharacterTextSplitter</span>
+<span class="kn">from</span> <span class="nn">local_rqa.text_loaders.langchain_text_loader</span> <span class="kn">import</span> <span class="n">LangChainTextLoader</span>
+
+<span class="c1"># specify how to load the data and how to chunk them</span>
+<span class="n">loader_func</span><span class="p">,</span> <span class="n">split_func</span> <span class="o">=</span> <span class="n">SeleniumURLLoader</span><span class="p">,</span> <span class="n">CharacterTextSplitter</span>
+<span class="n">loader_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;urls&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://docs.databricks.com/en/dbfs/index.html&quot;</span><span class="p">]}</span>
+<span class="n">splitter_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;chunk_size&#39;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span> <span class="s1">&#39;chunk_overlap&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="s1">&#39;separator&#39;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">}</span>
+<span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;loader_params&quot;</span><span class="p">:</span> <span class="n">loader_parameters</span><span class="p">,</span> <span class="s2">&quot;splitter_params&quot;</span><span class="p">:</span> <span class="n">splitter_parameters</span><span class="p">}</span>
+
+<span class="c1"># load the data, chunk them, and save them</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">LangChainTextLoader</span><span class="p">(</span>
+    <span class="n">save_folder</span><span class="o">=</span><span class="s2">&quot;example/demo&quot;</span><span class="p">,</span>  <span class="c1"># change this to your own folder</span>
+    <span class="n">save_filename</span><span class="o">=</span><span class="s2">&quot;databricks_web.pkl&quot;</span><span class="p">,</span>
+    <span class="n">loader_func</span><span class="o">=</span><span class="n">loader_func</span><span class="p">,</span>
+    <span class="n">splitter_func</span><span class="o">=</span><span class="n">split_func</span>
+<span class="p">)</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>this list of documents (<code class="docutils literal notranslate"><span class="pre">docs</span></code>) is now your <strong>document database</strong>, which will be used to create an embedding index for the RQA system.</p>
+</section>
+<section id="build-an-rqa-system">
+<h2>Build an RQA System<a class="headerlink" href="#build-an-rqa-system" title="Link to this heading">#</a></h2>
+<p>Given a path to a document database (see above), we can directly use <code class="docutils literal notranslate"><span class="pre">SimpleRQA</span></code> to 1) create and save an embedding index if <code class="docutils literal notranslate"><span class="pre">&lt;example/index&gt;</span></code> is empty, 2) plugin an embedding model and a generative model, and 3) run QA!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">local_rqa.pipelines.retrieval_qa</span> <span class="kn">import</span> <span class="n">SimpleRQA</span>
+<span class="kn">from</span> <span class="nn">local_rqa.schema.dialogue</span> <span class="kn">import</span> <span class="n">DialogueSession</span>
+
+<span class="n">rqa</span> <span class="o">=</span> <span class="n">SimpleRQA</span><span class="o">.</span><span class="n">from_scratch</span><span class="p">(</span>
+    <span class="n">document_path</span><span class="o">=</span><span class="s2">&quot;example/demo/databricks_web.pkl&quot;</span><span class="p">,</span>
+    <span class="n">index_path</span><span class="o">=</span><span class="s2">&quot;example/demo/index&quot;</span><span class="p">,</span>
+    <span class="n">embedding_model_name_or_path</span><span class="o">=</span><span class="s2">&quot;intfloat/e5-base-v2&quot;</span><span class="p">,</span>  <span class="c1"># embedding model</span>
+    <span class="n">qa_model_name_or_path</span><span class="o">=</span><span class="s2">&quot;lmsys/vicuna-7b-v1.5&quot;</span>  <span class="c1"># generative model</span>
+<span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">rqa</span><span class="o">.</span><span class="n">qa</span><span class="p">(</span>
+    <span class="n">batch_questions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;What is DBFS?&#39;</span><span class="p">],</span>
+    <span class="n">batch_dialogue_session</span><span class="o">=</span><span class="p">[</span><span class="n">DialogueSession</span><span class="p">()],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">batch_answers</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c1"># DBFS stands for Databricks File System, which is a ...</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">response</span></code> is a <code class="docutils literal notranslate"><span class="pre">RQAOutput</span></code> object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RQAOutput</span><span class="p">:</span>
+    <span class="n">batch_answers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">batch_source_documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]]</span>
+    <span class="n">batch_dialogue_session</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DialogueSession</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
+<p>Beyond this simple example, you can:</p>
+<ul class="simple">
+<li><p>prepare your own RQA data for training, evaluation, and serving (<a class="reference internal" href="../modules/data.html#data-main"><span class="std std-ref">Data</span></a>)</p></li>
+<li><p>train your own models using algorithms we implemented from latest research (<a class="reference internal" href="../modules/training.html#train-main"><span class="std std-ref">Training</span></a>)</p></li>
+<li><p>evaluate your RQA system with automatic metrics (<a class="reference internal" href="../modules/evaluation.html#evaluation-main"><span class="std std-ref">Evaluation</span></a>)</p></li>
+<li><p>deploy your RQA system to interact with real users (<a class="reference internal" href="../modules/serving.html#serving-main"><span class="std std-ref">Serving</span></a>)</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="installation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Installation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../modules/data.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Data</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-document">Prepare Document</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-an-rqa-system">Build an RQA System</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Xiao Yu, Yunan Lu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Xiao Yu, Yunan Lu.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

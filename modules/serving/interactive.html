@@ -1,0 +1,538 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Interactive Chat &#8212; LocalRQA  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'modules/serving/interactive';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Inference Acceleration Frameworks" href="acc_frameworks.html" />
+    <link rel="prev" title="Static Human Evaluation" href="human_eval.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">LocalRQA  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../data.html">Data</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../data/data_description.html">RQA Data Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data/data_preparation.html">Prepare RQA Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../training.html">Training</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../training/retriever.html">Training a Retriever</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../training/retriever/ctl.html">Contrastive Learning (CTL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../training/retriever/dca.html">Distill from Cross-Attention scores (DCA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../training/retriever/rpg.html">Distill from an LM’s probability distribution (RPG)</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../training/generator.html">Training a Generator</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../training/generator/sft.html">SFT with Gold Data (SFT)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../training/generator/swr.html">SFT with a Frozen Retriever (SwR)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../training/generator/fid.html">Fusion-in-Decoder Training (FiD)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../evaluation.html">Evaluation</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation/eval_retriever.html">Retriever Evaluation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation/eval_e2e.html">End-to-End Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../serving.html">Serving</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="human_eval.html">Static Human Evaluation</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Interactive Chat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acc_frameworks.html">Inference Acceleration Frameworks</a></li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Playground</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../playground/custom_rqa.html">Customize your RQA system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../playground/custom_trainer.html">Customize Model Trainers</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../usecases/databricks.html">Databricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usecases/faire.html">Faire</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api_reference/local_rqa.html">local_rqa namespace</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.evaluation.html">local_rqa.evaluation package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.guardrails.html">local_rqa.guardrails package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.pipelines.html">local_rqa.pipelines package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.qa_llms.html">local_rqa.qa_llms package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.retrievers.html">local_rqa.retrievers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.schema.html">local_rqa.schema package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.serve.html">local_rqa.serve package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api_reference/local_rqa.text_loaders.html">local_rqa.text_loaders package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api_reference/local_rqa.trainers.html">local_rqa.trainers namespace</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api_reference/local_rqa.trainers.qa_llm.html">local_rqa.trainers.qa_llm namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api_reference/local_rqa.trainers.retriever.html">local_rqa.trainers.retriever namespace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/modules/serving/interactive.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Interactive Chat</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="interactive-chat">
+<span id="serving-interactive-eval"></span><h1>Interactive Chat<a class="headerlink" href="#interactive-chat" title="Link to this heading">#</a></h1>
+<p>An interactive chat page allows real users to perform multi-turn chat with the model while providing feedback on the quality of the responses. This is useful for collecting human feedback on the model’s performance in a more natural setting.</p>
+<p>At a high level, <strong>you will need to prepare</strong> 1) your embedding and generative model of choice, and 2) a document and index database. Then, to handle asynchronous requests, you will launch 1) a model controller to manage model workers, 2) model workers to actually run the models, and 3) a web server to serve the interactive chat page.</p>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/interactive_ui.png"><img alt="Interactive Chat UI" src="../../_images/interactive_ui.png" style="width: 794.4px; height: 474.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">Interactive Chat</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>In more detail:</p>
+<ol class="arabic">
+<li><p>Make sure the <code class="docutils literal notranslate"><span class="pre">log</span></code> folder exists under the project root directory. This is because by default, all server logs and annotations will go under <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder.</p></li>
+<li><p>First start the model controller, which will by default listen to port 21001.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>local_rqa/serve/controller.py
+</pre></div>
+</div>
+</li>
+<li><p>Then, start the model worker(s) to run the models. For example, you can start one worker with GPU 0:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span>
+python<span class="w"> </span>local_rqa/serve/model_worker.py<span class="w"> </span><span class="se">\</span>
+--document_path<span class="w"> </span>&lt;example/documents.pkl&gt;<span class="w"> </span><span class="se">\</span>
+--index_path<span class="w"> </span>&lt;example/index&gt;<span class="w"> </span><span class="se">\</span>
+--embedding_model_name_or_path<span class="w"> </span>intfloat/e5-base-v2<span class="w"> </span><span class="se">\</span>
+--qa_model_name_or_path<span class="w"> </span>lmsys/vicuna-7b-v1.5<span class="w"> </span><span class="se">\</span>
+--model_id<span class="w"> </span>simple_rqa
+</pre></div>
+</div>
+<p>which will:</p>
+<ul class="simple">
+<li><p>read in the document database saved at <code class="docutils literal notranslate"><span class="pre">&lt;example/documents.pkl&gt;</span></code></p></li>
+<li><p>load the embedding and generative model (<code class="docutils literal notranslate"><span class="pre">intfloat/e5-base-v2</span></code> and <code class="docutils literal notranslate"><span class="pre">lmsys/vicuna-7b-v1.5</span></code> in this case). In general, this also works with most models that can be recognized by huggingface’s <code class="docutils literal notranslate"><span class="pre">AutoModel</span></code> class.</p></li>
+<li><p>read the index from <code class="docutils literal notranslate"><span class="pre">&lt;example/index&gt;</span></code> if not empty, otherwise index all the documents using the embedding model and save the index to <code class="docutils literal notranslate"><span class="pre">&lt;example/index&gt;</span></code></p></li>
+<li><p>register this worker as <code class="docutils literal notranslate"><span class="pre">simple_rqa</span></code> to the controller</p></li>
+</ul>
+<p>For more details on how to obtain the document or index database in step 1 and 3, you can refer to <a class="reference internal" href="../../getting_started/quickstart.html#quickstart"><span class="std std-ref">Quickstart</span></a> for a quick example.</p>
+</li>
+<li><p>To test to see if the above is working at this point:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>local_rqa/serve/test_message.py<span class="w"> </span>--model_id<span class="w"> </span>simple_rqa
+</pre></div>
+</div>
+<p>which will send a request to the controller for a response given the prompt “Tell me a joke with more than 20 words.”.</p>
+</li>
+<li><p>Finally, simply start the front-end web server to serve the interactive chat page!</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>local_rqa/serve/gradio_web_server.py<span class="w"> </span><span class="se">\</span>
+--port<span class="w"> </span><span class="m">28888</span><span class="w"> </span><span class="se">\</span>
+--model_id<span class="w"> </span>simple_rqa<span class="w"> </span><span class="se">\</span>
+--example<span class="w"> </span><span class="s2">&quot;What is DBFS? What can it do?&quot;</span><span class="w"> </span><span class="se">\</span>
+--example<span class="w"> </span><span class="s2">&quot;What is INVALID_ARRAY_INDEX?&quot;</span>
+</pre></div>
+</div>
+<p>this will launch a web server at <cite>http://localhost:28888</cite>. Note that</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--model_id</span> <span class="pre">simple_rqa</span></code> tells the controller that all requests to this server should be handled by the worker with id <cite>simple_rqa</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--example</span> <span class="pre">&quot;What</span> <span class="pre">is</span> <span class="pre">DBFS?</span> <span class="pre">What</span> <span class="pre">can</span> <span class="pre">it</span> <span class="pre">do?&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">--example</span> <span class="pre">&quot;What</span> <span class="pre">is</span> <span class="pre">INVALID_ARRAY_INDEX?&quot;</span></code> are example inputs that will be shown to the user when they open the chat webpage.</p></li>
+</ul>
+</li>
+</ol>
+<p>Optionally, you can further <strong>accelerate your language model’s inference speed</strong> using acceleration frameworks such as <code class="docutils literal notranslate"><span class="pre">TGI</span></code>, <code class="docutils literal notranslate"><span class="pre">vLLM</span></code>, or <code class="docutils literal notranslate"><span class="pre">SGLang</span></code>. For more details, please refer to <a class="reference internal" href="acc_frameworks.html#serving-acc-frameworks"><span class="std std-ref">Inference Acceleration Frameworks</span></a>. To use these frameworks with this interactive chat page, <strong>simply replace</strong> the <code class="docutils literal notranslate"><span class="pre">--qa_model_name_or_path</span></code> argument with the <strong>model URL provided by the acceleration framework</strong>.</p>
+<p>For example, with <code class="docutils literal notranslate"><span class="pre">vLLM</span></code>:</p>
+<ol class="arabic">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">vLLM</span></code> to host your generative model:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>vllm.entrypoints.api_server<span class="w"> </span>--model<span class="w"> </span>lmsys/vicuna-7b-v1.5
+</pre></div>
+</div>
+<p>this should by default host the model at <code class="docutils literal notranslate"><span class="pre">http://localhost:8000</span></code>.</p>
+</li>
+<li><p>Change the <code class="docutils literal notranslate"><span class="pre">--qa_model_name_or_path</span></code> argument to <code class="docutils literal notranslate"><span class="pre">&lt;framework-name&gt;::&lt;url&gt;/generate</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span>
+python<span class="w"> </span>local_rqa/serve/model_worker.py<span class="w"> </span><span class="se">\</span>
+--document_path<span class="w"> </span>&lt;example/documents.pkl&gt;<span class="w"> </span><span class="se">\</span>
+--index_path<span class="w"> </span>&lt;example/index&gt;<span class="w"> </span><span class="se">\</span>
+--embedding_model_name_or_path<span class="w"> </span>intfloat/e5-base-v2<span class="w"> </span><span class="se">\</span>
+<span class="c1"># --qa_model_name_or_path lmsys/vicuna-7b-v1.5 \</span>
+--qa_model_name_or_path<span class="w"> </span>vllm::http://localhost:8000/generate<span class="w"> </span><span class="se">\</span>
+--model_id<span class="w"> </span>simple_rqa
+</pre></div>
+</div>
+</li>
+<li><p>and the rest of the steps are the same as above.</p></li>
+</ol>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="human_eval.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Static Human Evaluation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="acc_frameworks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Inference Acceleration Frameworks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Xiao Yu, Yunan Lu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Xiao Yu, Yunan Lu.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
